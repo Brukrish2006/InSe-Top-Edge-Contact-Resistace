@@ -1,0 +1,17 @@
+import devsim
+devsim.workspace_init()
+devsim.add_1d_mesh(line="line1", material="mat")
+devsim.add_1d_contact(name="c1", material="mat")
+devsim.add_1d_contact(name="c2", material="mat")
+devsim.add_1d_region(line="line1", material="mat", region="reg")
+devsim.add_1d_mesh_line(line="line1", pos=0.0, ps=0.1, tag="c1")
+devsim.add_1d_mesh_line(line="line1", pos=1.0, ps=0.1, tag="c2")
+devsim.finalize_mesh(mesh="line1")
+devsim.create_device(mesh="line1", device="dev")
+devsim.set_parameter(device="dev", region="reg", name="NodeVolume", value="1.0")
+devsim.node_solution(device="dev", region="reg", name="T")
+devsim.edge_model(device="dev", region="reg", name="H", equation="10.0")
+devsim.equation(device="dev", region="reg", name="TEq", variable_name="T", edge_volume_model="H", variable_update="default")
+devsim.solve(type="dc", absolute_error=1.0, relative_error=1.0, maximum_iterations=0)
+for r in devsim.get_node_model_values(device="dev", region="reg", name="TEq_node_update"):
+    print("residual:", r)
