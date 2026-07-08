@@ -1,0 +1,47 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+.venv/
+venv/
+
+# DEVSIM / simulation artifacts
+*.log
+*.dat
+*.bin
+dev_*/
+workspace/
+
+# OS / editor cruft
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+
+# Known stale/duplicate files - do not re-add these
+fig2_resistance_vs_wf.png
+fig3_resistance_vs_lc.png
+fig_gamma_sensitivity.png
+fig_gamma_sensitivity_v2.png
+fig_vdw_gap.png
+fig_vdw_gap_v2.png
+fig_mesh_convergence.png
+test.csv
+InSe_Contact_Resistance_Manuscript_v4.docx
+InSe_Contact_Resistance_Manuscript_v5.docx
+InSe_Contact_Resistance_Manuscript_v6.docx
+InSe_Contact_Resistance_Manuscript_v7.docx
+InSe_Contact_Resistance_Manuscript_v8.docx
+InSe_Contact_Resistance_Manuscript_v9*
+InSe_Contact_Resistance_Manuscript_v10*
+InSe_Contact_Resistance_Manuscript_v11*
+draft_paper_review.md
+figures.md
+update_manuscript.py
+thermal_ablation_study.py
+parse_lit.py
+run_search.py
+test_edge_vol.py
+test_models.py
