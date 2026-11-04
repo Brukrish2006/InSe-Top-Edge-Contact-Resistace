@@ -62,7 +62,13 @@ We also calibrate it on a well-characterised metal/2D contact and test its predi
 \section{Model}
 \label{sec:model}
 \subsection{Device and band structure}
-The device is an $N$-layer InSe film (0.83~nm per layer; $N=6$, $t=5$~nm by default) on 10~nm SiO$_2$ with a back gate (flat band at $V_G=0$), with a 50-nm channel. Top contacts of length $L_c$ cover the upper surface, and edge contacts cover the film's end faces. The band gap follows a fit to photoluminescence data \cite{refmudd,refmudd2013}, $E_g(N)=1.26+2.78N^{-1.70}$~eV, which gives 1.69~eV at 3 layers, 1.39~eV at 6 layers and 1.30~eV at 12 layers. 32\% of the confinement shift is assigned to the valence band, roughly $m_e/(m_e+m_h)$. The 6-layer film therefore has $E_V=5.00$~eV below vacuum (Fig.~\ref{fig:thick}a). All parameters and their provenance are listed in Table~\ref{tab:params}.
+The device is an $N$-layer InSe film (0.83~nm per layer; $N=6$, $t=5$~nm by default) on 10~nm SiO$_2$ with a back gate (flat band at $V_G=0$), with a 50-nm channel. Top contacts of length $L_c$ cover the upper surface, and edge contacts cover the film's end faces. The band gap follows a fit to photoluminescence data \cite{refmudd,refmudd2013}, $E_g(N)=1.26+2.78N^{-1.70}$~eV, which gives 1.69~eV at 3 layers, 1.39~eV at 6 layers and 1.30~eV at 12 layers. 32\% of the confinement shift is assigned to the valence band, roughly $m_e/(m_e+m_h)$. The 6-layer film therefore has $E_V=5.00$~eV below vacuum (Fig.~\ref{fig:thick}a). All parameters and their provenance are listed in Table~\ref{tab:params}. The two geometries are sketched in Fig.~\ref{fig:schem}.
+
+\begin{figure}[t]
+\centering\includegraphics[width=\textwidth]{fig0_device_schematic.png}
+\caption{Simulated geometries (not to scale). (a) Top contacts of length $L_c$ separated from the film by a van der Waals gap; holes cross the gap and then flow laterally. (b) Edge contacts abutting the end faces of the film. Both devices sit on 10~nm SiO$_2$ with a back gate.}
+\label{fig:schem}
+\end{figure}
 
 \begin{table}[t]
 \centering
@@ -127,7 +133,7 @@ Test & Quantity & Relative error \\
 
 \begin{figure}[t]
 \centering\includegraphics[width=\textwidth]{fig1_verification.png}
-\caption{Verification. (a) Mott--Gurney law with Boltzmann and Fermi--Dirac statistics. (b) Thermionic emission at 300 and 350~K. (c) Transient heating of a gated edge device stepped to 1~V, approaching the DC solution.}
+\caption{Verification. (a) Mott--Gurney law with Boltzmann and Fermi--Dirac statistics. (b) Thermionic emission at 300 and 350~K. (c) Transient heating of a gated edge device stepped to 1~V (tunnelling off), approaching the DC solution.}
 \label{fig:ver}
 \end{figure}
 
@@ -141,7 +147,7 @@ The fit gives $\mathcal{T}_{\rm vdW}=1.0$, at its physical bound: $R_c=731$~\ohm
 
 \begin{figure}[t]
 \centering\includegraphics[width=\textwidth]{fig8_mos2_calibration.png}
-\caption{(a) Simulated $R_c(L_c)$ of Au/MoS$_2$ at 300 and 400~K with transmission-line fits. (b) Out-of-sample predictions against the measurements of Ref.~\cite{refenglish}; only $R_c$ at 300~K was fitted.}
+\caption{(a) Simulated $R_c(L_c)$ of Au/MoS$_2$ at 300 and 400~K with transmission-line fits. (b) Transfer length and (c) specific contact resistivity against the measurements of Ref.~\cite{refenglish}, with their quoted uncertainties. Only $R_c$ at 300~K was fitted; the 400~K values and $L_T$ are predictions.}
 \label{fig:mos2}
 \end{figure}
 
@@ -159,7 +165,7 @@ Out-of-plane transport limits top contacts (Fig.~\ref{fig:aniso}). Lowering $\mu
 
 \begin{figure}[t]
 \centering\includegraphics[width=\textwidth]{fig4_anisotropy.png}
-\caption{(a) $R_{\rm tot}$ versus out-of-plane/in-plane mobility ratio. (b) $2R_c$ of top contacts versus contact length. (c) Peak temperature rise at 1~V for isotropic and measured $\kappa_\perp$.}
+\caption{(a) $R_{\rm tot}$ versus out-of-plane/in-plane mobility ratio (colour: geometry; line style: $\Phi_M$). (b) $2R_c$ of top contacts versus contact length for two mobility ratios. (c) Peak temperature rise of ungated devices at 1~V for isotropic and measured $\kappa_\perp$.}
 \label{fig:aniso}
 \end{figure}
 
@@ -177,7 +183,7 @@ With the gate (Fig.~\ref{fig:gated}), both geometries switch with on/off ratios 
 
 \begin{figure}[t]
 \centering\includegraphics[width=\textwidth]{fig6_gated_transfer.png}
-\caption{Gated devices (10~nm SiO$_2$, $V_D=0.05$~V). (a) Transfer curves; symbols show the no-tunnelling (+) and local-$\Gamma$ models at 4.8~eV. (b) Share of the current injected by tunnelling. (c) Contact and channel resistance at 5.0~eV.}
+\caption{Gated devices (10~nm SiO$_2$, $V_D=0.05$~V). (a) Transfer curves for the full nonlocal model (lines), with the no-tunnelling ($+$) and local-$\Gamma$ (Y-shaped symbols) models at 4.8~eV. (b) Share of the current injected by tunnelling. (c) Contact and channel resistance at 5.0~eV.}
 \label{fig:gated}
 \end{figure}
 
@@ -186,7 +192,7 @@ Thinner films have larger band gaps and deeper valence bands (Fig.~\ref{fig:thic
 
 \begin{figure}[t]
 \centering\includegraphics[width=\textwidth]{fig2_thickness.png}
-\caption{(a) Layer-dependent band gap and valence-band edge with photoluminescence data. (b) $R_{\rm tot}$ versus layer number, ungated and in the gated on state.}
+\caption{(a) Layer-dependent band gap and valence-band edge with photoluminescence data. (b) $R_{\rm tot}$ versus layer number, ungated and in the gated on state ($V_G=-3$~V, $\Phi_M=5.0$~eV).}
 \label{fig:thick}
 \end{figure}
 
@@ -196,8 +202,14 @@ Thinner films have larger band gaps and deeper valence bands (Fig.~\ref{fig:thic
 
 \begin{figure}[t]
 \centering\includegraphics[width=\textwidth]{fig7_thermal.png}
-\caption{(a) Peak temperature rise versus dissipated power, gated on state. (b) Effect of each heat-model term at 1~V. (c) Response to a 0$\to$1~V drain step.}
+\caption{(a) Peak temperature rise versus dissipated power, gated on state. (b) Effect of each heat-model term at $V_D=1$~V, $V_G=-2$~V, $\Phi_M=5.0$~eV. (c) Response to a 0$\to$1~V drain step at $V_G=-2$~V, simulated without tunnelling (steady-state rises of 48~K and 2~K); only the time constant is used in the text.}
 \label{fig:thermal}
+\end{figure}
+
+\begin{figure}[t]
+\centering\includegraphics[width=\textwidth]{fig11_field_maps.png}
+\caption{Hole density and temperature rise of gated devices at $V_D=1$~V, $V_G=-2$~V, $\Phi_M=5.0$~eV (full model). The vertical axis is stretched: the film is 5~nm thick. The oxide interface is at the bottom ($y=5$~nm). Dotted lines in (a, b) mark the channel ends.}
+\label{fig:maps}
 \end{figure}
 
 \subsection{Compact model}
@@ -222,7 +234,7 @@ Over 120 cases ($\phi_{Bp}=0.05$--0.25~eV, $d_{\rm vdW}=0.2$--0.4~nm, $L_c=10$--
 
 \begin{figure}[t]
 \centering\includegraphics[width=\textwidth]{fig10_uncertainty.png}
-\caption{Monte Carlo propagation of parameter uncertainty (ungated, 0.05~V). (a) Distribution of $\log_{10}R_{\rm tot}$. (b) First-order variance indices.}
+\caption{Monte Carlo propagation of parameter uncertainty (ungated, 0.05~V). (a) Cumulative distributions of $\log_{10}R_{\rm tot}$. (b) Paired samples: the same parameter draw simulated for the top (50~nm) and edge contact; points below the diagonal have lower edge resistance. (c) First-order variance indices (colour: geometry; hatching: 5.0~eV).}
 \label{fig:uq}
 \end{figure}
 

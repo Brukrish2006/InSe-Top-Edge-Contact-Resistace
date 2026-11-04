@@ -31,6 +31,8 @@
   "max_abs_pct": 42.82551139969646,
   "n": 120
  },
+ "uq_paired_edge_lt_top_4.8": 1.0,
+ "uq_paired_edge_lt_top_5.0": 1.0,
  "uq": {
   "top50_4.8": {
    "median_R": 966515.9496552445,

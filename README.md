@@ -34,4 +34,5 @@ cd ../paper_v3 && pdflatex InSe_v3.tex && pdflatex InSe_v3.tex
 | `src_v3/verification.py`, `check_verification.py` | V1-V9 benchmarks and CI tolerance check |
 | `src_v3/studies.py` | All v3 studies (InSe and the MoS2 calibration) |
 | `src_v3/make_figures.py` | Figures 1-10, compact-model fit, TLM fits, UQ statistics (`data_v3/derived_*`) |
+| `src_v3/make_schematic.py`, `make_maps.py` | Fig. 0 (geometries) and Fig. 11 (2D hole-density and temperature maps; fields in `data_v3/fields_*.csv`) |
 | `paper_v3/` | `InSe_v3.tex/.pdf`, `Response_to_Reviewers_v3.tex/.pdf` |
