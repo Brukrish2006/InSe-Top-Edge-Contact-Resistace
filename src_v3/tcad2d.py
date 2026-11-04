@@ -1,7 +1,7 @@
 """
 tcad2d.py -- v3 DEVSIM model for metal / few-layer 2D-semiconductor contacts (InSe, MoS2).
 
-Extends the v2 model (commit 53bbd08, src_v2/inse2d.py, removed from the tree) with:
+Two-dimensional drift-diffusion / electro-thermal model with:
   * anisotropic (in-plane / out-of-plane) mobility and thermal conductivity
   * optional back gate (oxide region + gate electrode, flat band at V_G = 0)
   * Fermi-Dirac statistics (Nilsson inverse / Bednarczyk F_1/2), degenerate contacts allowed

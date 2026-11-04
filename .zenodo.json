@@ -4,5 +4,5 @@
   "creators": [{"name": "Adhikary, Harsha", "affiliation": "Indian Institute of Science, Bengaluru"}],
   "license": "MIT",
   "keywords": ["InSe", "Schottky contact", "DEVSIM", "TCAD", "2D semiconductors", "electro-thermal"],
-  "description": "DEVSIM models, verification suite, study scripts and data for top- and edge-contacted few-layer InSe Schottky-barrier p-FETs (v3), with the corrected v2 model and the original v1 code for transparency."
+  "description": "DEVSIM models, verification suite, study scripts and data for top- and edge-contacted few-layer InSe Schottky-barrier p-FETs."
 }
