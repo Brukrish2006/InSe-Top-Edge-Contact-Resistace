@@ -1,3 +1,40 @@
+# Hole Injection at Top and Edge Metal Contacts to Few-Layer InSe (v2, revised)
+
+> **Revision note (November 2026).** The first version of this study (`src/`, `data/`, `figures/`,
+> `paper/`) was rejected by the *Journal of Computational Electronics*. Reviewer 1 correctly
+> identified implementation errors in the public code. The model has been rewritten and verified
+> in `src_v2/`, every result was regenerated in `data_v2/` and `figures_v2/`, and the revised
+> manuscript and the point-by-point response are in `paper_v2/`. See `CHANGES_v2.md` for the list of
+> defects fixed and the conclusions withdrawn. The v1 folders are kept unchanged for transparency;
+> **do not use v1 results.**
+
+## v2 quick start
+
+```bash
+pip install devsim numpy scipy pandas matplotlib
+# Linux: point DEVSIM at a BLAS/LAPACK (Windows/MKL users: set DEVSIM_MATH_LIBS to mkl_rt)
+export DEVSIM_MATH_LIBS=/usr/lib/x86_64-linux-gnu/liblapack.so.3:/usr/lib/x86_64-linux-gnu/libblas.so.3
+cd src_v2
+python verification.py                  # V1-V5 benchmarks -> data_v2/verification_*.csv
+python studies.py mesh wf wf_iso pinning tunnel doping material thermalbc lch iv profiles
+python make_figures.py                  # -> figures_v2/
+cd ../paper_v2 && pdflatex InSe_revised.tex && pdflatex Response_to_Reviewers.tex
+```
+The full set of studies takes about 15 min on two cores.
+
+| v2 file | Purpose |
+|---|---|
+| `src_v2/inse2d.py` | Model: meshes, full Poisson coupling, p-type doping, flux (Robin) thermionic/TFE contacts with self-consistent field-dependent Gamma(F), WKB vdW-gap transmission, Fermi-level pinning, quasi-Fermi Joule heating, Robin thermal BCs, exact R decomposition, energy balance |
+| `src_v2/verification.py` | Ohmic resistor, finite-velocity contact resistor, Mott-Gurney SCLC, Schottky diode, 2D energy balance |
+| `src_v2/studies.py` | All parameter studies used in the paper |
+| `src_v2/make_figures.py` | Figures 1-8 and S1 |
+| `data_v2/` | All CSV outputs (+ `profiles.npz`: centre-line and 2D profiles) |
+| `paper_v2/` | `InSe_revised.tex/.pdf`, `Response_to_Reviewers.tex/.pdf` |
+
+---
+
+## Original (v1) README
+
 # Geometry-Dependent Contact Resistance and Space-Charge-Limited Bulk Transport in Metal–InSe Junctions
 
 Simulation code, data, and manuscript accompanying the paper *"Geometry-Dependent Contact
