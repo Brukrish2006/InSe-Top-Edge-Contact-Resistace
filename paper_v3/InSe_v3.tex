@@ -47,7 +47,7 @@ Monte Carlo analysis shows that the Fermi-level pinning factor dominates the unc
 \section{Introduction}
 InSe combines high electron mobility \cite{refband}, ballistic short-channel transistors \cite{refjiang} and wafer-scale growth \cite{refqin}, but complementary logic also needs efficient hole injection, which has received far less attention \cite{refsong}. Metal contacts to 2D semiconductors are governed by the Schottky barrier and Fermi-level pinning, by the vdW tunnel gap of top-deposited metals, and by how current spreads from the contact into the channel \cite{refallain,refkang}. Edge contacts remove the vdW gap and inject in-plane \cite{refwang,refguim}. Real devices are gated, and the gate can thin the Schottky barrier until tunnelling dominates injection, as in Schottky-barrier FETs. Layered crystals are also strongly anisotropic. Carrier mobility across InSe layers is typically one to three orders of magnitude lower than along them \cite{refsangwan}, and the through-plane thermal conductivity is about eleven times lower \cite{refrai}.
 
-This paper asks which contact geometry gives the lowest resistance for hole injection into a few-layer InSe p-FET, and why. It also asks how robust that answer is to the poorly known interface parameters. We answer with a model in which every ingredient that the earlier versions of this study lacked or mis-implemented is included and tested:
+This paper asks which contact geometry gives the lowest resistance for hole injection into a few-layer InSe p-FET, and why. It also asks how robust that answer is to the poorly known interface parameters. We answer with a model in which each of the following ingredients is included and tested:
 \begin{itemize}
 \item a flux-balanced contact condition;
 \item non-equilibrium Poisson coupling;
@@ -238,9 +238,6 @@ Over 120 cases ($\phi_{Bp}=0.05$--0.25~eV, $d_{\rm vdW}=0.2$--0.4~nm, $L_c=10$--
 \label{fig:uq}
 \end{figure}
 
-\subsection{Relation to earlier versions}
-Version 2 of this work corrected implementation errors in version 1: the boundary condition, the Poisson coupling, the doping sign and mixed operating points. It also withdrew the conclusions those errors produced. The present version adds the physics that v2 identified as missing. Three v2 statements change. First, tunnelling is not negligible: it is the dominant injection mechanism once a gate is present. Second, the top/edge difference is set by the vdW gap and by $\mu_\perp$, not by geometry alone. Third, absolute temperatures depend on the interface heat, which v2 did not deposit and which is up to 23\% of $IV$.
-
 \section{Conclusions}
 For hole injection into few-layer InSe p-FETs the model gives five design rules:
 \begin{enumerate}
@@ -255,7 +252,7 @@ The model is verified, calibrated on Au/MoS$_2$ with one parameter, and accompan
 \section*{Statements and Declarations}
 \paragraph{Author contributions} H.A.\ designed the study, developed the code, performed the simulations and analysis, and wrote the manuscript.
 \paragraph{Funding} None. \paragraph{Competing interests} None.
-\paragraph{Code and data availability} \url{https://github.com/Brukrish2006/InSe-Top-Edge-Contact-Resistace} (\texttt{src\_v3}, \texttt{data\_v3}, \texttt{figures\_v3}). Earlier versions are available in the repository history.
+\paragraph{Code and data availability} \url{https://github.com/Brukrish2006/InSe-Top-Edge-Contact-Resistace} (\texttt{src\_v3}, \texttt{data\_v3}, \texttt{figures\_v3}).
 
 \begin{thebibliography}{99}
 \bibitem{refband} D.A.~Bandurin \textit{et al.}, Nat.\ Nanotechnol.\ \textbf{12}, 223 (2017), \doi{10.1038/nnano.2016.242}.
