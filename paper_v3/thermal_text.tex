@@ -1,0 +1,26 @@
+Table~\ref{tab:therm} compares the geometries at the same gated operating point ($\Phi_M=5.0$~eV, $V_G=-2$~V). At $V_D=1$~V the edge-contacted device carries 3.7~A/cm and heats by 150~K; the 50-nm top contact carries 1.16~A/cm and heats by 24~K. Per unit power the edge device is also about twice as hot (41 vs 21~K\,cm/W), because its footprint on the oxide is a third of that of the top-contacted film. In the on state at $V_G=-3$~V (Fig.~\ref{fig:thermal}a) the edge device reaches about 490~K at 1~V, so its usable bias is thermally limited, not contact-limited.
+
+The individual heat terms matter at the 5--40\% level (Fig.~\ref{fig:thermal}b):
+\begin{itemize}
+\item Using bulk Joule heat only, as in v2, underestimates $\Delta T_{\max}$ by 7--8\% and misses 8--15\% of the dissipated power.
+\item Measured out-of-plane conductivity, compared with isotropic $\kappa$, raises $\Delta T_{\max}$ by 8\% (edge) and 17\% (top).
+\item Heat sinking through the metal contacts lowers $\Delta T_{\max}$ by 23\% (edge) and 42\% (top).
+\item A ten times smaller thermal boundary resistance lowers it by 35--37\%.
+\end{itemize}
+Peltier heat changes $\Delta T_{\max}$ by only about 1~K but redistributes heat: it cools the hole-injecting contact and heats the collecting one (top, 1~V: source $+11.9$~K, drain $+21.6$~K with Peltier, against $+13.5$ and $+20.9$~K without). Temperature-dependent statistics change temperatures by less than 1\%. The lattice responds to a drain step within a few hundred picoseconds, with 63\% of the final rise at 0.20~ns (top) and 0.25~ns (edge) (Fig.~\ref{fig:thermal}c). For pulses longer than a nanosecond the DC temperatures therefore apply.
+
+\begin{table}[h]
+\centering
+\caption{Gated operating points ($\Phi_M=5.0$~eV, $V_G=-2$~V, baseline thermal model). All quantities in a row refer to the same bias.}
+\label{tab:therm}\small
+\begin{tabular}{lcccccc}
+\toprule
+Geometry & $V_D$ (V) & $I_D$ (A/cm) & $IV$ (W/cm) & $\Delta T_{\max}$ (K) & $\Delta T_{\rm source}$ (K) & $\Delta T_{\rm drain}$ (K) \\
+\midrule
+Top, 50 nm & 0.5 & 0.618 & 0.309 & 5.9 & 3.5 & 5.6 \\
+Top, 50 nm & 1.0 & 1.164 & 1.164 & 24.0 & 11.9 & 21.6 \\
+Edge & 0.5 & 2.228 & 1.114 & 47.0 & 40.8 & 46.2 \\
+Edge & 1.0 & 3.693 & 3.693 & 149.9 & 144.4 & 144.6 \\
+\bottomrule
+\end{tabular}
+\end{table}
