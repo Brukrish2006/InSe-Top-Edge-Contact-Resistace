@@ -1,0 +1,117 @@
+\documentclass[11pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{amsmath}
+\usepackage[margin=1in]{geometry}
+\usepackage{xcolor}
+\usepackage{enumitem}
+\usepackage[colorlinks,urlcolor={blue!70!black},linkcolor={blue!70!black}]{hyperref}
+\setlength{\parskip}{4pt}\setlength{\parindent}{0pt}
+\newcommand{\rc}[1]{\par\medskip\noindent{\color{black!70}\textit{#1}}\par}
+\newcommand{\resp}{\noindent\textbf{Response.} }
+\newcommand{\chg}{\noindent\textbf{Changes.} }
+\sloppy
+\begin{document}
+\begin{center}
+{\Large Response to the reviewers}\\[4pt]
+Manuscript 5183a3bb-4b2c-4307-a79b-1faa62340b74, \textit{Journal of Computational Electronics}\\
+Revised title (v3): \textit{Gate-Controlled Hole Injection at Top and Edge Contacts to Few-Layer InSe: An Anisotropic, Electro-Thermal TCAD Study Verified Analytically and Calibrated on Au/MoS$_2$}\\
+Harsha Adhikary, Department of Physics, Indian Institute of Science
+\end{center}
+
+\section*{Summary}
+I thank the editor and the three reviewers. Reviewer~1's reading of the public code was correct on every point: the carrier boundary condition, the Poisson coupling and the doping sign were implemented incorrectly, and the thermal comparison mixed operating points. Reproducing those findings, I also found three further defects: a sign error in the contact potential, a truncated edge-mesh function in the public repository, and an isothermal results file that the public code could not reproduce. I therefore rewrote the model (\texttt{src\_v3/}), verified it against closed-form results, and recomputed every number and figure. Several conclusions of the original submission are withdrawn because they were artifacts of the defects. They were: that resistance is invariant to the tunnelling factor, that the barrier-free channel is SCLC, that the edge advantage is geometric, and that edge contacts run 94~K cooler. The manuscript has been rewritten around the corrected results. All code, data and figures are in the repository (\url{https://github.com/Brukrish2006/InSe-Top-Edge-Contact-Resistace}, folders \texttt{src\_v3/}, \texttt{data\_v3/}, \texttt{figures\_v3/}, \texttt{paper\_v3/}). The original implementation remains available in the git history (commit \texttt{5818c17}) so that the corrections can be checked; the intermediate corrected version is commit \texttt{53bbd08}.
+
+\section*{Reviewer 1}
+
+\rc{1. The claimed tunneling insensitivity is not established as a physical effect. The tunneling and transmission factors multiply a residual that fixes the hole concentration at its equilibrium value, without balancing finite interfacial injection against the current transported within the semiconductor.}
+\resp Correct. In DEVSIM the \texttt{node\_model} of a contact equation replaces the bulk equation at the contact nodes. Supplying $qv(1+\Gamma)(p-p_{\rm eq})$ there enforces $p_s=p_{\rm eq}$ for any nonzero prefactor, which is why the earlier $\Gamma$ sweep returned identical results to $10^{-9}$. The contact is now a flux (Robin) condition: the interfacial flux $qv_R\mathcal{T}_{\rm vdW}(1+\Gamma)(p_s-p_{\rm eq})$, scaled by the contact surface area, is balanced against the drift-diffusion current entering the contact node. We verified this against the analytic series resistance $L/(qN_A\mu)+2V_t/(qvN_A)$ (agreement $\le1.2\times10^{-3}$), a thermionic-emission Schottky diode (ideality 0.994, saturation current within 0.12\%) and Mott--Gurney SCLC. $\Gamma$ is now no longer a free constant. It is computed at every contact node from the local interface field by WKB through a triangular barrier, and updated self-consistently. With this condition, an imposed constant $\Gamma=1\to100$ changes the 50-nm top-contact resistance at 4.8~eV by 47\%, so the boundary condition does respond to interface physics. The physical $\Gamma(F)$ changes resistance by at most 6\% at $N_A=10^{16}$~cm$^{-3}$, because interface fields are only $10^4$--$10^5$~V/cm. This is now reported as a physical result with its reason, and ``Tunneling-Resolved'' has been removed from the title.\\
+\chg Sec.~2.2 (Eq.~2--3), Sec.~2.6 (V2, V4), Sec.~3.3, Fig.~1(b), Fig.~6(a,b), Sec.~3.7; code \texttt{tcad2d.py} (\texttt{\_build}, \texttt{update\_tunnel}).
+
+\rc{2. The coupling necessary to establish SCLC is not demonstrated. The public workflow retains the equilibrium charge-potential relation in Poisson's equation ... The implemented doping sign is also inconsistent with the stated p-type background.}
+\resp Both points are correct. \texttt{CreatePE}, which replaces the equilibrium charge with the actual carrier densities, was never called, and \texttt{NetDoping} was $+10^{16}$ (n-type). Poisson's equation now uses $\rho=q(p-n+N_D-N_A)$ after drift-diffusion is switched on, with $N_A=10^{16}$~cm$^{-3}$ p-type. The coupling is verified by the Mott--Gurney benchmark: $J/J_{\rm MG}=1.008$ at 160~V, with $d\ln J/d\ln V=1.97$. With the corrected physics, the barrier-free channel is contact-injection dominated. Its resistance scales as $L_{\rm ch}^{2.0-2.3}$, but the bias exponent reaches only $m=1.28$--$1.47$ (fit 0.4--1.2~V). We therefore no longer claim a demonstrated SCLC regime.\\
+\chg Sec.~2.1, Sec.~2.6 (V3), Sec.~3.4, Fig.~1(a), Fig.~5.
+
+\rc{3. The key electrical and thermal comparisons use inconsistent conditions and observables ... The lower temperature under unequal dissipated power does not independently demonstrate more effective heat removal. Comparing the experimental contact resistance of an electron-transport device with simulated total resistance for hole-transport device likewise does not provide direct validation.}
+\resp Correct on all three counts. In the earlier extraction script, $R$ was taken at 0.1~V and $T_{\max}$ at 2~V. In the corrected model every quantity is reported at the same operating point (Table~2), and temperature is plotted against dissipated power [Fig.~4(c)]. At equal bias (2~V) the edge-contacted device carries 5.4$\times$ the current of the 50-nm top contact and has a larger temperature rise (105~K vs 7.8~K). At equal power its rise per unit power is also larger: 152 vs 61~K\,cm/W, because of its smaller thermal footprint. The earlier ``94~K cooler'' statement is withdrawn. The comparison with the indium electron contact of Huang \textit{et al.}\ has been removed as validation. It is now discussed only qualitatively, as evidence that Schottky--Mott alignment does not describe real InSe contacts (Sec.~3.1).\\
+\chg Sec.~2.5, Sec.~3.1, Sec.~3.5, Table~2, Fig.~4, Fig.~7.
+
+\rc{These issues undermine the basis of the central transport interpretation. Resolving them requires validating the central model and its implementation, regenerating the principal results, and reassessing the conclusions.}
+\resp We did all three. A verification suite (\texttt{src\_v3/verification.py}, Fig.~1, \texttt{data\_v3/verification\_summary.csv}) covers: an ohmic resistor, a finite-velocity contact resistor, Mott--Gurney, a Schottky diode, and electrical/thermal energy balance in 2D. All results were regenerated with the verified code (\texttt{src\_v3/studies.py}), and the abstract, results and conclusions have been rewritten accordingly. Section~3.7 lists the defects of the earlier version and the conclusions withdrawn.
+
+\section*{Reviewer 2}
+
+\rc{The work uses DEVSIM, which requires the user to prepare equations ... This user input and the complete lack of verification or calibration of the transport simulation model using these unknown inputs are the main reasons for the rejection.}
+\resp We agree, and we have addressed both parts. All equations, boundary conditions and parameters are now stated explicitly (Sec.~2, Table~1) and implemented in a single documented module (\texttt{tcad2d.py}). Verification against five closed-form or conservation results is reported in Sec.~2.6 and Fig.~1, and mesh convergence is better than 1.3\% (Fig.~S1). Calibration is the harder part. No hole-injection data for metal/p-InSe contacts exist that would fix the barrier height, vdW-gap parameters and thermal conductances. We therefore do not claim calibration. Instead the paper (i) states which conclusions depend on which uncalibrated input and (ii) quantifies that dependence: pinning (Fig.~2a, \texttt{pinning\_top\_edge.csv}), vdW gap (Fig.~6c), material parameters and doping (Fig.~8), and thermal boundary conditions (Fig.~7c).
+
+\rc{The text claims that the simulations are benchmarked against an experimentally reported near-zero-barrier indium contact ... I could not identify how this benchmarking was carried out. Some of the device and material parameters from Ref.~[5] were not used.}
+\resp The reviewer is right that no quantitative benchmark was performed. That experiment concerns electron injection, whereas our model concerns holes. The benchmarking claim has been removed. Ref.~[5] is now used only to note that, with $\chi=3.7$~eV, Schottky--Mott alignment would give a 0.6-eV electron barrier for indium. The near-ohmic experimental contact therefore points to significant pinning or interface chemistry, which motivates the pinning analysis.
+
+\rc{The whole manuscript is chaotic, disorganised, and does not provide any tangible advance in the field. What is the main message? How could these simulations help in the development of metal contacts for InSe devices?}
+\resp The paper has been reorganised around one question: for a 5-nm p-type InSe channel, how much of the two-terminal resistance sits at the contacts, and what controls it? The answer has four parts, each actionable for contact development:
+\begin{enumerate}[nosep]
+\item The barrier threshold near 5.0~eV is an input of Schottky--Mott alignment, and it disappears for pinning $S\le0.5$. Measured barrier heights, not work functions, should guide metal choice.
+\item For barrier-limited contacts the top/edge difference is essentially the vdW tunnel gap. Without it the geometries differ by 4\%.
+\item For barrier-free contacts the 50-nm channel carries $\ge$86\% of the resistance and scales superlinearly with length. Transfer-length extraction then fails, and contact resistance should be obtained by decomposition.
+\item Top contacts become injection-limited at high bias. Edge contacts deliver up to 5.4$\times$ more current and a higher heat load per unit footprint, so heat removal through the contacts matters.
+\end{enumerate}
+Repeated robustness discussion and appendices have been condensed into Sec.~2.6 and Sec.~3.6.
+
+\section*{Reviewer 3}
+
+\rc{1. Fundamental distinction between total device resistance and contact resistance.}
+\resp We now report $R_{\rm tot}=V/I$ at a stated bias (default 0.05~V), the differential resistance $dV/dI$ where the I--V is nonlinear, and an exact decomposition $R_{\rm tot}=R_{c,s}+R_{\rm ch}+R_{c,d}$ from the hole quasi-Fermi potential, with the pure interface part $R_{\rm if}=P_{\rm if}/I^2$ given separately (Sec.~2.5, Fig.~3). The decomposed $R_c$ is independent of channel length (within 1\% at 5.0~eV), as a contact quantity should be. A transfer-length fit, by contrast, gives negative or inflated intercepts because $R_{\rm tot}(L_{\rm ch})$ is nonlinear. ``Contact resistance'' is used only for $R_c$, and the title and abstract now refer to total resistance and its decomposition.
+
+\rc{2. The $\sim$5.0 eV barrier-collapse threshold is largely built into the adopted band alignment ... add a barrier-height-versus-work-function plot, use a finer sweep around 4.9--5.1 eV, and discuss interface dipoles, Fermi-level pinning, MIGS, thickness-dependent band parameters.}
+\resp Agreed. Fig.~2(a) shows the input barrier versus $\Phi_M$ for $S=1$, 0.5 and 0.3, and the text states that the threshold follows from $E_V=\chi+E_g$. The sweep now contains 4.900, 4.925, 4.950, 4.975 and 5.000~eV. We point out that for $\Phi_{\rm eff}>E_V$ the barrier is negative and Boltzmann drift-diffusion is invalid; those points are clipped and shaded rather than presented as further reductions. Pinning (which represents MIGS and interface dipoles), $\chi$ and $E_g$ are varied explicitly. With $S\le0.5$ no collapse occurs below 5.4~eV, and $\pm0.1$~eV in $E_V$ changes $R_{\rm tot}$ by factors of 0.04--47 at 4.8~eV.
+
+\rc{3. The SCLC interpretation is interesting but needs stronger physical evidence ... spatial profiles of hole density, electric field, potential and current density; fitting windows and uncertainty for the exponents; applicability of SCLC to the 2D InSe model.}
+\resp With the corrected Poisson coupling the evidence does not support a developed SCLC regime, and we now say so. We provide centre-line profiles of $p$, $\psi$, $E$, $\phi_p$ and $T$ for all geometries, $L_{\rm ch}=50$ and 100~nm and 0.05--2~V (\texttt{centre-line profiles via \texttt{Device.centerline}}; Fig.~5b). We also give local exponents $m(V)$ and power-law fits over a stated window (0.4--1.2~V) with standard errors: $m=1.47\pm0.02$, $1.44\pm0.02$ and $1.28\pm0.02$ for 50, 100 and 200~nm. Finally, we relate the $L_{\rm ch}^{2.0-2.3}$ length scaling to thin-film SCLC theory (Grinberg \textit{et al.}). We distinguish this empirical behaviour from a proven mechanism and describe the regime as contact-injection dominated with SCLC-like length scaling.
+
+\rc{4. The stated ``21--27\% converged advantage'' is not numerically consistent with the quoted extrapolated values.}
+\resp The reviewer's arithmetic is correct: $1-2.27/2.87=20.9\%$ and $1-2.27/2.89=21.5\%$. The 27\% figure was an error. Those values belong to the withdrawn model. In the corrected model, every percentage states its values and denominator. The edge contact is 58\% (4.8~eV) and 27\% (5.0~eV) below the 50-nm top contact at 0.05~V, with $R_{\rm top}$ as denominator. These values come from a mesh that is converged to 1.3\%, so no extrapolation is needed.
+
+\rc{5. The $\sim$26\% electro-thermal advantage and the 94 K temperature reduction occur under different conditions.}
+\resp Agreed. Table~2 now lists $I$, $R_{\rm tot}$, $dV/dI$, $IV$ and $\Delta T_{\max}$ for each geometry at 0.05~V and 2~V, and every headline number in the text carries its conditions. Both earlier figures (26\%, 94~K) are withdrawn.
+
+\rc{6. The electro-thermal model requires substantially more methodological detail.}
+\resp Sec.~2.1 and 2.3 now give the heat equation and the heat source: the quasi-Fermi-level Joule heat of Wachutka, replacing $\mathbf{J}\cdot\mathbf{E}$. They also give the boundary conditions: a Robin substrate condition with $h_{\rm sub}=1/(R_{\rm TBR}+t_{\rm ox}/\kappa_{\rm ox})$, and adiabatic or heat-sinking metal contacts. Sec.~2.3 also states what is not modelled: lateral spreading in metal and substrate beyond lumped conductances, temperature-dependent carrier statistics, and deposition of interface heat. Energy conservation is checked: $IV=P_{\rm bulk}+P_{\rm if}$ to $10^{-12}$, and heat out equals $P_{\rm bulk}$ within 0.5\%. Fig.~7(c) shows that $T_{\max}$ is set mainly by $h_{\rm sub}$ and contact heat sinking, so absolute temperatures are described as model-dependent until calibrated.
+
+\rc{7. Justification is needed for applying bulk $\gamma$-InSe parameters to a 5 nm InSe layer.}
+\resp Table~1 now classifies every parameter as measured, literature-derived, representative or assumed, and gives the expected direction of thickness effects. Fig.~8 shows the one-at-a-time sensitivity of $R_{\rm tot}$ to $\mu_p$, $E_V$, $E_g$, $\varepsilon_r$, $m_h$ and $N_A$ in both regimes. The band alignment ($E_V$, $E_g$) dominates in the barrier-limited case, and $\mu_p$ in the barrier-free case.
+
+\section*{Additional corrections found during the revision}
+\begin{itemize}[nosep]
+\item The contact potential used $-\tfrac12V_t\ln(N_C/N_V)$ instead of $+\tfrac12V_t\ln(N_C/N_V)$, so the potential boundary condition and $p_{\rm eq}$ were inconsistent by about 34~meV.
+\item The public \texttt{mesh\_generator.py} ended inside the edge-mesh function (no regions, contacts or finalisation), so the edge results could not be reproduced from the repository.
+\item \texttt{data/summary\_results.csv} (the ``isothermal'' Table~1) could not be generated by any public script. At 0.1~V, where heating is negligible, it differed from the thermal solver by a factor of 1.5--2 (e.g.\ 1.67 vs 2.57~$\Omega$\,cm). In the corrected code the isothermal and electro-thermal solvers agree to $<2\times10^{-4}$ at 0.05~V (\texttt{wf\_thermal\_vs\_isothermal.csv}).
+\item For $\Phi_M>E_V$ the earlier model used $p_{\rm eq}>N_V$ (up to $2000N_V$ at 5.2~eV), outside the validity of Boltzmann statistics. Such barriers are now clipped and flagged.
+\end{itemize}
+
+
+\section*{Further revision (v3): additions beyond the reviewers' requests}
+After the v2 corrections we extended the model and analysis further. The v3 manuscript (\texttt{paper\_v3/}) is built on \texttt{src\_v3/}. Each item below is tied to the comment it strengthens.
+\begin{itemize}[nosep]
+\item \textbf{Calibration (R2).} The contact model is calibrated with one parameter against Au/MoS$_2$ (English \textit{et al.}, Nano Lett.\ 16, 3824, 2016).
+  \begin{itemize}[nosep]
+  \item Fitting $R_c=740$~$\Omega\,\mu$m at 300~K gives a vdW transmission of 1.0 (731~$\Omega\,\mu$m).
+  \item The transfer length predicted out of sample at 300~K is 34~nm, against 35--40~nm measured.
+  \item At 400~K the model predicts $\rho_c=2.0\times10^{-7}$ (measured 1.5) and $L_T=29$~nm (measured $\approx$20), with the measured direction of change.
+  \end{itemize}
+\item \textbf{Tunnelling (R1.1).} A nonlocal Tsu--Esaki/WKB model along contact normals is added. Its generation is semi-implicit and its energy bookkeeping is consistent with the heat equation. It is verified against an independent quadrature (0.17\%). In gated devices it carries 80--100\% of the on-current, 60$\times$ more than a local $\Gamma(F)$ model.
+\item \textbf{Physical model (R2, R3.3).} The model now includes:
+  \begin{itemize}[nosep]
+  \item a back gate;
+  \item Fermi--Dirac statistics, which allows degenerate contacts and removes the clipping at $E_V$ of v2;
+  \item temperature-dependent statistics and injection;
+  \item anisotropic mobility, with $\mu_\perp/\mu_\parallel$ between 0.002 and 1.
+  \end{itemize}
+\item \textbf{Thermal model (R3.6).} Measured anisotropic $\kappa$ (8.5/0.76~W/mK) is used. Interface Joule, Peltier and tunnelling heat are now deposited, so the total heat equals $IV$ to 0.3--1.2\%. The oxide and gate heat sink are modelled explicitly, and transient heating is included (time constant $\approx$0.2--0.25~ns).
+\item \textbf{Thickness (R3.7).} The band gap and affinity now depend on layer number, from a fit to photoluminescence data. A 3--12-layer study shows an optimum of about four layers for top contacts.
+\item \textbf{Robustness (R3.2, R3.7).} Separate pinning factors are used for top and edge contacts; $S_{\rm edge}=0.7$ already reverses the top/edge ranking. Monte Carlo uncertainty propagation over nine inputs shows that pinning and band alignment dominate.
+\item \textbf{Usability (R2).} A transmission-line compact model reproduces the simulated $R_c$ with a median error of 11\%.
+\item \textbf{Verification (R1, R2).} The suite now has nine tests (V1--V9), which run in continuous integration on every push.
+\end{itemize}
+
+\end{document}
