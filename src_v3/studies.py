@@ -247,6 +247,29 @@ def s_mos2():
     write("mos2_calibration", rows)
 
 
+def s_vdw():
+    """Dependence of the top/edge comparison on the vdW transmission T_vdW of the top contact.
+    The Au/MoS2 calibration saturates at T_vdW = 1, so it does not constrain the gap; the baseline
+    WKB value (0.30 nm, 2 eV) is 0.013. Top-contact T_vdW is imposed directly (T_vdW_top), for two
+    values of mu_perp/mu_par, gated on state (V_G = -3 V) and ungated, V_D = 0.05 V, L_c = 50 nm.
+    Isothermal (thermal=False): resistances at 0.05 V do not depend on self-heating."""
+    TV = [1.0, 0.3, 0.1, 0.03, None, 0.003, 0.001]  # None -> baseline WKB value
+    rows = []
+    for mode in ("gated", "ungated"):
+        for Phi in ((5.0, 4.8) if mode == "gated" else (4.8,)):
+            jobs = [("edge", None, 0.01)] + [("top", tv, rmu) for rmu in (0.01, 1.0) for tv in TV]
+            for kind, tv, rmu in jobs:
+                P = dict(thermal=False, mu_perp_ratio=rmu)
+                if tv is not None:
+                    P["T_vdW_top"] = tv
+                kw = dict(gate=GATE, VG=-3.0) if mode == "gated" else {}
+                r, dv = point(kind, Phi, V=0.05, Lc=50 * NM, P=P, **kw)
+                rows.append(dict(kind=kind, mode=mode, Phi=Phi, rmu=rmu, T_vdW=(dv.T_vdW if dv else tv),
+                                 **{k: r.get(k) for k in ("R_tot", "R_c", "R_ch", "tun_share")}))
+        write("vdw_sweep", rows)
+    write("vdw_sweep", rows)
+
+
 def s_thermal():
     rows = []
     for kind, Lc in [("top", 50 * NM), ("edge", 50 * NM)]:

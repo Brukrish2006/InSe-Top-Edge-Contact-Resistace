@@ -32,12 +32,12 @@
 \noindent
 We model hole injection into back-gated, few-layer $\gamma$-InSe through top and edge metal contacts with an open-source DEVSIM model. The model couples Poisson's equation to Fermi--Dirac carriers with anisotropic (in-plane/out-of-plane) mobility. Contacts use flux-balanced thermionic emission with a van der Waals (vdW) gap transmission and nonlocal Tsu--Esaki tunnelling along the contact normals. The lattice heat equation has anisotropic conductivity and includes Joule, interface, Peltier and tunnelling heat. Nine verification tests reproduce closed-form results and conservation laws. Calibrated with a single parameter to the measured contact resistance of ultra-high-vacuum Au/MoS$_2$ contacts (740~\ohmum), the same model predicts the measured transfer length at 300~K (34 vs 35--40~nm) and the measured trends with temperature. For InSe we find:
 (i) Gate-induced tunnelling dominates injection in a Schottky-barrier p-FET, carrying 80--100\% of the on-current at $\Phi_M\leq5.0$~eV. A local field-enhancement model underestimates the on-current 55--60-fold, and neglecting tunnelling 450--840-fold.
-(ii) Edge contacts give 24$\times$ lower contact resistance than 50-nm top contacts in the on state, and 72\% lower total resistance in the ungated, barrier-limited case. Most of this comes from the vdW gap and from slow out-of-plane transport, whose mobility ratio doubles the top-contact resistance between 1 and 0.002.
+(ii) At the baseline vdW transmission $\mathcal{T}_{\rm vdW}=0.013$, edge contacts give 24$\times$ lower contact resistance (4.2$\times$ lower total resistance) than 50-nm top contacts in the on state, and 72\% lower total resistance in the ungated, barrier-limited case. Most of this comes from the vdW gap. The calibration does not constrain $\mathcal{T}_{\rm vdW}$: for a transparent gap the on-state advantage falls to 2.3$\times$ (1.2$\times$ in total resistance). Slow out-of-plane transport matters less; its mobility ratio doubles the ungated top-contact resistance between 1 and 0.002.
 (iii) The edge advantage disappears if edge contacts are even moderately more strongly pinned ($S_{\rm edge}=0.7$).
 (iv) Top contacts have an optimum film thickness of about four layers, and edge contacts improve monotonically with thickness.
 (v) Edge-contacted devices carry 3--15$\times$ more current and heat correspondingly more; Peltier heat cools the source and heats the drain.
 A transmission-line compact model reproduces the simulated top-contact resistance with a median error of 11\%.
-Monte Carlo analysis shows that the Fermi-level pinning factor dominates the uncertainty of every prediction.
+Monte Carlo analysis shows that the band alignment and the Fermi-level pinning factor dominate the uncertainty of the ungated resistance. No hole-injection measurements on InSe exist, so every InSe result is a prediction conditional on three unmeasured inputs: the band alignment, the pinning factors and the vdW transmission.
 \end{abstract}
 
 \noindent\textbf{Keywords:} indium selenide; Schottky-barrier FET; contact resistance; tunnelling; electro-thermal simulation; van der Waals contacts; compact model; uncertainty quantification
@@ -143,7 +143,7 @@ No measurements of hole injection into p-InSe exist that could fix the interface
 
 \section{Results}
 \subsection{Calibration and out-of-sample test}
-The fit gives $\mathcal{T}_{\rm vdW}=1.0$, at its physical bound: $R_c=731$~\ohmum\ against 740~\ohmum\ measured. With the literature barrier, nonlocal tunnelling carries 99.8\% of the injection, and no additional vdW tunnel barrier is needed. This is consistent with the clean interfaces of that study. Without further adjustment the model gives $L_T=34$~nm and $\rho_c=2.7\times10^{-7}$~$\Omega$\,cm$^2$ at 300~K, both within the experimental range. At 400~K it predicts $\rho_c=2.0\times10^{-7}$~$\Omega$\,cm$^2$ (measured 1.5) and $L_T=29$~nm (measured $\approx$20, quoted uncertainty up to 50\%), with the measured direction of change for both (Fig.~\ref{fig:mos2}). The model underestimates how much $L_T$ shrinks with temperature. This is consistent with its temperature-independent barrier and no phonon-assisted injection. We take the agreement as validation of the contact and tunnelling implementation at the 10--40\% level, not of InSe parameters.
+The fit gives $\mathcal{T}_{\rm vdW}=1.0$, at its physical bound: $R_c=731$~\ohmum\ against 740~\ohmum\ measured. With the literature barrier, nonlocal tunnelling carries 99.8\% of the injection, and no additional vdW tunnel barrier is needed. This is consistent with the clean interfaces of that study. Without further adjustment the model gives $L_T=34$~nm and $\rho_c=2.7\times10^{-7}$~$\Omega$\,cm$^2$ at 300~K, both within the experimental range. At 400~K it predicts $\rho_c=2.0\times10^{-7}$~$\Omega$\,cm$^2$ (measured 1.5) and $L_T=29$~nm (measured $\approx$20, quoted uncertainty up to 50\%), with the measured direction of change for both (Fig.~\ref{fig:mos2}). The model underestimates how much $L_T$ shrinks with temperature. This is consistent with its temperature-independent barrier and no phonon-assisted injection. We take the agreement as validation of the contact and tunnelling implementation at the 10--40\% level, not of InSe parameters. Two limits follow. First, because the fit sits at its upper bound, it shows only that a clean ultra-high-vacuum interface can be fully transmitting. It gives no information on the transmission of a metal/InSe vdW gap, which is assumed here and tested over its full range in Sec.~\ref{sec:vdw}. Second, Au/MoS$_2$ is an electron contact, so the hole-specific inputs (valence-band position, hole masses) are not tested by it.
 
 \begin{figure}[t]
 \centering\includegraphics[width=\textwidth]{fig8_mos2_calibration.png}
@@ -176,6 +176,18 @@ Edge contacts expose dangling bonds and may be more strongly pinned than vdW top
 \centering\includegraphics[width=0.55\textwidth]{fig5_pinning_top_vs_edge.png}
 \caption{$R_{\rm tot}$ of edge contacts for $S_{\rm edge}=1$--0.3 and of 50-nm top contacts for $S_{\rm top}=1$ and 0.5 (ungated, 0.05~V).}
 \label{fig:pin}
+\end{figure}
+
+\subsection{Dependence on the vdW transmission}
+\label{sec:vdw}
+The baseline $\mathcal{T}_{\rm vdW}=0.013$ follows from an assumed gap of 0.30~nm and a 2-eV barrier (Table~\ref{tab:params}), and the Au/MoS$_2$ calibration does not constrain it (Sec.~\ref{sec:cal}). We therefore imposed $\mathcal{T}_{\rm vdW}$ on the top contact directly, from $10^{-3}$ to 1, for $\mu_\perp/\mu_\parallel=0.01$ and 1, and compared with the edge contact at the same operating point (Fig.~\ref{fig:vdw}; $L_c=50$~nm, $V_D=0.05$~V, $V_G=-3$~V for the gated cases). The edge contact has no vdW gap and is unaffected by $\mu_\perp/\mu_\parallel$, so a single edge reference is used.
+
+In the gated on state at 5.0~eV the top/edge ratio of contact resistance is 24 at the baseline, 7.6 at $\mathcal{T}_{\rm vdW}=0.1$ and 2.3 for a transparent gap; the ratios of total resistance are 4.2, 1.9 and 1.2. The top-contact resistance scales roughly as $\mathcal{T}_{\rm vdW}^{-1/2}$ (exponent 0.54 between 1 and 0.013). With $\mu_\perp/\mu_\parallel=1$ and a transparent gap, the contact ratio is 1.7 and the total ratio 1.02, so little advantage is left. At 4.8~eV in the gated state, a transparent gap makes the top contact marginally better in total resistance (ratio 0.92). In the ungated case at 4.8~eV the edge contact stays ahead over the whole range (total ratio 1.2--1.7 for a transparent gap and 3.6 at the baseline). The headline factor of 24 is therefore a statement about the assumed gap, not a calibrated result. What is robust is the direction of the advantage (ungated, and gated at 5.0~eV); its size at 5.0~eV in the gated state ranges from 1.7--2.3$\times$ to 200$\times$ in contact resistance (1.0--1.2$\times$ to 29$\times$ in total resistance) over the tested range of $\mathcal{T}_{\rm vdW}$. A measured top-contact resistance at a known barrier height, or a first-principles transmission for the InSe/metal gap, would fix this parameter.
+
+\begin{figure}[t]
+\centering\includegraphics[width=\textwidth]{fig12_vdw_sensitivity.png}
+\caption{Top/edge ratio of contact resistance $R_c$ (squares) and total resistance $R_{\rm tot}$ (circles) against the top-contact vdW transmission, for $\mu_\perp/\mu_\parallel=0.01$ (solid) and 1 (dashed). The dotted line marks the baseline $\mathcal{T}_{\rm vdW}=0.013$, the dashed vertical line the value $\mathcal{T}_{\rm vdW}=1$ at which the Au/MoS$_2$ fit saturates, and the shaded band the range sampled by the Monte Carlo analysis ($8\times10^{-4}$ to 0.13). The horizontal line marks equal resistance. (a, b) Gated on state, $V_G=-3$~V; (c) ungated. $V_D=0.05$~V, $L_c=50$~nm.}
+\label{fig:vdw}
 \end{figure}
 
 \subsection{Gated Schottky-barrier p-FETs}
@@ -245,12 +257,12 @@ Version 2 of this work corrected implementation errors in version 1: the boundar
 For hole injection into few-layer InSe p-FETs the model gives five design rules:
 \begin{enumerate}
 \item Contacts must be modelled with nonlocal tunnelling once a gate is present. It provides 80--100\% of the on-current for $\Phi_M\leq5.0$~eV, and local enhancement models miss it by more than an order of magnitude.
-\item Edge contacts give about 24$\times$ lower contact resistance in the on state, because they avoid the vdW gap and the slow out-of-plane path. This holds only if they are not more strongly pinned than top contacts; $S_{\rm edge}=0.7$ already reverses the comparison.
+\item Edge contacts give about 24$\times$ lower contact resistance (4.2$\times$ lower total resistance) in the on state at the baseline vdW transmission of 0.013, mainly because they avoid the vdW gap, and to a lesser extent the slow out-of-plane path. The factor falls to 2.3$\times$ (1.2$\times$) for a transparent gap, and the calibration does not fix it. It also holds only if edge contacts are not more strongly pinned than top contacts; $S_{\rm edge}=0.7$ already reverses the comparison.
 \item High-work-function metals beyond $E_V$ still help (2--2.6$\times$), provided pinning is weak.
 \item Top contacts have an optimum film thickness of about four layers; edge contacts benefit from thicker films.
 \item Edge-contacted devices carry several times more current and need heat removal, with absolute temperatures set by the oxide and thermal boundary resistance.
 \end{enumerate}
-The model is verified, calibrated on Au/MoS$_2$ with one parameter, and accompanied by a compact model and uncertainty bounds. Its main limitation is the unmeasured pinning factor of InSe contacts.
+The model is verified, calibrated on Au/MoS$_2$ with one parameter, and accompanied by a compact model and uncertainty bounds. The calibration tests the contact and tunnelling implementation for an electron contact. It does not test InSe parameters. No hole-injection measurements on InSe exist, so every InSe result above is conditional on three unmeasured inputs: the band alignment, the pinning factors of the two contacts and the vdW transmission of the top contact. Its main limitations are the unmeasured pinning factor and vdW transmission. Measuring the barrier height of a top contact, and comparing top and edge contacts on the same film, would turn these predictions into tests.
 
 \section*{Statements and Declarations}
 \paragraph{Author contributions} H.A.\ designed the study, developed the code, performed the simulations and analysis, and wrote the manuscript.

@@ -23,7 +23,7 @@ pip install -r requirements.txt
 export DEVSIM_MATH_LIBS=/usr/lib/x86_64-linux-gnu/liblapack.so.3:/usr/lib/x86_64-linux-gnu/libblas.so.3   # Linux
 cd src_v3
 python verification.py && python check_verification.py      # V1-V9 (also run by CI)
-python studies.py wf pinning aniso compact thickness gated thermal uq mos2   # several hours on 2 cores
+python studies.py wf pinning aniso compact thickness gated thermal uq mos2 vdw   # several hours on 2 cores
 python make_figures.py
 cd ../paper_v3 && pdflatex InSe_v3.tex && pdflatex InSe_v3.tex
 ```
@@ -32,7 +32,7 @@ cd ../paper_v3 && pdflatex InSe_v3.tex && pdflatex InSe_v3.tex
 |---|---|
 | `src_v3/tcad2d.py` | Model: meshes (top/edge, optional oxide + gate), anisotropic FD drift-diffusion, flux contacts, nonlocal or local tunnelling, full heat model, transient, extraction |
 | `src_v3/verification.py`, `check_verification.py` | V1-V9 benchmarks and CI tolerance check |
-| `src_v3/studies.py` | All v3 studies (InSe and the MoS2 calibration) |
+| `src_v3/studies.py` | All v3 studies (InSe and the MoS2 calibration; `vdw` = top/edge comparison against the vdW transmission, `data_v3/vdw_sweep.csv`, Fig. 12) |
 | `src_v3/make_figures.py` | Figures 1-10, compact-model fit, TLM fits, UQ statistics (`data_v3/derived_*`) |
 | `src_v3/make_schematic.py`, `make_maps.py` | Fig. 0 (geometries) and Fig. 11 (2D hole-density and temperature maps; fields in `data_v3/fields_*.csv`) |
 | `paper_v3/` | `InSe_v3.tex/.pdf`, `Response_to_Reviewers_v3.tex/.pdf` |

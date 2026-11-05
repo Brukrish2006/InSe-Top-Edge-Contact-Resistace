@@ -360,5 +360,42 @@ if uq is not None:
     save(fig, "fig10_uncertainty")
     DER["uq"] = stats
 
+# ---------------------------------------------------------------- Fig 12 dependence on the vdW transmission
+vs = rd("vdw_sweep")
+if vs is not None:
+    Tbase = m.wkb_vdw(dict(m.DEFAULTS, T_vdW_top=None))
+    Tmc_hi = m.wkb_vdw(dict(m.DEFAULTS, T_vdW_top=None, d_vdW=0.2e-7, Phi_vdW=1.0))  # Monte Carlo prior limits
+    Tmc_lo = m.wkb_vdw(dict(m.DEFAULTS, T_vdW_top=None, d_vdW=0.4e-7, Phi_vdW=3.0))
+    panels = [("gated", 5.0, "(a) Gated on state, 5.0 eV"), ("gated", 4.8, "(b) Gated on state, 4.8 eV"),
+              ("ungated", 4.8, "(c) Ungated, 4.8 eV")]
+    fig, ax = plt.subplots(1, 3, figsize=(7.2, 2.7), sharey=True)
+    vd = dict(T_baseline=Tbase, T_mc_range=[Tmc_lo, Tmc_hi])
+    for a, (mode, Phi, ttl) in zip(ax, panels):
+        g = vs[(vs["mode"] == mode) & np.isclose(vs.Phi, Phi)]
+        e = g[g.kind == "edge"].iloc[0]
+        a.axvspan(Tmc_lo, Tmc_hi, color="#ebebe6", zorder=0, lw=0)
+        for rmu, ls in ((0.01, "-"), (1.0, "--")):
+            t = g[(g.kind == "top") & np.isclose(g.rmu, rmu)].sort_values("T_vdW")
+            a.loglog(t.T_vdW, t.R_c / e.R_c, ls, color=C[1], marker="s", ms=3.5)
+            a.loglog(t.T_vdW, t.R_tot / e.R_tot, ls, color=C[0], marker="o", ms=3.5)
+            vd[f"{mode}_{Phi}_rmu{rmu}"] = dict(T_vdW=t.T_vdW.tolist(), Rc_ratio=(t.R_c / e.R_c).tolist(),
+                                                Rtot_ratio=(t.R_tot / e.R_tot).tolist())
+        a.axhline(1.0, color=INK, lw=0.8)
+        a.axvline(Tbase, color=INK, lw=0.8, ls=":")
+        a.set_xlim(6e-4, 1.6); a.set_xlabel(r"top-contact vdW transmission $\mathcal{T}_{\rm vdW}$")
+        a.set_title(ttl, fontsize=9, loc="left")
+    ax[0].set_ylabel("top / edge resistance ratio")
+    ax[0].text(7.5e-4, 1.08, "edge = top", fontsize=6.5, color=INK, va="bottom", ha="left")
+    for a in ax:
+        a.axvline(1.0, color=INK, lw=0.8, ls="--", alpha=0.5)  # calibrated value (Au/MoS2 fit saturates at 1)
+    ax[0].legend(handles=[Line2D([0], [0], color=C[1], marker="s", ms=3.5, label="contact, $R_c$"),
+                          Line2D([0], [0], color=C[0], marker="o", ms=3.5, label="total, $R_{\\rm tot}$"),
+                          Line2D([0], [0], color=INK, ls="-", label="$\\mu_\\perp/\\mu_\\parallel=0.01$"),
+                          Line2D([0], [0], color=INK, ls="--", label="$\\mu_\\perp/\\mu_\\parallel=1$")],
+                 frameon=False, fontsize=6, loc="upper right")
+    ax[0].set_ylim(0.5, 600)
+    DER["vdw"] = vd
+    save(fig, "fig12_vdw_sensitivity")
+
 json.dump(DER, open(os.path.join(D, "derived_summary.json"), "w"), indent=1, default=float)
 print(json.dumps(DER, indent=1, default=float)[:3000])
