@@ -45,3 +45,10 @@ parse_lit.py
 run_search.py
 test_edge_vol.py
 test_models.py
+
+# LaTeX build files
+*.aux
+*.out
+*.toc
+*.bbl
+*.blg
