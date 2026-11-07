@@ -17,10 +17,22 @@ Units: cm, V, A, s, K. 2D results per unit width (A/cm, Ohm*cm).
 import math
 import os
 
-os.environ.setdefault(
-    "DEVSIM_MATH_LIBS",
-    "/usr/lib/x86_64-linux-gnu/liblapack.so.3:/usr/lib/x86_64-linux-gnu/libblas.so.3",
-)
+if os.name == "nt":
+    # Windows: point DEVSIM at the MKL runtime installed by "pip install mkl"
+    # (it lands in <python>\\Library\\bin, which is not on PATH).
+    import glob
+    import sys as _sys
+    for _d in {_sys.prefix, _sys.base_prefix, os.path.dirname(_sys.executable)}:
+        _hits = sorted(glob.glob(os.path.join(_d, "Library", "bin", "mkl_rt*.dll")))
+        if _hits and "DEVSIM_MATH_LIBS" not in os.environ:
+            os.add_dll_directory(os.path.dirname(_hits[-1]))
+            os.environ["PATH"] = os.path.dirname(_hits[-1]) + os.pathsep + os.environ.get("PATH", "")
+            os.environ["DEVSIM_MATH_LIBS"] = _hits[-1]
+else:
+    os.environ.setdefault(
+        "DEVSIM_MATH_LIBS",
+        "/usr/lib/x86_64-linux-gnu/liblapack.so.3:/usr/lib/x86_64-linux-gnu/libblas.so.3",
+    )
 import numpy as np
 import devsim as ds
 

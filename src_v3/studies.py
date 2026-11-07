@@ -272,6 +272,66 @@ def s_thermal():
     write("thermal_transient", tr)
 
 
+
+# ---------------------------------------------------------------------------
+# Measured / calculated pinning with the literature band alignment of InSe
+# ---------------------------------------------------------------------------
+LIT = dict(chi_bulk=4.60)  # electron affinity used with the measured pinning data (Chen et al. 2019)
+METALS = dict(Ti=4.33, Cr=4.50, Au=5.10, Pd=5.12, Pt=5.65)
+
+
+def lit_Ev(t=5 * NM):
+    P = dict(m.DEFAULTS); P.update(LIT)
+    Eg, chi, _ = m.band(P, t)
+    return chi + Eg
+
+
+def pin_cases():
+    """Pinning levels are taken relative to the band edges of the 6-layer film, as reported."""
+    Ev = lit_Ev()
+    P = dict(m.DEFAULTS); P.update(LIT)
+    Ec = m.band(P, 5 * NM)[1]
+    return {
+        "direct (measured)": dict(S=0.05, CNL=Ec + 0.30),      # Chen et al. 2019: 0.3 eV below E_C (energies below vacuum)
+        "ideal MIGS (DFT)": dict(S=0.18, CNL=Ev - 0.58),       # Guo & Robertson 2017: 0.58 eV above E_V
+        "interlayer (measured)": dict(S=0.50, CNL=Ec + 0.60),  # Chen et al. 2019: 5.2 eV with chi=4.6
+        "unpinned": dict(S=1.0, CNL=Ec + 0.30),
+    }
+
+
+def s_barrier():
+    """On/off resistance versus hole barrier phi_Bp (literature alignment); gated and ungated."""
+    rows = []
+    Ev = lit_Ev()
+    VGs = [0.0, -1.0, -2.0, -3.0, -4.0]
+    for phiB in (0.0, 0.2, 0.4, 0.6, 0.8, 1.0):
+        Phi = Ev - phiB
+        for kind, Lc in [("top", 50 * NM), ("edge", 50 * NM)]:
+            P = dict(LIT)
+            rows.append(point(kind, Phi, Lc=Lc, P=P, extra=dict(study="ungated", phiB_set=phiB))[0])
+            rows += transfer(kind, Phi, 0.05, P=P, Lc=Lc, VGs=VGs, tag=dict(study="gated", phiB_set=phiB))
+            for tun in ("off",):
+                P2 = dict(LIT, tunneling=tun)
+                rows += transfer(kind, Phi, 0.05, P=P2, Lc=Lc, VGs=[-3.0],
+                                 tag=dict(study="gated", phiB_set=phiB, tunneling=tun))
+        write("barrier_sweep", rows)
+    write("barrier_sweep", rows)
+
+
+def s_metals():
+    """Real metals with measured / calculated pinning (literature alignment)."""
+    rows = []
+    for case, c in pin_cases().items():
+        for metal, Phi in METALS.items():
+            for kind, Lc in [("top", 50 * NM), ("edge", 50 * NM)]:
+                P = dict(LIT, S_top=c["S"], S_edge=c["S"], Phi_CNL=c["CNL"])
+                tag = dict(case=case, metal=metal, S=c["S"], CNL=c["CNL"])
+                rows.append(point(kind, Phi, Lc=Lc, P=P, extra=dict(tag, study="ungated"))[0])
+                rows += transfer(kind, Phi, 0.05, P=P, Lc=Lc, VGs=[-3.0], tag=dict(tag, study="gated"))
+        write("metals_pinning", rows)
+    write("metals_pinning", rows)
+
+
 if __name__ == "__main__":
     for s in sys.argv[1:]:
         t0 = time.time()
