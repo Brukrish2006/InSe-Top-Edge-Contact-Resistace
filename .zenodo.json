@@ -1,8 +1,0 @@
-{
-  "title": "InSe top- and edge-contact TCAD: verified drift-diffusion / electro-thermal DEVSIM models (v3)",
-  "upload_type": "software",
-  "creators": [{"name": "Adhikary, Harsha", "affiliation": "Indian Institute of Science, Bengaluru"}],
-  "license": "MIT",
-  "keywords": ["InSe", "Schottky contact", "DEVSIM", "TCAD", "2D semiconductors", "electro-thermal"],
-  "description": "DEVSIM models, verification suite, study scripts and data for top- and edge-contacted few-layer InSe Schottky-barrier p-FETs."
-}
