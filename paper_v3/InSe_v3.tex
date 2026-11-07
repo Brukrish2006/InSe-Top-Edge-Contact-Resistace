@@ -21,7 +21,7 @@
 \newcommand{\ohmum}{\ensuremath{\Omega\cdot\mu\mathrm{m}}}
 \sloppy
 
-\title{Gate-Controlled Hole Injection at Top and Edge Contacts to Few-Layer InSe:\\ An Anisotropic, Electro-Thermal TCAD Study Verified Analytically and Calibrated on Au/MoS$_2$}
+\title{Gate-Controlled Hole Injection at Top and Edge Contacts to Few-Layer InSe:\\ An Anisotropic, Electro-Thermal TCAD Study Verified Analytically and Benchmarked on a Known Contact}
 \author{Harsha Adhikary\thanks{Corresponding author. Email: \href{mailto:harshaa@iisc.ac.in}{harshaa@iisc.ac.in}} \\[4pt]
 \small Department of Physics, Indian Institute of Science (IISc), Bengaluru, India}
 \date{}
@@ -31,7 +31,7 @@
 
 \begin{abstract}
 \noindent
-We model hole injection into back-gated, few-layer $\gamma$-InSe through top and edge metal contacts with an open-source DEVSIM model. The model couples Poisson's equation to Fermi--Dirac carriers with anisotropic (in-plane/out-of-plane) mobility. Contacts use flux-balanced thermionic emission with a van der Waals (vdW) gap transmission and nonlocal Tsu--Esaki tunnelling along the contact normals. The lattice heat equation has anisotropic conductivity and includes Joule, interface, Peltier and tunnelling heat. Nine verification tests reproduce closed-form results and conservation laws. Calibrated with a single parameter to the measured contact resistance of ultra-high-vacuum Au/MoS$_2$ contacts (740~\ohmum), the same model predicts the measured transfer length at 300~K (34 vs 35--40~nm) and the measured trends with temperature. For InSe we find:
+We model hole injection into back-gated, few-layer $\gamma$-InSe through top and edge metal contacts with an open-source DEVSIM model. The model couples Poisson's equation to Fermi--Dirac carriers with anisotropic (in-plane/out-of-plane) mobility. Contacts use flux-balanced thermionic emission with a van der Waals (vdW) gap transmission and nonlocal Tsu--Esaki tunnelling along the contact normals. The lattice heat equation has anisotropic conductivity and includes Joule, interface, Peltier and tunnelling heat. Nine verification tests reproduce closed-form results and conservation laws. As a numerical benchmark on a different material, with a single parameter fitted to the measured contact resistance of ultra-high-vacuum Au/MoS$_2$ contacts (740~\ohmum), the same model predicts the measured transfer length at 300~K (34 vs 35--40~nm) and the measured trends with temperature. For InSe we find:
 (i) Gate-induced tunnelling dominates injection in a Schottky-barrier p-FET, carrying 80--100\% of the on-current at $\Phi_M\leq5.0$~eV. A local field-enhancement model underestimates the on-current 55--60-fold, and neglecting tunnelling 450--840-fold.
 (ii) Edge contacts give 24$\times$ lower contact resistance than 50-nm top contacts in the on state, and 72\% lower total resistance in the ungated, barrier-limited case. Most of this comes from the vdW gap and from slow out-of-plane transport, whose mobility ratio doubles the top-contact resistance between 1 and 0.002.
 (iii) The edge advantage disappears if edge contacts are even moderately more strongly pinned ($S_{\rm edge}=0.7$).
@@ -58,7 +58,7 @@ This paper asks which contact geometry gives the lowest resistance for hole inje
 \item transport and thermal anisotropy;
 \item a complete heat source.
 \end{itemize}
-We also calibrate it on a well-characterised metal/2D contact and test its predictions out of sample.
+We also benchmark its numerics on a well-characterised metal/2D contact (Au/MoS$_2$) and test its predictions out of sample.
 
 \section{Model}
 \label{sec:model}
@@ -138,13 +138,13 @@ Test & Quantity & Relative error \\
 \label{fig:ver}
 \end{figure}
 
-\subsection{Calibration on Au/MoS$_2$}
+\subsection{Numerical benchmark on Au/MoS$_2$}
 \label{sec:cal}
-No measurements of hole injection into p-InSe exist that could fix the interface parameters. We therefore test the contact model on the best-characterised metal/2D contact: ultra-high-vacuum Au on 4.5-nm MoS$_2$ with a 90-nm SiO$_2$ back gate \cite{refenglish}. The measured quantities at $n=10^{13}$~cm$^{-2}$ are $R_c=740$~\ohmum, $\rho_c\approx3\times10^{-7}$~$\Omega$\,cm$^2$ and $L_T\approx35$--40~nm at 300~K, and $\rho_c\approx1.5\times10^{-7}$~$\Omega$\,cm$^2$ and $L_T\approx20$~nm at 400~K. We keep the 0.15-eV electron barrier assumed in that work and use literature MoS$_2$ parameters, with an under-contact mobility of 35~cm$^2$/Vs scaling as $T^{-1.6}$. We fit a single parameter, $\mathcal{T}_{\rm vdW}$, to $R_c(300\,{\rm K})$ only. The quantities predicted out of sample are then $L_T(300\,\rm K)$ (from simulated $R_c(L_c)$ with $L_c=20$--200~nm), and $\rho_c$ and $L_T$ at 400~K.
+No measurements of hole injection into p-InSe exist that could fix the interface parameters. We therefore use a different, well-characterised system only as a numerical benchmark of the solver, contact and tunnelling implementation: the best-characterised metal/2D contact, ultra-high-vacuum Au on 4.5-nm MoS$_2$ with a 90-nm SiO$_2$ back gate \cite{refenglish}. The measured quantities at $n=10^{13}$~cm$^{-2}$ are $R_c=740$~\ohmum, $\rho_c\approx3\times10^{-7}$~$\Omega$\,cm$^2$ and $L_T\approx35$--40~nm at 300~K, and $\rho_c\approx1.5\times10^{-7}$~$\Omega$\,cm$^2$ and $L_T\approx20$~nm at 400~K. We keep the 0.15-eV electron barrier assumed in that work and use literature MoS$_2$ parameters, with an under-contact mobility of 35~cm$^2$/Vs scaling as $T^{-1.6}$. We fit a single parameter, $\mathcal{T}_{\rm vdW}$, to $R_c(300\,{\rm K})$ only. The quantities predicted out of sample are then $L_T(300\,\rm K)$ (from simulated $R_c(L_c)$ with $L_c=20$--200~nm), and $\rho_c$ and $L_T$ at 400~K.
 
 \section{Results}
-\subsection{Calibration and out-of-sample test}
-The fit gives $\mathcal{T}_{\rm vdW}=1.0$, at its physical bound: $R_c=731$~\ohmum\ against 740~\ohmum\ measured. With the literature barrier, nonlocal tunnelling carries 99.8\% of the injection, and no additional vdW tunnel barrier is needed. This is consistent with the clean interfaces of that study. Without further adjustment the model gives $L_T=34$~nm and $\rho_c=2.7\times10^{-7}$~$\Omega$\,cm$^2$ at 300~K, both within the experimental range. At 400~K it predicts $\rho_c=2.0\times10^{-7}$~$\Omega$\,cm$^2$ (measured 1.5) and $L_T=29$~nm (measured $\approx$20, quoted uncertainty up to 50\%), with the measured direction of change for both (Fig.~\ref{fig:mos2}). The model underestimates how much $L_T$ shrinks with temperature. This is consistent with its temperature-independent barrier and no phonon-assisted injection. We take the agreement as validation of the contact and tunnelling implementation at the 10--40\% level, not of InSe parameters.
+\subsection{Benchmark and out-of-sample test}
+The fit gives $\mathcal{T}_{\rm vdW}=1.0$, at its physical bound: $R_c=731$~\ohmum\ against 740~\ohmum\ measured. With the literature barrier, nonlocal tunnelling carries 99.8\% of the injection, and no additional vdW tunnel barrier is needed. This is consistent with the clean interfaces of that study. Without further adjustment the model gives $L_T=34$~nm and $\rho_c=2.7\times10^{-7}$~$\Omega$\,cm$^2$ at 300~K, both within the experimental range. At 400~K it predicts $\rho_c=2.0\times10^{-7}$~$\Omega$\,cm$^2$ (measured 1.5) and $L_T=29$~nm (measured $\approx$20, quoted uncertainty up to 50\%), with the measured direction of change for both (Fig.~\ref{fig:mos2}). The model underestimates how much $L_T$ shrinks with temperature. This is consistent with its temperature-independent barrier and no phonon-assisted injection. We take the agreement as validation of the contact and tunnelling implementation at the 10--40\% level. It is a check of the numerics only: MoS$_2$ has a different band structure, no strong anisotropy and no layer-dependent gap, so it does not validate the InSe parameters or the InSe-specific results.
 
 \begin{figure}[!htbp]
 \centering\includegraphics[width=0.96\textwidth]{fig8_mos2_calibration.png}
@@ -248,7 +248,7 @@ For hole injection into few-layer InSe p-FETs the model gives five design rules:
 \item Top contacts have an optimum film thickness of about four layers; edge contacts benefit from thicker films.
 \item Edge-contacted devices carry several times more current and need heat removal, with absolute temperatures set by the oxide and thermal boundary resistance.
 \end{enumerate}
-The model is verified, calibrated on Au/MoS$_2$ with one parameter, and accompanied by a compact model and uncertainty bounds. Its main limitation is the unmeasured pinning factor of InSe contacts.
+The model is verified, benchmarked on Au/MoS$_2$ with one fitted parameter, and accompanied by a compact model and uncertainty bounds. Its main limitation is the unmeasured pinning factor of InSe contacts.
 
 \section*{Statements and Declarations}
 \paragraph{Author contributions} H.A.\ designed the study, developed the code, performed the simulations and analysis, and wrote the manuscript.
