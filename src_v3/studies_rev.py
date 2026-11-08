@@ -50,7 +50,9 @@ def run_dev(spec):
                 rows.append(s.summarize(dv, dict(tag, **st.get("tag", {}))))
         return spec["out"], rows
     except Exception as e:  # keep going; failures are recorded, not hidden
+        import traceback
         print("RES FAILED", spec["out"], kind, tag, str(e)[:200], flush=True)
+        print("TRACEBACK", traceback.format_exc()[-2000:], flush=True)
         return spec["out"], [dict(tag, geom=s.lab(kind, spec["Lc"]), Phi_M=spec["Phi"], failed=1, err=str(e)[:120])]
 
 
