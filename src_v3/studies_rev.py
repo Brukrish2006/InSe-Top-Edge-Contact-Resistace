@@ -46,7 +46,8 @@ def run_dev(spec):
                 dv.set_gate(st["VG"])
             if "V" in st:
                 dv.set_bias(st["V"])
-            rows.append(s.summarize(dv, dict(tag, **st.get("tag", {}))))
+            if st.get("save", True):  # a step with save=False only moves the operating point
+                rows.append(s.summarize(dv, dict(tag, **st.get("tag", {}))))
         return spec["out"], rows
     except Exception as e:  # keep going; failures are recorded, not hidden
         print("RES FAILED", spec["out"], kind, tag, str(e)[:200], flush=True)
@@ -93,7 +94,7 @@ def tasks_thermal_lit():
         for kind in GEOMS:
             for name, extra in variants:
                 P = dict(s.LIT, S_top=c["S"], S_edge=c["S"], Phi_CNL=c["CNL"], **extra)
-                steps = [{"VG": -3.0}, {"V": 0.5}, {"V": 1.0}]
+                steps = [{"VG": -3.0, "save": False}, {"V": 0.5}, {"V": 1.0}]
                 T.append(_spec("thermal_lit", kind, PT, P, dict(case=case, metal="Pt", variant=name), steps))
     return T
 
@@ -104,7 +105,7 @@ def tasks_mesh_convergence():
         for kind in GEOMS:
             # (a) the Table 3 operating point (reference alignment, thermal on)
             T.append(_spec("mesh_convergence", kind, 5.0, {}, dict(case="table3_reference", mf=mf),
-                           [{"VG": -2.0}, {"V": 0.5}, {"V": 1.0}], mf=mf))
+                           [{"VG": -2.0, "save": False}, {"V": 0.5}, {"V": 1.0}], mf=mf))
             # (b) tunnelling-dominated measured-pinning on state (direct Pt, interlayer Pt)
             for case in ("direct (measured)", "interlayer (measured)"):
                 c = s.pin_cases()[case]
