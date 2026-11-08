@@ -34,10 +34,10 @@
 We model hole injection into back-gated, few-layer $\gamma$-InSe through top and edge metal contacts with an open-source DEVSIM model. The model couples Poisson's equation to Fermi--Dirac carriers with anisotropic (in-plane/out-of-plane) mobility. Contacts use flux-balanced thermionic emission with a van der Waals (vdW) gap transmission and nonlocal Tsu--Esaki tunnelling along the contact normals. The lattice heat equation has anisotropic conductivity and includes Joule, interface, Peltier and tunnelling heat. Nine verification tests reproduce closed-form results and conservation laws. As a numerical benchmark on a different material, with a single parameter fitted to the measured contact resistance of ultra-high-vacuum Au/MoS$_2$ contacts (740~\ohmum), the same model gives a transfer length of 34~nm at 300~K (measured 35--40~nm) and the measured trends with temperature. For InSe we find:
 (i) With the Fermi-level pinning measured for direct metal/InSe contacts ($S=0.05$, pinning level 0.3~eV below $E_C$) and the measured electron affinity, every common metal gives a hole barrier of 1.05--1.12~eV. Such contacts are electron-injecting, and hole conduction requires gate-induced tunnelling, which carries $\geq$99.9\% of the on-current; the on-state resistance then varies by only 2.4$\times$ from Ti to Pt.
 (ii) For hole barriers up to 1~eV, edge contacts outperform 50-nm top contacts in the gated on state, and the advantage grows with the barrier: 14$\times$ at 0.2~eV, 51$\times$ at 0.6~eV and 150$\times$ at 1.0~eV. It arises from the vdW gap and from slow out-of-plane transport.
-(iii) Lowering the hole barrier needs weaker pinning: with the measured oxide interlayer ($S=0.5$) Pt reaches 0.52~eV and a 700$\times$ lower edge resistance than with direct contacts. The edge advantage disappears only if edge contacts are more strongly pinned than top contacts.
-(iv) At the $S=1$ reference alignment, top contacts have an optimum film thickness of about four layers, and edge contacts improve monotonically with thickness.
-(v) At the same reference alignment, edge-contacted devices carry more current and heat correspondingly more; Peltier heat cools the source and heats the drain.
-A transmission-line compact model reproduces the simulated top-contact resistance with a median error of 11\%, and a Monte Carlo analysis of the ungated device ($S\geq0.3$) identifies band alignment and pinning as the dominant uncertainties.
+(iii) Lowering the hole barrier needs weaker pinning: with the measured oxide interlayer ($S=0.5$) Pt reaches 0.52~eV and a 700$\times$ lower edge resistance than with direct contacts. In ungated, barrier-limited operation the edge advantage disappears if edge contacts are more strongly pinned than top contacts; in the gated on state it survived independently varied pinning ($S=0.05$--0.5) in 96\% of Monte Carlo samples.
+(iv) Top contacts have an optimum film thickness of four to six layers, and edge contacts improve monotonically with thickness.
+(v) Edge-contacted devices carry more current and heat correspondingly more, but with directly pinned contacts self-heating is negligible and it becomes significant only after depinning; Peltier heat cools the source and heats the drain.
+A transmission-line compact model reproduces the simulated top-contact resistance with a median error of 11\%, and Monte Carlo analysis identifies band alignment and pinning as the dominant uncertainties of the ungated device, and the pinning level and the hole tunnelling mass in the gated on state, where the edge contact has lower resistance in every sample with shared pinning (median ratio about 100).
 \end{abstract}
 
 \noindent\textbf{Keywords:} indium selenide; Schottky-barrier FET; contact resistance; tunnelling; electro-thermal simulation; van der Waals contacts; compact model; uncertainty quantification
@@ -72,26 +72,27 @@ The device is an $N$-layer InSe film (0.83~nm per layer; $N=6$, $t=5$~nm by defa
 
 \begin{table}[!htbp]
 \centering
-\caption{Parameters (6-layer InSe unless stated). M: measured; L: literature calculation or compilation; R: representative value within a measured range; A: assumed. Sensitivities are given in Sec.~\ref{sec:uq}.}
-\label{tab:params}\small
-\resizebox{\textwidth}{!}{\begin{tabular}{lll}
+\caption{Parameters (6-layer InSe unless stated). M: measured; L: literature calculation or compilation; R: representative value within a measured range; A: assumed. The last column gives the effect of a larger value on the on-state resistance (or on $\Delta T_{\max}$), from the Monte Carlo analysis (Sec.~\ref{sec:uq}, Fig.~\ref{fig:uqgated}) and the sensitivity runs, and the expected change for thinner films where it is known.}
+\label{tab:params}\footnotesize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{@{}p{0.17\textwidth}p{0.25\textwidth}p{0.21\textwidth}p{0.33\textwidth}@{}}
 \toprule
-Parameter & Value & Source / type \\
+Parameter & Value & Source / type & Effect of a larger value; thickness trend \\
 \midrule
-$E_g(N)$, $E_V(N)$ & $1.26+2.78N^{-1.7}$ eV; 1.39, 5.00 eV at $N=6$ & fit to PL \cite{refmudd,refmudd2013} (M); 32\% VB share (A) \\
-$m_e$, $m_h$ (DOS and tunnelling) & 0.07, 0.17 $m_0$ & L \cite{refmag} \\
-$\varepsilon_r$ & 6.4 & L \\
-$\mu_{n,\parallel}$, $\mu_{p,\parallel}$ & 1000, 50 cm$^2$/Vs & M \cite{refband}; A \\
-$\mu_\perp/\mu_\parallel$ & 0.01 (range 0.002--1) & M (electrons; 0.002 in vertical FETs \cite{refsangwan}, $\sim$0.01 bulk) \\
-$\mu(T)$ & $\propto T^{-1.5}$ & A \\
-$\kappa_\parallel$, $\kappa_\perp$ & 8.5, 0.76 W/mK & M, time-domain thermoreflectance \cite{refrai} \\
-$c_V$ & 1.43 J/cm$^3$K & Dulong--Petit (L) \\
-$N_A$ & $10^{16}$ cm$^{-3}$ & A \\
-$S_{\rm top}$, $S_{\rm edge}$, $\Phi_{\rm CNL}$ & 1, 1, 4.35 eV (reference); 0.05 and 0.5 measured, 0.18 calculated (Sec.~\ref{sec:measured}) & A (varied); M \cite{refchen}; L \cite{refguo} \\
-vdW gap $d$, $\Phi_{\rm vdW}$ & 0.30 nm, 2.0 eV ($\mathcal{T}_{\rm vdW}=0.013$) & A (varied) \\
-oxide; $R_{\rm TBR}$ & 10 nm SiO$_2$ ($\kappa$=1.4 W/mK); $10^{-8}$ m$^2$K/W at the gate & A \\
+$E_g(N)$, $E_V(N)$ & $1.26+2.78N^{-1.7}$ eV; 1.39, 5.00 eV at $N=6$ & fit to PL \cite{refmudd,refmudd2013} (M); 32\% VB share (A) & Deeper $E_V$ raises $\phi_{Bp}$ and $R$ exponentially. Thinner films: larger gap, higher $R$ (Fig.~\ref{fig:thick}); VB share 0.2--0.5 moves the top-contact optimum by one layer \\
+$m_e$, $m_h$ (DOS and tunnelling) & 0.07, 0.17 $m_0$ & L \cite{refmag} & Heavier $m_h$ suppresses tunnelling and raises the gated $R$ (second-largest index). Few-layer value uncertain; direction unknown \\
+$\varepsilon_r$ & 6.4 & L & Raises the gated $R$ moderately ($\rho\approx0.2$--0.3). Weaker screening in few layers would lower $R$ \\
+$\mu_{n,\parallel}$, $\mu_{p,\parallel}$ & 1000, 50 cm$^2$/Vs & M \cite{refband}; A & Lowers only the channel part; contact-limited on state insensitive (index at noise floor). Thinner films: lower $\mu$, higher $R_{\rm ch}$ \\
+$\mu_\perp/\mu_\parallel$ & 0.01 (range 0.002--1) & M (electrons; 0.002 in vertical FETs \cite{refsangwan}, $\sim$0.01 bulk) & Smaller ratio raises top-contact $R$ (2$\times$ from 1 to 0.002, ungated); edge unaffected \\
+$\mu(T)$ & $\propto T^{-1.5}$ & A & Stronger decay raises $R$ of self-heated devices only \\
+$\kappa_\parallel$, $\kappa_\perp$ & 8.5, 0.76 W/mK & M, time-domain thermoreflectance \cite{refrai} & Lower $\kappa$ raises $\Delta T_{\max}$ (measured vs isotropic $\kappa_\perp$: +8--17\%). Few-layer $\kappa$ likely below bulk: higher $\Delta T$ \\
+$c_V$ & 1.43 J/cm$^3$K & Dulong--Petit (L) & Scales only the thermal time constant \\
+$N_A$ & $10^{16}$ cm$^{-3}$ & A & Weak (index at noise floor) \\
+$S_{\rm top}$, $S_{\rm edge}$, $\Phi_{\rm CNL}$ & 1, 1, 4.35 eV (reference); 0.05 and 0.5 measured, 0.18 calculated (Sec.~\ref{sec:measured}) & A (varied); M \cite{refchen}; L \cite{refguo} & Dominant: the pinning level and $S$ set $\phi_{Bp}$ (largest indices); for Pt a larger $S$ lowers $R$. $S_{\rm edge}>S_{\rm top}$ reverses the ungated ranking only \\
+vdW gap $d$, $\Phi_{\rm vdW}$ & 0.30 nm, 2.0 eV ($\mathcal{T}_{\rm vdW}=0.013$) & A (varied) & Raise top-contact $R$ only ($\rho\approx0.2$ gated); edge unaffected \\
+oxide; $R_{\rm TBR}$ & 10 nm SiO$_2$ ($\kappa$=1.4 W/mK); $10^{-8}$ m$^2$K/W at the gate & A & 3$\times$ larger $R_{\rm TBR}$ raises $\Delta T_{\max}$ by 58--73\%. Oxide thickness not varied \\
 \bottomrule
-\end{tabular}}
+\end{tabular}
 \end{table}
 
 \subsection{Carrier transport}
@@ -116,7 +117,7 @@ $R_{\rm tot}=V_D/I_D$ is reported per unit width; 1~\ohmcm\ equals $10^4$~\ohmum
 
 \subsection{Verification}
 \label{sec:ver}
-Table~\ref{tab:ver} and Fig.~\ref{fig:ver} summarise nine tests: (V1) an ohmic resistor; (V2) a finite-velocity contact resistor; (V3) Mott--Gurney space-charge-limited current with Boltzmann and Fermi--Dirac statistics \cite{refmott}; (V4) thermionic emission at 300 and 350~K; (V5) energy and charge conservation in 2D, gated and ungated (heat out equals $IV$ within 0.3\% except 1.2\% in the hottest gated case, where Thomson heat from temperature gradients is not separately balanced); (V6) nonlocal tunnelling against an independent quadrature on the same band profile (0.17\%), and on a depletion-approximation profile (13\%, the approximation's own error); (V7) a degenerate contact at equilibrium; (V8) transient energy conservation and approach to the DC state; and (V9) Gauss's law with a gate. $R_{\rm tot}$ changes by less than 1.3\% between 0.5$\times$ and 3$\times$ mesh density (Supplementary).
+Table~\ref{tab:ver} and Fig.~\ref{fig:ver} summarise nine tests: (V1) an ohmic resistor; (V2) a finite-velocity contact resistor; (V3) Mott--Gurney space-charge-limited current with Boltzmann and Fermi--Dirac statistics \cite{refmott}; (V4) thermionic emission at 300 and 350~K; (V5) energy and charge conservation in 2D, gated and ungated (heat out equals $IV$ within 0.3\% except 1.2\% in the hottest gated case, where Thomson heat from temperature gradients is not separately balanced); (V6) nonlocal tunnelling against an independent quadrature on the same band profile (0.17\%), and on a depletion-approximation profile (13\%, the approximation's own error); (V7) a degenerate contact at equilibrium; (V8) transient energy conservation and approach to the DC state; and (V9) Gauss's law with a gate. $R_{\rm tot}$ changes by less than 1.3\% between 0.5$\times$ and 3$\times$ mesh density in the ungated device (Supplementary), and by at most 1.5\% (with $\Delta T_{\max}$ changing by at most 0.6~K) at the operating points of Table~\ref{tab:therm} between 1$\times$ and 3$\times$. Convergence is slower in the tunnelling-dominated on state at the measured pinning (Sec.~\ref{sec:measured}): between 1$\times$ and 3$\times$ the edge-contact resistance changes non-monotonically by up to 12\% and the top-contact resistance by up to 5\%. On-state resistances and top/edge ratios there carry a mesh uncertainty of about 15\% (Fig.~\ref{fig:electron}c).
 
 \begin{table}[!htbp]
 \centering
@@ -171,7 +172,8 @@ Out-of-plane transport limits top contacts (Fig.~\ref{fig:aniso}). Lowering $\mu
 \end{figure}
 
 \subsection{Pinning: can top contacts win?}
-Edge contacts expose dangling bonds and may be more strongly pinned than vdW top contacts. Figure~\ref{fig:pin} varies $S_{\rm edge}$ with $S_{\rm top}=1$. Already at $S_{\rm edge}=0.7$ the edge contact is 180$\times$ more resistive than with $S_{\rm edge}=1$ at 4.8~eV ($2.6\times10^5$~\ohmcm), and 50$\times$ worse than the 50-nm top contact. It overtakes the top contact again only for metals with $\Phi_M\geq5.4$~eV. The geometric and vdW advantage of edge contacts is therefore smaller than the effect of a modest difference in pinning. Which geometry wins is decided by interface chemistry, and $S_{\rm edge}$ is the quantity experiments should measure first.
+\label{sec:res_pin}
+Edge contacts expose dangling bonds and may be more strongly pinned than vdW top contacts. Figure~\ref{fig:pin} varies $S_{\rm edge}$ with $S_{\rm top}=1$. Already at $S_{\rm edge}=0.7$ the edge contact is 180$\times$ more resistive than with $S_{\rm edge}=1$ at 4.8~eV ($2.6\times10^5$~\ohmcm), and 50$\times$ worse than the 50-nm top contact. It overtakes the top contact again only for metals with $\Phi_M\geq5.4$~eV. The geometric and vdW advantage of edge contacts is therefore smaller than the effect of a modest difference in pinning. Which geometry wins is decided by interface chemistry, and $S_{\rm edge}$ is the quantity experiments should measure first. This reversal applies to the ungated, barrier-limited contact. In the gated on state the edge contact keeps its advantage over a wide range of unequal pinning (Sec.~\ref{sec:uq}).
 
 \begin{figure}[!htbp]
 \centering\includegraphics[width=0.55\textwidth]{fig5_pinning_top_vs_edge.png}
@@ -189,10 +191,17 @@ With the calculated ideal pinning the barriers fall to 0.52--0.76~eV and the edg
 
 The geometry lever becomes stronger, not weaker, as the barrier rises (Fig.~\ref{fig:measured}b). The ratio of top- to edge-contact on-state resistance is 4.1 at $\phi_{Bp}=0$, 14 at 0.2~eV, 35 at 0.4~eV, 51 at 0.6~eV, 74 at 0.8~eV and 150 at 1.0~eV. At high barriers the current must tunnel, and the edge contact tunnels in-plane with the gate field, while the top contact must tunnel vertically through the vdW gap and the slow out-of-plane path. Without tunnelling the resistance rises by $5\times10^2$ (edge) and $3\times10^2$ (top) at 0.2~eV and by $5\times10^7$ and $8\times10^6$ at 0.6~eV, so a thermionic contact model would declare any InSe hole contact unusable. Gated runs that did not converge are omitted. The hole current there is expected to be small, but this was not verified. They are the top contacts with $\phi_{Bp}\geq1.07$~eV (direct pinning except Pt; Ti and Cr with $S\geq0.5$) and the runs without tunnelling at 0.8--1.0~eV. For the measured direct pinning the top/edge ratio is therefore available only for Pt (170$\times$ at $\phi_{Bp}=1.05$~eV). The ungated resistance is not monotonic above $\phi_{Bp}\approx0.7$~eV because electron injection takes over.
 
+As a consistency check against the measured electron barriers, we applied the same model to electron injection into an n-type film ($N_D=10^{16}$~cm$^{-3}$) with the measured direct pinning, for In, Ti and Pd contacts at 200--400~K (Fig.~\ref{fig:electron}a,b). At $V_G=0$ the Arrhenius barriers, from the slope of $\ln(I/T^2)$ against $1/T$, are 0.14--0.17~eV (edge) and 0.20--0.24~eV (top). They differ by at most 0.04~eV between metals across a 1-eV range of work function, in line with the weak metal dependence reported in Ref.~\cite{refchen}. They lie 0.06--0.16~eV below the input barrier of 0.30~eV because tunnelling contributes even without a gate, so barriers extracted this way are lower bounds. Above $V_G=+1$~V the Arrhenius slope turns negative because channel transport dominates.
+
 \begin{figure}[!htbp]
 \centering\includegraphics[width=0.96\textwidth]{fig12_measured_pinning.png}
 \caption{Literature band alignment ($\chi=4.6$~eV, $E_V=5.90$~eV for 6 layers). (a) On-state $R_{\rm tot}$ ($V_G=-3$~V, $V_D=0.05$~V) versus hole barrier, with nonlocal tunnelling (solid) and without tunnelling (dotted). (b) Ratio of top- to edge-contact on-state resistance. (c) On-state $R_{\rm tot}$ for five metals and four pinning cases: no pinning; measured oxide interlayer and direct contact (M) \cite{refchen}; calculated ideal interface \cite{refguo}. Filled: edge; open: top, 50~nm. Missing points did not converge and were not determined.}
 \label{fig:measured}
+\end{figure}
+\begin{figure}[!htbp]
+\centering\includegraphics[width=0.96\textwidth]{fig15_electron_mesh.png}
+\caption{(a) Arrhenius plots of electron injection at $V_G=0$ with the measured direct pinning ($S=0.05$, input barrier 0.30~eV) for In, Ti and Pd; filled: edge, open: top. (b) Arrhenius barrier versus $V_G$. (c) Change of $R_{\rm tot}$ with mesh factor for the Table~\ref{tab:therm} operating point and for the gated on state at the measured pinning (Pt, $V_G=-3$~V).}
+\label{fig:electron}
 \end{figure}
 
 \subsection{Gated Schottky-barrier p-FETs}
@@ -205,7 +214,7 @@ With the gate (Fig.~\ref{fig:gated}), both geometries switch with on/off ratios 
 \end{figure}
 
 \subsection{Thickness}
-These results use the $S=1$ reference alignment and the assumed 32\% valence-band share of the confinement shift. The position of the optimum depends on both and was not recomputed for the measured alignment. Thinner films have larger band gaps and deeper valence bands (Fig.~\ref{fig:thick}a), so ungated resistances rise steeply below six layers. At 4.8~eV the edge-contact resistance rises from 242~\ohmcm\ (12 layers) to $1.1\times10^5$~\ohmcm\ (3 layers). In the gated on state ($\Phi_M=5.0$~eV, $V_G=-3$~V) the edge contact improves monotonically with thickness (0.197$\to$0.135~\ohmcm\ from 3 to 12 layers). The top contact instead has an optimum near four layers: 0.53~\ohmcm, rising to 1.55~\ohmcm\ at 12 layers. Beyond that thickness the vertical access through layers with low $\mu_\perp$ outweighs the shallower barrier (Fig.~\ref{fig:thick}b).
+The trends below are robust to the band alignment and to the assumed 32\% valence-band share of the confinement shift (Fig.~\ref{fig:measuredalign}b,c). With the measured alignment and Pt contacts ($V_G=-3$~V) edge contacts again improve monotonically from 3 to 12 layers (oxide interlayer: 25$\to$4.5~\ohmcm), and top contacts have an optimum at five layers (interlayer, 207~\ohmcm) or six layers (direct pinning). Changing the valence-band share to 0.2 or 0.5 moves the optimum of the reference alignment between four and five layers. Thinner films have larger band gaps and deeper valence bands (Fig.~\ref{fig:thick}a), so ungated resistances rise steeply below six layers. At 4.8~eV the edge-contact resistance rises from 242~\ohmcm\ (12 layers) to $1.1\times10^5$~\ohmcm\ (3 layers). In the gated on state ($\Phi_M=5.0$~eV, $V_G=-3$~V) the edge contact improves monotonically with thickness (0.197$\to$0.135~\ohmcm\ from 3 to 12 layers). The top contact instead has an optimum near four layers: 0.53~\ohmcm, rising to 1.55~\ohmcm\ at 12 layers. Beyond that thickness the vertical access through layers with low $\mu_\perp$ outweighs the shallower barrier (Fig.~\ref{fig:thick}b).
 
 \begin{figure}[!htbp]
 \centering\includegraphics[width=0.96\textwidth]{fig2_thickness.png}
@@ -221,6 +230,11 @@ These results use the $S=1$ reference alignment and the assumed 32\% valence-ban
 \centering\includegraphics[width=0.96\textwidth]{fig7_thermal.png}
 \caption{(a) Peak temperature rise versus dissipated power, gated on state. (b) Effect of each heat-model term at $V_D=1$~V, $V_G=-2$~V, $\Phi_M=5.0$~eV. (c) Response to a 0$\to$1~V drain step at $V_G=-2$~V, simulated without tunnelling (steady-state rises of 48~K and 2~K); only the time constant is used in the text.}
 \label{fig:thermal}
+\end{figure}
+\begin{figure}[!htbp]
+\centering\includegraphics[width=0.96\textwidth]{fig14_measured_alignment.png}
+\caption{Measured alignment. (a) Peak temperature rise at $V_D=1$~V, $V_G=-3$~V for Pt contacts and four pinning cases; bars span heat sinking through the metal (lower) and a three times larger $R_{\rm TBR}$ (upper). (b) On-state $R_{\rm tot}$ versus layer number for Pt with the oxide interlayer and direct pinning (missing top points did not converge). (c) Reference alignment ($\Phi_M=5.0$~eV, $S=1$) for valence-band shares of 0.2, 0.32 and 0.5. Filled: edge; open: top, 50~nm.}
+\label{fig:measuredalign}
 \end{figure}
 
 \begin{figure}[!htbp]
@@ -254,22 +268,27 @@ Over 120 cases ($\phi_{Bp}=0.05$--0.25~eV, $d_{\rm vdW}=0.2$--0.4~nm, $L_c=10$--
 \caption{Monte Carlo propagation of parameter uncertainty (ungated, 0.05~V). (a) Cumulative distributions of $\log_{10}R_{\rm tot}$. (b) Paired samples: the same parameter draw simulated for the top (50~nm) and edge contact; points below the diagonal have lower edge resistance. (c) First-order variance indices (colour: geometry; hatching: 5.0~eV).}
 \label{fig:uq}
 \end{figure}
+\begin{figure}[!htbp]
+\centering\includegraphics[width=0.96\textwidth]{fig13_uq_gated.png}
+\caption{Monte Carlo analysis of the gated on state at the literature alignment (Pt, $V_G=-3$~V, $V_D=0.05$~V, 240 samples). (a) Cumulative distributions of $\log_{10}R_{\rm tot}$. (b) Paired samples with shared $S$ and with independently sampled $S_{\rm edge}$; points below the diagonal have lower edge resistance. (c) Binned first-order indices with the permutation noise floor.}
+\label{fig:uqgated}
+\end{figure}
 
 \section{Conclusions}
 For hole injection into few-layer InSe p-FETs the model gives five design rules:
 \begin{enumerate}
 \item With the measured pinning of direct metal/InSe contacts ($S=0.05$), every common metal gives a hole barrier of about 1.1~eV and an electron-injecting contact. Hole operation then relies entirely on gate-induced tunnelling, and the metal work function barely matters (2.4$\times$ from Ti to Pt).
 \item The barrier must first be lowered by depinning: the measured oxide interlayer brings Pt to 0.52~eV and lowers the on-state resistance 700$\times$.
-\item For hole barriers up to 1~eV, edge contacts beat 50-nm top contacts in the on state, by 14$\times$ at 0.2~eV and 150$\times$ at 1~eV, because they avoid the vdW gap and the slow out-of-plane path. This holds only if edge contacts are not more strongly pinned than top contacts, which is the one interface property still to be measured.
+\item For hole barriers up to 1~eV, edge contacts beat 50-nm top contacts in the on state, by 14$\times$ at 0.2~eV and 150$\times$ at 1~eV, because they avoid the vdW gap and the slow out-of-plane path. In ungated, barrier-limited operation this holds only if edge contacts are not more strongly pinned than top contacts; in the gated on state it held in 96\% of samples with independently varied pinning. The pinning of edge contacts remains the interface property most worth measuring.
 \item Nonlocal tunnelling is essential: thermionic and local enhancement models underestimate the on-current by orders of magnitude.
-\item At the $S=1$ reference alignment, top contacts have an optimum film thickness of about four layers, and edge-contacted devices carry more current and need heat removal.
+\item Top contacts have an optimum film thickness of four to six layers. Edge-contacted devices carry more current and need heat removal once the contacts are depinned.
 \end{enumerate}
-The model is verified, benchmarked on Au/MoS$_2$ with one fitted parameter, anchored to the measured pinning of InSe contacts, and accompanied by a compact model and uncertainty bounds. Its main remaining limitations are the uncertain absolute band alignment of few-layer InSe and the unmeasured pinning of edge contacts. The vdW-gap transmission, the tunnelling mass and the interface thermal resistance are assumed, not measured. The one-dimensional WKB treatment is checked against quadrature on the same band profile (V6) but not against a two-dimensional quantum calculation. No InSe contact has been used as a benchmark. The thickness and self-heating results use the $S=1$ reference alignment, and the Monte Carlo analysis covers only the ungated device with $S\geq0.3$.
+The model is verified, benchmarked on Au/MoS$_2$ with one fitted parameter, anchored to the measured pinning of InSe contacts, and accompanied by a compact model and uncertainty bounds. Its main remaining limitations are the uncertain absolute band alignment of few-layer InSe and the unmeasured pinning of edge contacts. The vdW-gap transmission, the tunnelling mass and the interface thermal resistance are assumed, not measured. The one-dimensional WKB treatment is checked against quadrature on the same band profile (V6) but not against a two-dimensional quantum calculation. No InSe contact has been used as a benchmark. In the gated on state the hole tunnelling mass is, after the pinning level, the largest uncertainty, and on-state resistances at the measured pinning carry a mesh uncertainty of about 15\%.
 
 \section*{Statements and Declarations}
 \paragraph{Author contributions} H.A.\ designed the study, developed the code, performed the simulations and analysis, and wrote the manuscript.
 \paragraph{Funding} None. \paragraph{Competing interests} None.
-\paragraph{Code and data availability} \url{https://github.com/Brukrish2006/InSe-Top-Edge-Contact-Resistace} (\texttt{src\_v3}, \texttt{data\_v3}, \texttt{figures\_v3}). The numbers quoted in Secs.~\ref{sec:measured} and~\ref{sec:heat} are regenerated from \texttt{data\_v3} by \texttt{src\_v3/check\_numbers.py}.
+\paragraph{Code and data availability} \url{https://github.com/Brukrish2006/InSe-Top-Edge-Contact-Resistace} (\texttt{src\_v3}, \texttt{data\_v3}, \texttt{figures\_v3}). The numbers quoted in Secs.~\ref{sec:measured} and~\ref{sec:heat} are regenerated from \texttt{data\_v3} by \texttt{src\_v3/check\_numbers.py}. The gated Monte Carlo, measured-alignment thermal and thickness runs, mesh study and electron-injection check are produced by \texttt{src\_v3/run\_revision.py} and summarised by \texttt{src\_v3/analyze\_revision.py}.
 
 \begin{thebibliography}{99}
 \bibitem{refband} D.A.~Bandurin \textit{et al.}, Nat.\ Nanotechnol.\ \textbf{12}, 223 (2017), \doi{10.1038/nnano.2016.242}.

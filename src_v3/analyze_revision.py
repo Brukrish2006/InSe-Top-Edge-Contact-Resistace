@@ -85,3 +85,27 @@ if e is not None:
             out.append((metal, geom, vg, -sl))
     print(pd.DataFrame(out, columns=["metal", "geom", "VG", "phi_eff_eV"]).round(3).to_string(index=False))
     print("Compare the flat-band barrier (VG where phi_eff stops decreasing) with the S = 0.05 / 0.3 eV values of Ref. [11].")
+
+c = rd("chen2019")
+if c is not None:
+    c = c[c["failed"].fillna(0) == 0] if "failed" in c else c
+    kB = 8.617e-5
+    a = c[c.part == "A_arrhenius"]
+    print("\n=== chen2019 part A: Arrhenius barrier (300-400 K) per V_G, top contacts, 15 nm n-InSe, 300 nm SiO2")
+    rows = []
+    for (case, metal, vg), g in a.groupby(["case", "metal", "VG"]):
+        if len(g) >= 3:
+            rows.append((case, metal, g.Phi_M.iloc[0], vg, -np.polyfit(1 / (kB * g.T0.values), np.log(g.I.values / g.T0.values ** 2), 1)[0]))
+    A = pd.DataFrame(rows, columns=["case", "metal", "Phi_M", "VG", "phi_B"])
+    print(A.pivot_table(index=["case", "metal"], columns="VG", values="phi_B").round(3).to_string())
+    print("apparent pinning factor (slope of phi_B vs Phi_M across metals), reported: control 0.05, OML 0.5")
+    for (case, vg), g in A.groupby(["case", "VG"]):
+        if len(g) >= 3:
+            print(f"   {case:20s} VG={vg:+5.0f} V  S_app={np.polyfit(g.Phi_M, g.phi_B, 1)[0]:+.3f}")
+    print("reported: In with oxidized monolayer, 65 meV")
+    b = c[c.part == "B_oncurrent"]
+    if len(b):
+        print("\n=== chen2019 part B: In contact, V_D=1 V; reported 103 uA/um (1.03 A/cm) for OML at V_G=80 V, 3-6x control")
+        pv = b.pivot_table(index=["Lch_nm", "VG"], columns="case", values="I")
+        pv["ratio_OML/control"] = pv["oxidized monolayer"] / pv["control"]
+        print(pv.to_string(float_format=lambda x: f"{x:.4g}"))

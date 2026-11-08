@@ -38,8 +38,10 @@ def run_dev(spec):
     kind = spec["kind"]
     tag = spec["tag"]
     try:
+        gate = spec.get("gate_dict", GATE) if spec.get("gate") else None
+        kw = dict(Lch=spec["Lch"]) if "Lch" in spec else {}
         dv = m.Device(kind, P=spec["P"], Phi_M=spec["Phi"], Lc=spec["Lc"], t=spec.get("t", 5 * NM),
-                      gate=GATE if spec.get("gate") else None, mf=spec.get("mf", 1.0))
+                      gate=gate, mf=spec.get("mf", 1.0), **kw)
         rows = []
         for st in spec["steps"]:
             if "VG" in st:
@@ -151,5 +153,36 @@ def tasks_inse_electron():
     return T
 
 
+def tasks_chen2019():
+    """Reproduce the measurement protocol of Chen et al., npj 2D Mater. Appl. 3, 49 (2019) [Ref. 11]:
+    n-type InSe, 10-20 nm thick, top contacts (In, Ti, Cr, Pd), 300 nm SiO2 back gate, Arrhenius barriers
+    from 300-400 K, with the reported pinning of control (S=0.05, Phi_CNL=4.9 eV) and oxidized-monolayer
+    (S=0.5, Phi_CNL=5.2 eV) contacts. Part B: In-contact on-current at V_G=80 V, V_D=1 V (reported 103 uA/um
+    for the oxidized-monolayer device, 3-6x the control)."""
+    T = []
+    t = 18 * 0.83 * NM                      # 15 nm
+    g300 = dict(t_ox=300e-7)
+    metals = dict(In=4.12, Ti=4.33, Cr=4.50, Pd=5.12)
+    cases = {"control": (0.05, 4.9), "oxidized monolayer": (0.5, 5.2)}
+    for case, (S, cnl) in cases.items():
+        for metal, Phi in metals.items():
+            for T0 in (300.0, 325.0, 350.0, 375.0, 400.0):
+                P = dict(s.LIT, NA=0.0, ND=1e16, T0=T0, thermal=False, S_top=S, S_edge=S, Phi_CNL=cnl)
+                steps = [{"V": 0.05}] + [{"VG": v} for v in (-20.0, -10.0, 0.0, 10.0, 20.0, 40.0)]
+                sp = _spec("chen2019", "top", Phi, P, dict(part="A_arrhenius", case=case, metal=metal, S=S, CNL=cnl, T0=T0),
+                           steps, t=t)
+                sp.update(gate_dict=g300, Lc=200 * NM, Lch=500 * NM)
+                T.append(sp)
+        for Lch in (1000, 3000):
+            P = dict(s.LIT, NA=0.0, ND=1e16, thermal=False, S_top=S, S_edge=S, Phi_CNL=cnl)
+            steps = [{"V": 1.0}] + [{"VG": v} for v in (20.0, 40.0, 60.0, 80.0)]
+            sp = _spec("chen2019", "top", metals["In"], P, dict(part="B_oncurrent", case=case, metal="In", S=S, CNL=cnl,
+                                                               Lch_nm=Lch), steps, t=t)
+            sp.update(gate_dict=g300, Lc=500 * NM, Lch=Lch * NM)
+            T.append(sp)
+    return T
+
+
 STUDIES = {"uq_gated": tasks_uq_gated, "thermal_lit": tasks_thermal_lit, "mesh_convergence": tasks_mesh_convergence,
-           "thickness_lit": tasks_thickness_lit, "inse_electron": tasks_inse_electron}
+           "thickness_lit": tasks_thickness_lit, "inse_electron": tasks_inse_electron,
+           "chen2019": tasks_chen2019}
