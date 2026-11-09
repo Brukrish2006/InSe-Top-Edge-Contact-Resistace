@@ -45,7 +45,10 @@ def run_dev(spec):
         rows = []
         for st in spec["steps"]:
             if "VG" in st:
-                dv.set_gate(st["VG"])
+                if "vg_step" in spec:  # thick oxide: larger gate steps (the ramp still halves on failure)
+                    dv._ramp("gate_bias", "vg", st["VG"], spec["vg_step"], max_step=2 * spec["vg_step"])
+                else:
+                    dv.set_gate(st["VG"])
             if "V" in st:
                 dv.set_bias(st["V"])
             if st.get("save", True):  # a step with save=False only moves the operating point
@@ -171,14 +174,14 @@ def tasks_chen2019():
                 steps = [{"V": 0.05}] + [{"VG": v} for v in (-20.0, -10.0, 0.0, 10.0, 20.0, 40.0)]
                 sp = _spec("chen2019", "top", Phi, P, dict(part="A_arrhenius", case=case, metal=metal, S=S, CNL=cnl, T0=T0),
                            steps, t=t)
-                sp.update(gate_dict=g300, Lc=200 * NM, Lch=500 * NM)
+                sp.update(gate_dict=g300, Lc=200 * NM, Lch=500 * NM, vg_step=1.0)
                 T.append(sp)
         for Lch in (1000, 3000):
             P = dict(s.LIT, NA=0.0, ND=1e16, thermal=False, S_top=S, S_edge=S, Phi_CNL=cnl)
             steps = [{"V": 1.0}] + [{"VG": v} for v in (20.0, 40.0, 60.0, 80.0)]
             sp = _spec("chen2019", "top", metals["In"], P, dict(part="B_oncurrent", case=case, metal="In", S=S, CNL=cnl,
                                                                Lch_nm=Lch), steps, t=t)
-            sp.update(gate_dict=g300, Lc=500 * NM, Lch=Lch * NM)
+            sp.update(gate_dict=g300, Lc=500 * NM, Lch=Lch * NM, vg_step=1.0)
             T.append(sp)
     return T
 
