@@ -186,6 +186,24 @@ def tasks_chen2019():
     return T
 
 
+def tasks_chen2019_300K():
+    """Re-run of the 300 K points of chen2019 part A without the unreachable negative gate (deep depletion at
+    V_G < -5 V in the n-type film): V_G = 0 and +20 V, shared with the 350 K and 400 K runs."""
+    T = []
+    t = 18 * 0.83 * NM
+    metals = dict(In=4.12, Ti=4.33, Cr=4.50, Pd=5.12)
+    cases = {"control": (0.05, 4.9), "oxidized monolayer": (0.5, 5.2)}
+    for case, (S, cnl) in cases.items():
+        for metal, Phi in metals.items():
+            P = dict(s.LIT, NA=0.0, ND=1e16, T0=300.0, thermal=False, S_top=S, S_edge=S, Phi_CNL=cnl)
+            steps = [{"V": 0.05, "save": False}] + [{"VG": v} for v in (0.0, 20.0)]
+            sp = _spec("chen2019_300K", "top", Phi, P, dict(part="A_arrhenius", case=case, metal=metal, S=S, CNL=cnl, T0=300.0),
+                       steps, t=t)
+            sp.update(gate_dict=dict(t_ox=300e-7), Lc=200 * NM, Lch=500 * NM, vg_step=1.0)
+            T.append(sp)
+    return T
+
+
 STUDIES = {"uq_gated": tasks_uq_gated, "thermal_lit": tasks_thermal_lit, "mesh_convergence": tasks_mesh_convergence,
            "thickness_lit": tasks_thickness_lit, "inse_electron": tasks_inse_electron,
-           "chen2019": tasks_chen2019}
+           "chen2019": tasks_chen2019, "chen2019_300K": tasks_chen2019_300K}

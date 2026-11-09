@@ -87,6 +87,9 @@ if e is not None:
     print("Compare the flat-band barrier (VG where phi_eff stops decreasing) with the S = 0.05 / 0.3 eV values of Ref. [11].")
 
 c = rd("chen2019")
+c2 = rd("chen2019_300K")
+if c is not None and c2 is not None:
+    c = pd.concat([c, c2], ignore_index=True)
 if c is not None:
     c = c[c["failed"].fillna(0) == 0] if "failed" in c else c
     kB = 8.617e-5
