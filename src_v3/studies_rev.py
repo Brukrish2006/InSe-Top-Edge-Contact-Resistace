@@ -169,16 +169,16 @@ def tasks_chen2019():
     cases = {"control": (0.05, 4.9), "oxidized monolayer": (0.5, 5.2)}
     for case, (S, cnl) in cases.items():
         for metal, Phi in metals.items():
-            for T0 in (300.0, 325.0, 350.0, 375.0, 400.0):
+            for T0 in (300.0, 350.0, 400.0):
                 P = dict(s.LIT, NA=0.0, ND=1e16, T0=T0, thermal=False, S_top=S, S_edge=S, Phi_CNL=cnl)
-                steps = [{"V": 0.05}] + [{"VG": v} for v in (-20.0, -10.0, 0.0, 10.0, 20.0, 40.0)]
+                steps = [{"V": 0.05, "save": False}] + [{"VG": v} for v in (-20.0, 0.0, 20.0)]
                 sp = _spec("chen2019", "top", Phi, P, dict(part="A_arrhenius", case=case, metal=metal, S=S, CNL=cnl, T0=T0),
                            steps, t=t)
                 sp.update(gate_dict=g300, Lc=200 * NM, Lch=500 * NM, vg_step=1.0)
                 T.append(sp)
-        for Lch in (1000, 3000):
+        for Lch in (1000,):
             P = dict(s.LIT, NA=0.0, ND=1e16, thermal=False, S_top=S, S_edge=S, Phi_CNL=cnl)
-            steps = [{"V": 1.0}] + [{"VG": v} for v in (20.0, 40.0, 60.0, 80.0)]
+            steps = [{"V": 1.0, "save": False}] + [{"VG": v} for v in (40.0, 80.0)]
             sp = _spec("chen2019", "top", metals["In"], P, dict(part="B_oncurrent", case=case, metal="In", S=S, CNL=cnl,
                                                                Lch_nm=Lch), steps, t=t)
             sp.update(gate_dict=g300, Lc=500 * NM, Lch=Lch * NM, vg_step=1.0)
