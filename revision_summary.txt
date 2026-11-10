@@ -216,3 +216,27 @@ metal  geom  VG  phi_eff_eV
    Ti top50 3.0      -0.058
    Ti top50 4.0      -0.062
 Compare the flat-band barrier (VG where phi_eff stops decreasing) with the S = 0.05 / 0.3 eV values of Ref. [11].
+
+=== chen2019 part A: Arrhenius barrier (300-400 K) per V_G, top contacts, 15 nm n-InSe, 300 nm SiO2
+VG                        -20.0   0.0    20.0
+case               metal                     
+control            Cr       NaN  0.261  0.092
+                   In       NaN  0.241  0.083
+                   Pd       NaN  0.294  0.106
+                   Ti       NaN  0.252  0.088
+oxidized monolayer Cr       NaN  0.229  0.078
+                   In       NaN -0.057 -0.040
+                   Pd     0.474  0.541  0.210
+                   Ti       NaN  0.115  0.032
+apparent pinning factor (slope of phi_B vs Phi_M across metals), reported: control 0.05, OML 0.5
+   control              VG=   +0 V  S_app=+0.052
+   control              VG=  +20 V  S_app=+0.023
+   oxidized monolayer   VG=   +0 V  S_app=+0.580
+   oxidized monolayer   VG=  +20 V  S_app=+0.244
+reported: In with oxidized monolayer, 65 meV
+
+=== chen2019 part B: In contact, V_D=1 V; reported 103 uA/um (1.03 A/cm) for OML at V_G=80 V, 3-6x control
+case         control  oxidized monolayer  ratio_OML/control
+Lch_nm VG                                                  
+1000.0 40.0  0.08635               1.175              13.61
+       80.0   0.1855                1.87              10.08

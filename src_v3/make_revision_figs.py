@@ -175,14 +175,22 @@ try:
          Line2D([], [], color=ORANGE, marker="o", ls="none", label="oxide, $S$=0.5")] + ax[0].get_legend_handles_labels()[0]
     ax[0].legend(handles=h, frameon=False, fontsize=6.3, loc="upper left")
     ax[0].set_title("(a) barriers, 300--400 K", loc="left", fontsize=9)
-    b = c[(c.part == "B_oncurrent") & np.isclose(c.VG, 80.0)].set_index("case").I * 100   # A/cm -> uA/um
-    xs = np.arange(2)
-    ax[1].bar(xs - 0.2, [b["control"], b["oxidized monolayer"]], 0.38, color=[BLUE, ORANGE], label="this work ($L$=1 $\\mu$m)")
-    ax[1].bar(xs + 0.2, [103 / 6, 103], 0.38, color="none", edgecolor=INK, hatch="//", label="Ref. [11]")
-    ax[1].errorbar([0.2], [103 / 6], yerr=[[103 / 6 - 103 / 6], [103 / 3 - 103 / 6]], color=INK, capsize=2, lw=1)
-    ax[1].set_yscale("log"); ax[1].set_xticks(xs); ax[1].set_xticklabels(["control", "oxide\ninterlayer"])
-    ax[1].set_ylabel(r"$I_D$ at $V_G$=80 V, $V_D$=1 V ($\mu$A/$\mu$m)"); ax[1].legend(frameon=False, fontsize=6.3, loc="upper left")
-    ax[1].set_ylim(5, 800); ax[1].set_title("(b) on-current, In contact", loc="left", fontsize=9)
+    cm = ok(rd("chen2019_mu"))
+    b0 = c[(c.part == "B_oncurrent") & np.isclose(c.VG, 80.0) & np.isclose(c.Lch_nm, 1000.0)].copy(); b0["mu_n"] = 1000.0
+    cm = pd.concat([cm[np.isclose(cm.VG, 80.0) & np.isclose(cm.Lch_nm, 1000.0)], b0], ignore_index=True)
+    cm = cm.assign(uA=cm.I * 100)                                                    # A/cm -> uA/um
+    for case, col, mkr in (("control", BLUE, "o"), ("oxidized monolayer", ORANGE, "s")):
+        g = cm[cm["case"] == case].sort_values("mu_n")
+        ax[1].plot(g.mu_n, g.uA, color=col, marker=mkr, ms=4, label=("control" if case == "control" else "oxide interlayer"))
+    ax[1].axhspan(103 / 6, 103 / 3, color=BLUE, alpha=0.18, lw=0)
+    ax[1].axhline(103, color=ORANGE, ls="--", lw=1)
+    ax[1].text(105, 118, "Ref. [11], oxide: 103", color=ORANGE, fontsize=6.3)
+    ax[1].text(105, 37, "Ref. [11], control (inferred)", color=BLUE, fontsize=6.3)
+    ax[1].set_xscale("log"); ax[1].set_yscale("log")
+    ax[1].set_xlabel(r"Assumed $\mu_n$ (cm$^2$/Vs)")
+    ax[1].set_ylabel(r"$I_D$ at $V_G$=80 V, $V_D$=1 V ($\mu$A/$\mu$m)")
+    ax[1].legend(frameon=False, fontsize=6.3, loc="lower right")
+    ax[1].set_ylim(6, 300); ax[1].set_title(r"(b) on-current, $L$=1 $\mu$m", loc="left", fontsize=9)
     save(fig, "fig16_chen2019")
 except Exception as e:  # keep the other figures if the Chen data are missing
     print("fig16 skipped:", e)
