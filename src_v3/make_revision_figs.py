@@ -109,7 +109,8 @@ ax[2].set_title("(c) reference, $\\Phi_M$=5.0 eV", loc="left", fontsize=9)
 save(fig, "fig14_measured_alignment")
 
 # ------------------------------------------------------------------ Fig 15: electron injection check and mesh study
-e = ok(rd("inse_electron")); kB = 8.617e-5
+kB = 8.617e-5
+e = ok(rd("inse_electron"))
 fig, ax = plt.subplots(1, 3, figsize=(7.2, 2.6))
 mc = {"In": BLUE, "Ti": GREEN, "Pd": ORANGE}
 for metal, col in mc.items():
@@ -142,3 +143,46 @@ ax[2].axhline(0, color=GREY, lw=0.8)
 ax[2].set_xlabel("Mesh factor"); ax[2].set_ylabel(r"$\Delta R_{\rm tot}$ vs factor 1 (%)"); ax[2].set_xticks([1, 2, 3])
 ax[2].set_ylim(-9, 14); ax[2].legend(frameon=False, fontsize=6, loc="lower left", ncol=2, columnspacing=0.8); ax[2].set_title("(c) mesh", loc="left", fontsize=9)
 save(fig, "fig15_electron_mesh")
+
+# ------------------------------------------------------------------ Fig 16: comparison with Chen et al. 2019
+try:
+    c = pd.concat([rd("chen2019"), rd("chen2019_300K")], ignore_index=True)
+    c = ok(c)
+    A = c[c.part == "A_arrhenius"]
+    rows = []
+    for (case, metal, vg), g in A.groupby(["case", "metal", "VG"]):
+        if len(g) >= 3:
+            rows.append((case, metal, g.Phi_M.iloc[0], vg,
+                         -np.polyfit(1 / (kB * g.T0.values), np.log(g.I.values / g.T0.values ** 2), 1)[0]))
+    R = pd.DataFrame(rows, columns=["case", "metal", "Phi", "VG", "phiB"])
+    R0 = R[R.VG == 0.0]
+    fig, ax = plt.subplots(1, 2, figsize=(7.2, 2.7), gridspec_kw=dict(width_ratios=[1.35, 1]))
+    mk = dict(In="o", Ti="v", Cr="^", Pd="s")
+    for case, col in (("control", BLUE), ("oxidized monolayer", ORANGE)):
+        g = R0[R0["case"] == case]
+        for _, r in g.iterrows():
+            ax[0].plot(r.Phi, r.phiB, mk[r.metal], color=col, ms=5)
+        gg = g[g.metal != "In"] if case != "control" else g
+        sl, ic = np.polyfit(gg.Phi, gg.phiB, 1)
+        xs = np.array([4.0, 5.25]); ax[0].plot(xs, sl * xs + ic, color=col, lw=1, ls="--")
+        ax[0].text(4.05 if case == "control" else 4.75, 0.34 if case == "control" else 0.05,
+                   f"$S_{{\\rm app}}$ = {sl:.2f}" + (" (excl. In)" if case != "control" else ""), color=col, fontsize=7)
+    ax[0].plot(4.12, 0.065, "*", color=INK, ms=9, label="Ref. [11], In + oxide")
+    ax[0].plot(5.12, 0.57, "D", color=INK, mfc="none", ms=6, label="Ref. [11], Pd + oxide")
+    ax[0].axhline(0, color=GREY, lw=0.8)
+    ax[0].set_xlabel(r"Metal work function $\Phi_M$ (eV)"); ax[0].set_ylabel("Arrhenius barrier at $V_G$=0 (eV)")
+    h = [Line2D([], [], color=BLUE, marker="o", ls="none", label="control, $S$=0.05"),
+         Line2D([], [], color=ORANGE, marker="o", ls="none", label="oxide, $S$=0.5")] + ax[0].get_legend_handles_labels()[0]
+    ax[0].legend(handles=h, frameon=False, fontsize=6.3, loc="upper left")
+    ax[0].set_title("(a) barriers, 300--400 K", loc="left", fontsize=9)
+    b = c[(c.part == "B_oncurrent") & np.isclose(c.VG, 80.0)].set_index("case").I * 100   # A/cm -> uA/um
+    xs = np.arange(2)
+    ax[1].bar(xs - 0.2, [b["control"], b["oxidized monolayer"]], 0.38, color=[BLUE, ORANGE], label="this work ($L$=1 $\\mu$m)")
+    ax[1].bar(xs + 0.2, [103 / 6, 103], 0.38, color="none", edgecolor=INK, hatch="//", label="Ref. [11]")
+    ax[1].errorbar([0.2], [103 / 6], yerr=[[103 / 6 - 103 / 6], [103 / 3 - 103 / 6]], color=INK, capsize=2, lw=1)
+    ax[1].set_yscale("log"); ax[1].set_xticks(xs); ax[1].set_xticklabels(["control", "oxide\ninterlayer"])
+    ax[1].set_ylabel(r"$I_D$ at $V_G$=80 V, $V_D$=1 V ($\mu$A/$\mu$m)"); ax[1].legend(frameon=False, fontsize=6.3, loc="upper left")
+    ax[1].set_ylim(5, 800); ax[1].set_title("(b) on-current, In contact", loc="left", fontsize=9)
+    save(fig, "fig16_chen2019")
+except Exception as e:  # keep the other figures if the Chen data are missing
+    print("fig16 skipped:", e)

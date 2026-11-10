@@ -1,0 +1,242 @@
+
+=== uq_gated: gated on state, Pt, VG=-3 V, VD=0.05 V (n samples per geometry/variant shown)
+
+edge/indep_edge: n=240  log10 R_tot: p5=1.40 med=2.92 p95=4.90   tunnelling share median=1.000
+       param  spearman  S1_binned  noise_floor
+         dEV    -0.220      0.066        0.028
+           S     0.077      0.011        0.029
+S_edge_indep    -0.310      0.162        0.031
+     cnl_off    -0.613      0.392        0.029
+       d_vdW     0.045      0.007        0.031
+     Phi_vdW     0.018      0.048        0.028
+        mu_p     0.018      0.039        0.033
+         rmu    -0.001      0.061        0.033
+          NA     0.103      0.018        0.031
+       eps_r     0.290      0.086        0.028
+          mh     0.501      0.274        0.031
+
+edge/shared: n=240  log10 R_tot: p5=1.28 med=2.83 p95=4.91   tunnelling share median=1.000
+       param  spearman  S1_binned  noise_floor
+         dEV    -0.271      0.070        0.025
+           S    -0.457      0.218        0.030
+S_edge_indep     0.128      0.084        0.029
+     cnl_off    -0.585      0.353        0.029
+       d_vdW    -0.025      0.009        0.031
+     Phi_vdW     0.051      0.054        0.028
+        mu_p     0.042      0.022        0.034
+         rmu    -0.006      0.058        0.028
+          NA     0.060      0.024        0.029
+       eps_r     0.259      0.067        0.029
+          mh     0.467      0.247        0.027
+
+top50/shared: n=233  log10 R_tot: p5=2.67 med=4.78 p95=7.31   tunnelling share median=1.000
+       param  spearman  S1_binned  noise_floor
+         dEV    -0.222      0.058        0.032
+           S    -0.403      0.176        0.034
+S_edge_indep     0.091      0.052        0.032
+     cnl_off    -0.538      0.290        0.028
+       d_vdW     0.196      0.052        0.030
+     Phi_vdW     0.199      0.091        0.030
+        mu_p     0.005      0.019        0.033
+         rmu     0.018      0.081        0.029
+          NA     0.057      0.020        0.030
+       eps_r     0.211      0.046        0.033
+          mh     0.485      0.265        0.030
+
+edge/top ratio (shared pinning): median=0.00953 p5=0.00124 p95=0.0653 edge lower in 100% of 233 samples
+edge with independent S_edge vs top: edge lower in 96% of 233 samples
+
+=== thermal_lit (Pt, VG=-3 V)
+                 case      variant  geom   V     I  P_el      dT  balance_pct
+interlayer (measured)         full  edge 0.5 0.117 0.059   3.535        0.184
+interlayer (measured)         full  edge 1.0 0.440 0.440  24.221        0.407
+             unpinned         full  edge 0.5 1.154 0.577  32.824        1.350
+             unpinned         full  edge 1.0 2.539 2.539 128.178        1.747
+     ideal MIGS (DFT)   R_TBR_3e-8  edge 0.5 0.118 0.059   6.015        0.203
+     ideal MIGS (DFT)   R_TBR_3e-8  edge 1.0 0.438 0.438  42.212        0.424
+     ideal MIGS (DFT) contact_sink  edge 0.5 0.118 0.059   2.770        0.170
+     ideal MIGS (DFT) contact_sink  edge 1.0 0.444 0.444  18.663        0.392
+interlayer (measured) contact_sink  edge 0.5 0.117 0.059   2.752        0.169
+interlayer (measured) contact_sink  edge 1.0 0.441 0.441  18.561        0.390
+interlayer (measured)   R_TBR_3e-8  edge 0.5 0.117 0.059   5.975        0.202
+interlayer (measured)   R_TBR_3e-8  edge 1.0 0.436 0.436  41.984        0.422
+     ideal MIGS (DFT)         full  edge 0.5 0.118 0.059   3.559        0.185
+     ideal MIGS (DFT)         full  edge 1.0 0.442 0.442  24.355        0.409
+    direct (measured)         full  edge 0.5 0.000 0.000   0.010        0.004
+    direct (measured)         full  edge 1.0 0.003 0.003   0.169        0.011
+    direct (measured)   R_TBR_3e-8  edge 0.5 0.000 0.000   0.017        0.004
+    direct (measured)   R_TBR_3e-8  edge 1.0 0.003 0.003   0.304        0.011
+    direct (measured) contact_sink  edge 0.5 0.000 0.000   0.008        0.004
+    direct (measured) contact_sink  edge 1.0 0.003 0.003   0.132        0.011
+             unpinned contact_sink  edge 0.5 1.166 0.583  25.455        1.253
+             unpinned contact_sink  edge 1.0 2.637 2.637 100.001        1.704
+             unpinned   R_TBR_3e-8  edge 0.5 1.115 0.558  54.792        1.325
+             unpinned   R_TBR_3e-8  edge 1.0 2.238 2.238 202.738        1.723
+             unpinned contact_sink top50 0.5 0.078 0.039   0.421        0.037
+             unpinned contact_sink top50 1.0 0.201 0.201   2.516        0.089
+             unpinned         full top50 0.5 0.078 0.039   0.943        0.047
+             unpinned         full top50 1.0 0.201 0.201   4.425        0.114
+     ideal MIGS (DFT)   R_TBR_3e-8 top50 0.5 0.003 0.001   0.052        0.003
+     ideal MIGS (DFT)   R_TBR_3e-8 top50 1.0 0.009 0.009   0.364        0.014
+interlayer (measured) contact_sink top50 0.5 0.003 0.001   0.019        0.002
+interlayer (measured) contact_sink top50 1.0 0.009 0.009   0.143        0.011
+     ideal MIGS (DFT) contact_sink top50 0.5 0.003 0.001   0.019        0.002
+     ideal MIGS (DFT) contact_sink top50 1.0 0.009 0.009   0.144        0.011
+             unpinned   R_TBR_3e-8 top50 0.5 0.078 0.039   1.675        0.078
+             unpinned   R_TBR_3e-8 top50 1.0 0.200 0.200   7.569        0.174
+     ideal MIGS (DFT)         full top50 0.5 0.003 0.001   0.030        0.002
+     ideal MIGS (DFT)         full top50 1.0 0.009 0.009   0.222        0.011
+interlayer (measured)   R_TBR_3e-8 top50 0.5 0.003 0.001   0.051        0.003
+interlayer (measured)   R_TBR_3e-8 top50 1.0 0.009 0.009   0.361        0.014
+interlayer (measured)         full top50 0.5 0.003 0.001   0.030        0.002
+interlayer (measured)         full top50 1.0 0.009 0.009   0.221        0.011
+    direct (measured) contact_sink top50 0.5 0.000 0.000   0.000       -0.005
+    direct (measured) contact_sink top50 1.0 0.000 0.000   0.000        0.007
+    direct (measured)   R_TBR_3e-8 top50 0.5 0.000 0.000   0.000       -0.005
+    direct (measured)   R_TBR_3e-8 top50 1.0 0.000 0.000   0.001        0.007
+    direct (measured)         full top50 0.5 0.000 0.000   0.000       -0.005
+    direct (measured)         full top50 1.0 0.000 0.000   0.001        0.007
+
+=== mesh_convergence: change relative to mf=1
+
+mf=2.0
+                                       dR_tot_%    dI_%  dTmax_K
+case                  geom  V    VG                             
+direct (measured)     edge  0.05 -3.0    12.085 -10.782      NaN
+                                  0.0     3.275  -3.171      NaN
+                      top50 0.05 -3.0    -3.316   3.430      NaN
+                                  0.0    -1.596   1.622      NaN
+interlayer (measured) edge  0.05 -3.0     7.914  -7.334      NaN
+                                  0.0     2.436  -2.378      NaN
+                      top50 0.05 -3.0    -0.949   0.958      NaN
+                                  0.0     0.367  -0.366      NaN
+table3_reference      edge  0.50 -2.0     0.570  -0.567   -0.225
+                            1.00 -2.0     0.436  -0.434   -0.606
+                      top50 0.50 -2.0     0.884  -0.876   -0.019
+                            1.00 -2.0     1.054  -1.043   -0.047
+
+mf=3.0
+                                       dR_tot_%   dI_%  dTmax_K
+case                  geom  V    VG                            
+direct (measured)     edge  0.05 -3.0     8.762 -8.056      NaN
+                                  0.0     0.296 -0.296      NaN
+                      top50 0.05 -3.0    -4.675  4.904      NaN
+                                  0.0    -2.331  2.386      NaN
+interlayer (measured) edge  0.05 -3.0     5.653 -5.351      NaN
+                                  0.0     1.639 -1.613      NaN
+                      top50 0.05 -3.0    -1.188  1.202      NaN
+                                  0.0     0.474 -0.471      NaN
+table3_reference      edge  0.50 -2.0     0.602 -0.598   -0.218
+                            1.00 -2.0     0.459 -0.457   -0.611
+                      top50 0.50 -2.0     1.246 -1.231   -0.027
+                            1.00 -2.0     1.521 -1.498   -0.080
+
+=== thickness_lit: gated on-state R_tot (Ohm cm) vs layers
+
+('literature', 'direct (measured)', nan)  best layer count: {'edge': 12, 'top50': 6}
+geom          edge         top50
+layers                          
+3       15364.5328           NaN
+4        8149.1091           NaN
+5        6071.1897  2.255677e+06
+6        5210.1820  8.861344e+05
+8        4453.0227  2.038733e+06
+12       3968.1955  2.909113e+08
+
+('literature', 'interlayer (measured)', nan)  best layer count: {'edge': 12, 'top50': 5}
+geom       edge       top50
+layers                     
+3       25.2101  15440.0269
+4       12.9504    479.1103
+5        9.0076    206.5469
+6        7.2258    324.9862
+8        5.6180   1446.8465
+12       4.5170  26529.9413
+
+('reference_S1', nan, 0.2)  best layer count: {'edge': 12, 'top50': 4}
+geom      edge   top50
+layers                
+3       0.1641  0.4704
+4       0.1496  0.4420
+5       0.1431  0.4788
+6       0.1397  0.5479
+8       0.1362  0.7803
+12      0.1321  1.5004
+
+('reference_S1', nan, 0.32)  best layer count: {'edge': 12, 'top50': 4}
+geom      edge   top50
+layers                
+3       0.1900  0.6399
+4       0.1603  0.5244
+5       0.1486  0.5360
+6       0.1429  0.5942
+8       0.1378  0.8105
+12      0.1329  1.5500
+
+('reference_S1', nan, 0.5)  best layer count: {'edge': 12, 'top50': 5}
+geom      edge   top50
+layers                
+3       0.2613  1.1291
+4       0.1855  0.7190
+5       0.1608  0.6648
+6       0.1498  0.6935
+8       0.1408  0.8722
+12      0.1342  1.6259
+
+=== inse_electron: Arrhenius slope of ln(I/T^2) vs 1/T -> effective barrier (eV) per VG
+metal  geom  VG  phi_eff_eV
+   In  edge 0.0       0.139
+   In  edge 1.0      -0.048
+   In  edge 2.0      -0.059
+   In  edge 3.0      -0.061
+   In  edge 4.0      -0.062
+   In top50 0.0       0.199
+   In top50 1.0      -0.023
+   In top50 2.0      -0.051
+   In top50 3.0      -0.058
+   In top50 4.0      -0.062
+   Pd  edge 0.0       0.167
+   Pd  edge 1.0      -0.046
+   Pd  edge 2.0      -0.059
+   Pd  edge 3.0      -0.061
+   Pd  edge 4.0      -0.062
+   Pd top50 0.0       0.239
+   Pd top50 1.0      -0.010
+   Pd top50 2.0      -0.050
+   Pd top50 3.0      -0.057
+   Pd top50 4.0      -0.062
+   Ti  edge 0.0       0.145
+   Ti  edge 1.0      -0.047
+   Ti  edge 2.0      -0.059
+   Ti  edge 3.0      -0.061
+   Ti  edge 4.0      -0.062
+   Ti top50 0.0       0.208
+   Ti top50 1.0      -0.021
+   Ti top50 2.0      -0.051
+   Ti top50 3.0      -0.058
+   Ti top50 4.0      -0.062
+Compare the flat-band barrier (VG where phi_eff stops decreasing) with the S = 0.05 / 0.3 eV values of Ref. [11].
+
+=== chen2019 part A: Arrhenius barrier (300-400 K) per V_G, top contacts, 15 nm n-InSe, 300 nm SiO2
+VG                        -20.0   0.0    20.0
+case               metal                     
+control            Cr       NaN  0.261  0.092
+                   In       NaN  0.241  0.083
+                   Pd       NaN  0.294  0.106
+                   Ti       NaN  0.252  0.088
+oxidized monolayer Cr       NaN  0.229  0.078
+                   In       NaN -0.057 -0.040
+                   Pd     0.474  0.541  0.210
+                   Ti       NaN  0.115  0.032
+apparent pinning factor (slope of phi_B vs Phi_M across metals), reported: control 0.05, OML 0.5
+   control              VG=   +0 V  S_app=+0.052
+   control              VG=  +20 V  S_app=+0.023
+   oxidized monolayer   VG=   +0 V  S_app=+0.580
+   oxidized monolayer   VG=  +20 V  S_app=+0.244
+reported: In with oxidized monolayer, 65 meV
+
+=== chen2019 part B: In contact, V_D=1 V; reported 103 uA/um (1.03 A/cm) for OML at V_G=80 V, 3-6x control
+case         control  oxidized monolayer  ratio_OML/control
+Lch_nm VG                                                  
+1000.0 40.0  0.08635               1.175              13.61
+       80.0   0.1855                1.87              10.08
