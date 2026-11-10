@@ -204,6 +204,25 @@ def tasks_chen2019_300K():
     return T
 
 
+def tasks_chen2019_mu():
+    """Sensitivity of the chen2019 part-B on-currents to the assumed electron mobility (Chen et al. used InSe on
+    SiO2, where mobilities are typically far below the 1000 cm2/Vs baseline) and to the unreported channel length."""
+    T = []
+    t = 18 * 0.83 * NM
+    cases = {"control": (0.05, 4.9), "oxidized monolayer": (0.5, 5.2)}
+    grid = [(mu, 1000) for mu in (100.0, 200.0, 500.0)] + [(1000.0, 3000)]
+    for case, (S, cnl) in cases.items():
+        for mu, Lch in grid:
+            P = dict(s.LIT, NA=0.0, ND=1e16, thermal=False, S_top=S, S_edge=S, Phi_CNL=cnl, mu_n=mu)
+            steps = [{"V": 1.0, "save": False}] + [{"VG": v} for v in (40.0, 80.0)]
+            sp = _spec("chen2019_mu", "top", 4.12, P, dict(part="B_oncurrent", case=case, metal="In", S=S, CNL=cnl,
+                                                           Lch_nm=Lch, mu_n=mu), steps, t=t)
+            sp.update(gate_dict=dict(t_ox=300e-7), Lc=500 * NM, Lch=Lch * NM, vg_step=1.0)
+            T.append(sp)
+    return T
+
+
 STUDIES = {"uq_gated": tasks_uq_gated, "thermal_lit": tasks_thermal_lit, "mesh_convergence": tasks_mesh_convergence,
            "thickness_lit": tasks_thickness_lit, "inse_electron": tasks_inse_electron,
-           "chen2019": tasks_chen2019, "chen2019_300K": tasks_chen2019_300K}
+           "chen2019": tasks_chen2019, "chen2019_300K": tasks_chen2019_300K,
+           "chen2019_mu": tasks_chen2019_mu}

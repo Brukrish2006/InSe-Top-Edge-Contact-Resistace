@@ -112,3 +112,16 @@ if c is not None:
         pv = b.pivot_table(index=["Lch_nm", "VG"], columns="case", values="I")
         pv["ratio_OML/control"] = pv["oxidized monolayer"] / pv["control"]
         print(pv.to_string(float_format=lambda x: f"{x:.4g}"))
+
+
+cm = rd("chen2019_mu")
+if cm is not None:
+    cm = cm[cm["failed"].fillna(0) == 0] if "failed" in cm else cm
+    if c is not None:
+        b0 = c[(c.part == "B_oncurrent")].copy(); b0["mu_n"] = 1000.0
+        cm = pd.concat([cm, b0], ignore_index=True)
+    print("\n=== chen2019_mu: In contact, V_D=1 V, on-current (uA/um) vs mu_n and L_ch; reported OML 103 uA/um, ratio 3-6x")
+    cm = cm.assign(I_uA_um=cm.I * 100.0)
+    pv = cm[cm.VG == 80.0].pivot_table(index=["Lch_nm", "mu_n"], columns="case", values="I_uA_um")
+    pv["ratio"] = pv["oxidized monolayer"] / pv["control"]
+    print(pv.to_string(float_format=lambda x: f"{x:.4g}"))
