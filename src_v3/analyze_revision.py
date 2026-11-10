@@ -136,3 +136,13 @@ if mu_ is not None:
     rel = pv.div(pv[1.0], axis=0) - 1
     print("max |change| relative to factor 1 (%):", round(100 * rel.abs().max().max(), 2))
     print("max |change| between 0.5x and 3x (%):", round(100 * ((pv[3.0] / pv[0.5] - 1).abs().max()), 2))
+
+
+tr = rd("top_retry")
+if tr is not None:
+    print("\n=== top_retry: previously non-converged gated on-state cases (V_G=-3 V, V_D=0.05 V)")
+    if "failed" in tr:
+        print("failed runs:", int(tr["failed"].fillna(0).sum()), "of", len(tr))
+    ok_ = tr[tr["failed"].fillna(0) == 0] if "failed" in tr else tr
+    if len(ok_):
+        print(ok_[["geom", "case", "metal", "variant", "phiBp", "R_tot", "tun_share"]].round(4).to_string(index=False))

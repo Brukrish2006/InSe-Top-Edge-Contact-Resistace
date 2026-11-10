@@ -133,6 +133,29 @@ def tasks_mesh_ungated():
     return T
 
 
+def tasks_top_retry():
+    """Gated on-state (V_G = -3 V, V_D = 0.05 V, literature alignment) for the cases of metals_pinning that did not
+    converge, with two other continuation paths: (A) gate ramped at V_D = 0, then the bias applied; (B) bias first,
+    then a very small gate step (0.02 V)."""
+    pc = s.pin_cases()
+    cases = [("direct (measured)", m_, "top") for m_ in ("Ti", "Cr", "Au", "Pd")]
+    cases += [("interlayer (measured)", m_, "top") for m_ in ("Cr", "Ti")]
+    cases += [("unpinned", "Cr", "top"), ("unpinned", "Ti", "edge")]
+    T = []
+    for case, metal, kind in cases:
+        c = pc[case]
+        P = dict(s.LIT, S_top=c["S"], S_edge=c["S"], Phi_CNL=c["CNL"], thermal=False)
+        tag = dict(case=case, metal=metal, S=c["S"], CNL=c["CNL"], study="gated")
+        a = _spec("top_retry", kind, s.METALS[metal], P, dict(tag, variant="A_gate_first"),
+                  [{"VG": -3.0, "save": False}, {"V": 0.05}])
+        a["vg_step"] = 0.1
+        b = _spec("top_retry", kind, s.METALS[metal], P, dict(tag, variant="B_small_gate_step"),
+                  [{"V": 0.05, "save": False}, {"VG": -3.0}])
+        b["vg_step"] = 0.02
+        T += [a, b]
+    return T
+
+
 def tasks_thickness_lit():
     T = []
     for N in (3, 4, 5, 6, 8, 12):
@@ -237,4 +260,5 @@ STUDIES = {"uq_gated": tasks_uq_gated, "thermal_lit": tasks_thermal_lit, "mesh_c
            "thickness_lit": tasks_thickness_lit, "inse_electron": tasks_inse_electron,
            "chen2019": tasks_chen2019, "chen2019_300K": tasks_chen2019_300K,
            "chen2019_mu": tasks_chen2019_mu,
-           "mesh_ungated": tasks_mesh_ungated}
+           "mesh_ungated": tasks_mesh_ungated,
+           "top_retry": tasks_top_retry}
