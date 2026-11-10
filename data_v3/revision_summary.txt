@@ -249,3 +249,13 @@ Lch_nm mu_n
        500.0     17.08               136.9  8.012
        1000.0    18.55                 187  10.08
 3000.0 1000.0    16.91               126.3  7.469
+
+=== mesh_ungated: Rtot (Ohm cm) at 0.05 V, ungated, reference alignment, vs mesh factor
+mf             0.5    1.0    2.0    3.0
+geom  Phi_M                            
+edge  4.8   1415.2 1425.6 1431.1 1432.9
+      5.0   11.434 11.477 11.488  11.49
+top50 4.8     5069 5083.4 5086.8 5087.3
+      5.0   16.986 17.121 17.171 17.186
+max |change| relative to factor 1 (%): 0.79
+max |change| between 0.5x and 3x (%): 1.25
