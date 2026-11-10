@@ -125,3 +125,14 @@ if cm is not None:
     pv = cm[cm.VG == 80.0].pivot_table(index=["Lch_nm", "mu_n"], columns="case", values="I_uA_um")
     pv["ratio"] = pv["oxidized monolayer"] / pv["control"]
     print(pv.to_string(float_format=lambda x: f"{x:.4g}"))
+
+
+mu_ = rd("mesh_ungated")
+if mu_ is not None:
+    mu_ = mu_[mu_["failed"].fillna(0) == 0] if "failed" in mu_ else mu_
+    print("\n=== mesh_ungated: Rtot (Ohm cm) at 0.05 V, ungated, reference alignment, vs mesh factor")
+    pv = mu_.pivot_table(index=["geom", "Phi_M"], columns="mf", values="R_tot")
+    print(pv.to_string(float_format=lambda x: f"{x:.5g}"))
+    rel = pv.div(pv[1.0], axis=0) - 1
+    print("max |change| relative to factor 1 (%):", round(100 * rel.abs().max().max(), 2))
+    print("max |change| between 0.5x and 3x (%):", round(100 * ((pv[3.0] / pv[0.5] - 1).abs().max()), 2))

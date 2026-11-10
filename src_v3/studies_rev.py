@@ -122,6 +122,17 @@ def tasks_mesh_convergence():
     return T
 
 
+def tasks_mesh_ungated():
+    """Mesh-factor 0.5-3 for the ungated device at the reference alignment (Rtot at 0.05 V, 4.8 and 5.0 eV)."""
+    T = []
+    for mf in (0.5, 1.0, 2.0, 3.0):
+        for kind in ("top", "edge"):
+            for Phi in (4.8, 5.0):
+                T.append(_spec("mesh_ungated", kind, Phi, dict(thermal=False), dict(case="ungated_reference", mf=mf),
+                               [{"V": 0.05}], gate=False, mf=mf))
+    return T
+
+
 def tasks_thickness_lit():
     T = []
     for N in (3, 4, 5, 6, 8, 12):
@@ -225,4 +236,5 @@ def tasks_chen2019_mu():
 STUDIES = {"uq_gated": tasks_uq_gated, "thermal_lit": tasks_thermal_lit, "mesh_convergence": tasks_mesh_convergence,
            "thickness_lit": tasks_thickness_lit, "inse_electron": tasks_inse_electron,
            "chen2019": tasks_chen2019, "chen2019_300K": tasks_chen2019_300K,
-           "chen2019_mu": tasks_chen2019_mu}
+           "chen2019_mu": tasks_chen2019_mu,
+           "mesh_ungated": tasks_mesh_ungated}
