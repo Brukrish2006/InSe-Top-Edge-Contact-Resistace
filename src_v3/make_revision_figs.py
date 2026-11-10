@@ -35,13 +35,13 @@ def first_order(x, y, nb=8):
 
 # ------------------------------------------------------------------ Fig 13: gated Monte Carlo
 u = ok(rd("uq_gated")); u = u[np.isclose(u.VG, -3.0)]
-fig, ax = plt.subplots(1, 3, figsize=(7.2, 2.6), gridspec_kw=dict(width_ratios=[1, 1, 1.3]))
+fig, ax = plt.subplots(1, 3, figsize=(6.5, 2.96), gridspec_kw=dict(width_ratios=[1, 1, 1.3]))
 for (geom, var), col, ls, lab in [(("edge", "shared"), BLUE, "-", "Edge"), (("top50", "shared"), ORANGE, "-", "Top, 50 nm"),
-                                  (("edge", "indep_edge"), BLUE, ":", r"Edge, independent $S_{\rm edge}$")]:
+                                  (("edge", "indep_edge"), BLUE, ":", r"Edge, indep. $S$")]:
     y = np.sort(np.log10(u[(u.geom == geom) & (u.variant == var)].R_tot.values))
     ax[0].plot(y, np.arange(1, len(y) + 1) / len(y), color=col, ls=ls, label=lab)
 ax[0].set_xlabel(r"$\log_{10}R_{\rm tot}$ ($\Omega$cm)"); ax[0].set_ylabel("Cumulative fraction")
-ax[0].legend(frameon=False, loc="lower right", fontsize=6.5); ax[0].set_title("(a)", loc="left", fontsize=9)
+ax[0].legend(frameon=False, loc="lower right", fontsize=6.5, handlelength=1.6); ax[0].set_title("(a)", loc="left", fontsize=9)
 sh = u[u.variant == "shared"].pivot_table(index="sample", columns="geom", values="R_tot").dropna()
 ie = u[u.variant == "indep_edge"].set_index("sample").R_tot
 ax[1].loglog(sh["top50"], sh["edge"], "o", color=BLUE, ms=2.8, alpha=0.7, label="shared $S$")
@@ -50,7 +50,7 @@ ax[1].loglog(sh.loc[j, "top50"], ie.loc[j], "^", color=GREEN, ms=2.8, alpha=0.6,
 lim = [min(sh.min().min(), ie.min()) / 3, sh["top50"].max() * 3]
 ax[1].plot(lim, lim, color=INK, lw=0.8); ax[1].set_xlim(lim); ax[1].set_ylim(lim)
 ax[1].set_xlabel(r"$R_{\rm tot}^{\rm top}$ ($\Omega$cm)"); ax[1].set_ylabel(r"$R_{\rm tot}^{\rm edge}$ ($\Omega$cm)")
-ax[1].legend(frameon=False, loc="upper left", fontsize=6.5); ax[1].set_title("(b)", loc="left", fontsize=9)
+ax[1].legend(frameon=False, loc="upper left", fontsize=7); ax[1].set_title("(b)", loc="left", fontsize=9)
 par = ["cnl_off", "mh", "S", "eps_r", "dEV", "Phi_vdW", "d_vdW", "rmu", "mu_p", "NA"]
 lab = {"cnl_off": "pin. level", "mh": "$m_h$", "S": "$S$", "eps_r": r"$\varepsilon_r$", "dEV": r"$\Delta E_V$",
        "Phi_vdW": r"$\Phi_{\rm vdW}$", "d_vdW": r"$d_{\rm vdW}$", "rmu": r"$\mu_\perp/\mu_\parallel$", "mu_p": r"$\mu_p$", "NA": "$N_A$"}
@@ -62,16 +62,16 @@ for k, (geom, col) in enumerate((("edge", BLUE), ("top50", ORANGE))):
         si, fl = first_order(g[p].values, y); vals.append(si); floors.append(fl)
     ax[2].bar(xs + (k - 0.5) * 0.38, vals, 0.38, color=col, label="Edge" if geom == "edge" else "Top, 50 nm")
 ax[2].axhline(np.mean(floors), color=GREY, ls="--", lw=0.9, label="noise floor")
-ax[2].set_xticks(xs); ax[2].set_xticklabels([lab[p] for p in par], rotation=60, fontsize=7)
-ax[2].set_ylabel("First-order index"); ax[2].legend(frameon=False, fontsize=6.5)
+ax[2].set_xticks(xs); ax[2].set_xticklabels([lab[p] for p in par], rotation=90, fontsize=7.5)
+ax[2].set_ylabel("First-order index"); ax[2].legend(frameon=False, fontsize=7)
 ax[2].set_title("(c)", loc="left", fontsize=9)
 save(fig, "fig13_uq_gated")
 
 # ------------------------------------------------------------------ Fig 14: measured alignment, heat and thickness
 t = ok(rd("thermal_lit")); t = t[np.isclose(t.V, 1.0)].assign(dT=lambda d: d.Tmax - 300)
 cases = ["direct (measured)", "ideal MIGS (DFT)", "interlayer (measured)", "unpinned"]
-clab = ["direct\n$S$=0.05", "DFT\n$S$=0.18", "oxide\n$S$=0.5", "none\n$S$=1"]
-fig, ax = plt.subplots(1, 3, figsize=(7.2, 2.6))
+clab = ["direct\n0.05", "DFT\n0.18", "oxide\n0.5", "none\n1"]
+fig, ax = plt.subplots(1, 3, figsize=(6.5, 2.96))
 for k, (geom, col, mk) in enumerate((("edge", BLUE, "o"), ("top50", ORANGE, "s"))):
     for i, c in enumerate(cases):
         d = t[(t["case"] == c) & (t.geom == geom)].set_index("variant").dT
@@ -81,11 +81,11 @@ for k, (geom, col, mk) in enumerate((("edge", BLUE, "o"), ("top50", ORANGE, "s")
         lo, hi = d.get("contact_sink", d["full"]), d.get("R_TBR_3e-8", d["full"])
         ax[0].errorbar(x, d["full"], yerr=[[d["full"] - lo], [hi - d["full"]]], fmt=mk, color=col, ms=4.5, capsize=2,
                        mfc=col if geom == "edge" else "white", lw=1)
-ax[0].set_yscale("log"); ax[0].set_xticks(range(4)); ax[0].set_xticklabels(clab, fontsize=7)
+ax[0].set_yscale("log"); ax[0].set_ylim(1e-4, 1e4); ax[0].set_xlabel("Pinning factor $S$"); ax[0].set_xticks(range(4)); ax[0].set_xticklabels(clab, fontsize=7)
 ax[0].set_ylabel(r"$\Delta T_{\max}$ at $V_D$=1 V (K)"); ax[0].set_title("(a) Pt, $V_G=-3$ V", loc="left", fontsize=9)
 ax[0].legend(handles=[Line2D([], [], color=BLUE, marker="o", ls="none", label="Edge"),
                       Line2D([], [], color=ORANGE, marker="s", mfc="white", ls="none", label="Top, 50 nm")],
-             frameon=False, fontsize=6.5, loc="upper left")
+             frameon=False, fontsize=7, loc="upper left")
 th = ok(rd("thickness_lit")); th = th[np.isclose(th.VG, -3.0)]
 lt = th[th.study == "literature"]
 for c, ls in (("interlayer (measured)", "-"), ("direct (measured)", "--")):
@@ -94,9 +94,9 @@ for c, ls in (("interlayer (measured)", "-"), ("direct (measured)", "--")):
         ax[1].semilogy(d.layers, d.R_tot, color=col, ls=ls, marker=mk, ms=3.5, mfc=col if geom == "edge" else "white")
 ax[1].set_xticks([3, 4, 6, 8, 12]); ax[1].set_xlabel("Layers"); ax[1].set_ylabel(r"On-state $R_{\rm tot}$ ($\Omega$cm)")
 ax[1].legend(handles=[Line2D([], [], color=INK, ls="-", label="oxide interlayer"), Line2D([], [], color=INK, ls="--", label="direct")],
-             frameon=False, fontsize=6.5, loc="upper left", ncol=2)
-ax[1].set_ylim(1, 1e11)
-ax[1].set_title("(b) measured alignment, Pt", loc="left", fontsize=9)
+             frameon=False, fontsize=7, loc="upper left", ncol=1)
+ax[1].set_ylim(1, 1e12)
+ax[1].set_title("(b) Measured, Pt", loc="left", fontsize=9)
 rf = th[th.study == "reference_S1"]
 for frac, col in ((0.2, GREEN), (0.32, INK), (0.5, YELLOW)):
     for geom, mk, ls in (("edge", "o", "-"), ("top50", "s", "--")):
@@ -104,14 +104,14 @@ for frac, col in ((0.2, GREEN), (0.32, INK), (0.5, YELLOW)):
         ax[2].plot(d.layers, d.R_tot, color=col, ls=ls, marker=mk, ms=3.5, mfc=col if geom == "edge" else "white",
                    label=f"VB share {frac}" if geom == "top50" else None)
 ax[2].set_xticks([3, 4, 6, 8, 12]); ax[2].set_xlabel("Layers"); ax[2].set_ylabel(r"On-state $R_{\rm tot}$ ($\Omega$cm)")
-ax[2].legend(frameon=False, fontsize=6.5, loc="upper left")
-ax[2].set_title("(c) reference, $\\Phi_M$=5.0 eV", loc="left", fontsize=9)
+ax[2].set_ylim(0.1, 2.6); ax[2].legend(frameon=False, fontsize=6.5, loc="upper left")
+ax[2].set_title("(c) Reference, 5 eV", loc="left", fontsize=9)
 save(fig, "fig14_measured_alignment")
 
 # ------------------------------------------------------------------ Fig 15: electron injection check and mesh study
 kB = 8.617e-5
 e = ok(rd("inse_electron"))
-fig, ax = plt.subplots(1, 3, figsize=(7.2, 2.6))
+fig, ax = plt.subplots(1, 3, figsize=(6.5, 2.96))
 mc = {"In": BLUE, "Ti": GREEN, "Pd": ORANGE}
 for metal, col in mc.items():
     for geom, mk, ls in (("edge", "o", "-"), ("top50", "s", "--")):
@@ -125,14 +125,14 @@ for metal, col in mc.items():
         ax[1].plot(rows[:, 0], rows[:, 1], color=col, ls=ls, marker=mk, ms=3.5, mfc=col if geom == "edge" else "white",
                    label=metal if geom == "edge" else None)
 ax[0].set_xlabel(r"$1/k_BT$ (eV$^{-1}$)"); ax[0].set_ylabel(r"$\ln(I/T^2)$"); ax[0].set_title("(a) $V_G$=0", loc="left", fontsize=9)
-ax[1].axhline(0.30, color=GREY, ls=":", lw=1); ax[1].text(2.2, 0.31, "input 0.30 eV", fontsize=6.5, color=GREY)
+ax[1].axhline(0.30, color=GREY, ls=":", lw=1); ax[1].text(4.0, 0.31, "input 0.30 eV", fontsize=7, color=GREY, ha="right"); ax[1].set_ylim(-0.1, 0.46)
 ax[1].set_xlabel("$V_G$ (V)"); ax[1].set_ylabel("Arrhenius barrier (eV)")
 ax[1].legend(handles=ax[1].get_legend_handles_labels()[0] + [Line2D([], [], color=INK, ls="-", marker="o", ms=3.5, label="edge"),
-             Line2D([], [], color=INK, ls="--", marker="s", mfc="white", ms=3.5, label="top")], frameon=False, fontsize=6.5, ncol=2)
+             Line2D([], [], color=INK, ls="--", marker="s", mfc="white", ms=3.5, label="top")], frameon=False, fontsize=7, ncol=2, loc="upper left", columnspacing=0.8, handlelength=1.6)
 ax[1].set_title("(b) electrons, $S$=0.05", loc="left", fontsize=9)
 ms = ok(rd("mesh_convergence"))
-keys = [("table3_reference", -2.0, 1.0, "Table 3, 1 V"), ("interlayer (measured)", -3.0, 0.05, "oxide, on"),
-        ("direct (measured)", -3.0, 0.05, "direct, on")]
+keys = [("table3_reference", -2.0, 1.0, "Table 3"), ("interlayer (measured)", -3.0, 0.05, "oxide"),
+        ("direct (measured)", -3.0, 0.05, "direct")]
 for (case, vg, v, lab), col in zip(keys, (INK, GREEN, YELLOW)):
     for geom, mk, ls in (("edge", "o", "-"), ("top50", "s", "--")):
         d = ms[(ms["case"] == case) & (ms.geom == geom) & np.isclose(ms.VG, vg) & np.isclose(ms.V, v)].sort_values("mf")
@@ -141,7 +141,7 @@ for (case, vg, v, lab), col in zip(keys, (INK, GREEN, YELLOW)):
                        mfc=col if geom == "edge" else "white", label=lab if geom == "edge" else None)
 ax[2].axhline(0, color=GREY, lw=0.8)
 ax[2].set_xlabel("Mesh factor"); ax[2].set_ylabel(r"$\Delta R_{\rm tot}$ vs factor 1 (%)"); ax[2].set_xticks([1, 2, 3])
-ax[2].set_ylim(-9, 14); ax[2].legend(frameon=False, fontsize=6, loc="lower left", ncol=2, columnspacing=0.8); ax[2].set_title("(c) mesh", loc="left", fontsize=9)
+ax[2].set_ylim(-13, 14); ax[2].legend(frameon=False, fontsize=6.5, loc="lower left", ncol=1, handlelength=1.6); ax[2].set_title("(c) mesh", loc="left", fontsize=9)
 save(fig, "fig15_electron_mesh")
 
 # ------------------------------------------------------------------ Fig 16: comparison with Chen et al. 2019
@@ -156,7 +156,7 @@ try:
                          -np.polyfit(1 / (kB * g.T0.values), np.log(g.I.values / g.T0.values ** 2), 1)[0]))
     R = pd.DataFrame(rows, columns=["case", "metal", "Phi", "VG", "phiB"])
     R0 = R[R.VG == 0.0]
-    fig, ax = plt.subplots(1, 2, figsize=(7.2, 2.7), gridspec_kw=dict(width_ratios=[1.35, 1]))
+    fig, ax = plt.subplots(1, 2, figsize=(6.5, 3.08), gridspec_kw=dict(width_ratios=[1.35, 1]))
     mk = dict(In="o", Ti="v", Cr="^", Pd="s")
     for case, col in (("control", BLUE), ("oxidized monolayer", ORANGE)):
         g = R0[R0["case"] == case]
@@ -166,14 +166,14 @@ try:
         sl, ic = np.polyfit(gg.Phi, gg.phiB, 1)
         xs = np.array([4.0, 5.25]); ax[0].plot(xs, sl * xs + ic, color=col, lw=1, ls="--")
         ax[0].text(4.05 if case == "control" else 4.75, 0.34 if case == "control" else 0.05,
-                   f"$S_{{\\rm app}}$ = {sl:.2f}" + (" (excl. In)" if case != "control" else ""), color=col, fontsize=7)
+                   f"$S_{{\\rm app}}$ = {sl:.2f}" + (" (excl. In)" if case != "control" else ""), color=col, fontsize=8)
     ax[0].plot(4.12, 0.065, "*", color=INK, ms=9, label="Ref. [11], In + oxide")
     ax[0].plot(5.12, 0.57, "D", color=INK, mfc="none", ms=6, label="Ref. [11], Pd + oxide")
     ax[0].axhline(0, color=GREY, lw=0.8)
     ax[0].set_xlabel(r"Metal work function $\Phi_M$ (eV)"); ax[0].set_ylabel("Arrhenius barrier at $V_G$=0 (eV)")
     h = [Line2D([], [], color=BLUE, marker="o", ls="none", label="control, $S$=0.05"),
          Line2D([], [], color=ORANGE, marker="o", ls="none", label="oxide, $S$=0.5")] + ax[0].get_legend_handles_labels()[0]
-    ax[0].legend(handles=h, frameon=False, fontsize=6.3, loc="upper left")
+    ax[0].legend(handles=h, frameon=False, fontsize=7, loc="upper left")
     ax[0].set_title("(a) barriers, 300--400 K", loc="left", fontsize=9)
     cm = ok(rd("chen2019_mu"))
     b0 = c[(c.part == "B_oncurrent") & np.isclose(c.VG, 80.0) & np.isclose(c.Lch_nm, 1000.0)].copy(); b0["mu_n"] = 1000.0
@@ -184,12 +184,12 @@ try:
         ax[1].plot(g.mu_n, g.uA, color=col, marker=mkr, ms=4, label=("control" if case == "control" else "oxide interlayer"))
     ax[1].axhspan(103 / 6, 103 / 3, color=BLUE, alpha=0.18, lw=0)
     ax[1].axhline(103, color=ORANGE, ls="--", lw=1)
-    ax[1].text(105, 118, "Ref. [11], oxide: 103", color=ORANGE, fontsize=6.3)
-    ax[1].text(105, 37, "Ref. [11], control (inferred)", color=BLUE, fontsize=6.3)
+    ax[1].text(105, 118, "Ref. [11], oxide: 103", color=ORANGE, fontsize=8)
+    ax[1].text(105, 37, "Ref. [11], control (inferred)", color=BLUE, fontsize=8)
     ax[1].set_xscale("log"); ax[1].set_yscale("log")
     ax[1].set_xlabel(r"Assumed $\mu_n$ (cm$^2$/Vs)")
     ax[1].set_ylabel(r"$I_D$ at $V_G$=80 V, $V_D$=1 V ($\mu$A/$\mu$m)")
-    ax[1].legend(frameon=False, fontsize=6.3, loc="lower right")
+    ax[1].legend(frameon=False, fontsize=7, loc="lower right")
     ax[1].set_ylim(6, 300); ax[1].set_title(r"(b) on-current, $L$=1 $\mu$m", loc="left", fontsize=9)
     save(fig, "fig16_chen2019")
 except Exception as e:  # keep the other figures if the Chen data are missing

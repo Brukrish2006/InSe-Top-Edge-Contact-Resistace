@@ -20,7 +20,7 @@ BLUE, ORANGE, INK = "#2a78d6", "#eb6834", "#3a3a38"
 b = pd.read_csv(os.path.join(D, "barrier_sweep.csv"))
 mt = pd.read_csv(os.path.join(D, "metals_pinning.csv"))
 
-fig, ax = plt.subplots(1, 3, figsize=(7.2, 3.1), gridspec_kw=dict(width_ratios=[1, 0.75, 1.25]))
+fig, ax = plt.subplots(1, 3, figsize=(6.5, 3.53), gridspec_kw=dict(width_ratios=[1, 0.75, 1.4]))
 
 # (a) on-state and ungated resistance versus hole barrier
 on = b[(b.study == "gated") & np.isclose(b.VG, -3.0)]
@@ -33,8 +33,8 @@ ax[0].set_xlabel(r"Hole barrier $\phi_{Bp}$ (eV)")
 ax[0].set_ylabel(r"$R_{\rm tot}$ at $V_G=-3$ V ($\Omega$cm)")
 h = ax[0].get_legend_handles_labels()[0] + [Line2D([], [], color=INK, ls="-", label="nonlocal tunnelling"),
                                             Line2D([], [], color=INK, ls=":", mfc="white", marker="o", label="no tunnelling")]
-ax[0].legend(handles=h, loc="upper right", frameon=False, fontsize=6.3, ncol=2, columnspacing=0.6, handlelength=1.6, borderaxespad=0.1)
-ax[0].set_ylim(1e-2, 1e16); ax[0].set_yticks([1e0, 1e4, 1e8, 1e12])
+ax[0].legend(handles=h, loc="lower right", frameon=False, fontsize=7, ncol=1, handlelength=1.8, borderaxespad=0.1)
+ax[0].set_ylim(1e-5, 1e11); ax[0].set_yticks([1e0, 1e4, 1e8])
 ax[0].set_title("(a)", loc="left", fontsize=9)
 
 # (b) edge/top ratio of on-state resistance
@@ -48,8 +48,8 @@ ax[1].set_title("(b)", loc="left", fontsize=9)
 
 # (c) real metals, on-state, four pinning cases
 cases = ["unpinned", "interlayer (measured)", "ideal MIGS (DFT)", "direct (measured)"]
-lab = {"unpinned": "1\nnone", "interlayer (measured)": "0.5\noxide (M)",
-       "ideal MIGS (DFT)": "0.18\nDFT", "direct (measured)": "0.05\ndirect (M)"}
+lab = {"unpinned": "none\n1", "interlayer (measured)": "oxide\n0.5",
+       "ideal MIGS (DFT)": "DFT\n0.18", "direct (measured)": "direct\n0.05"}
 metals = ["Ti", "Cr", "Au", "Pd", "Pt"]
 mk = dict(Ti="v", Cr="^", Au="o", Pd="s", Pt="D")
 g = mt[mt.study == "gated"]
@@ -69,8 +69,8 @@ ax[2].set_ylabel(r"$R_{\rm tot}$ at $V_G=-3$ V ($\Omega$cm)")
 hm = [Line2D([], [], color=INK, marker=mk[x], ls="none", ms=4.5, label=x) for x in metals]
 hm += [Line2D([], [], color=BLUE, marker="o", ls="none", label="edge (filled)"),
        Line2D([], [], color=ORANGE, marker="o", mfc="white", ls="none", label="top (open)")]
-ax[2].legend(handles=hm, loc="upper center", frameon=False, ncol=4, fontsize=6, columnspacing=0.6, handletextpad=0.2, bbox_to_anchor=(0.5, 1.02))
-ax[2].set_ylim(1e-1, 1e10)
+ax[2].legend(handles=hm, loc="upper center", frameon=False, ncol=4, fontsize=6.5, columnspacing=0.5, handletextpad=0.1, bbox_to_anchor=(0.5, 1.0))
+ax[2].set_ylim(1e-1, 1e12); ax[2].set_yticks([1e-1, 1e1, 1e3, 1e5, 1e7])
 ax[2].set_title("(c)", loc="left", fontsize=9)
 
 fig.tight_layout()

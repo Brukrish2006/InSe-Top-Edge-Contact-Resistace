@@ -33,18 +33,18 @@ for kind in ("top", "edge"):
 def meta(kind):
     return dict(l.strip().split("=") for l in open(os.path.join(D, f"fields_{kind}_meta.txt")))
 
-fig, ax = plt.subplots(2, 2, figsize=(7.2, 3.9), sharex=False)
-for r, (kind, name) in enumerate((("top", "Top contact (metal over 0–50 and 100–150 nm)"), ("edge", "Edge contact (metal at $x$ = 0 and 50 nm)"))):
+fig, ax = plt.subplots(2, 2, figsize=(6.5, 4.45), sharex=False)
+for r, (kind, name) in enumerate((("top", "Top contact"), ("edge", "Edge contact"))):
     d = fields[kind]; mt = meta(kind)
     x0, x1 = float(mt["x_ch0_nm"]), float(mt["x_ch1_nm"])
     for c, (col, lab, cmap) in enumerate((("p", "$\\log_{10}\\,p$ (cm$^{-3}$)", "viridis"), ("T", "$\\Delta T$ (K)", "inferno"))):
         v = np.log10(np.maximum(d.p, 1.0)) if col == "p" else d["T"] - 300.0
         cs = ax[r, c].tricontourf(d.x_nm, d.y_nm, v, 40, cmap=cmap)
-        cb = fig.colorbar(cs, ax=ax[r, c], pad=0.02, fraction=0.05); cb.set_label(lab, fontsize=8); cb.ax.tick_params(labelsize=7)
+        cb = fig.colorbar(cs, ax=ax[r, c], pad=0.02, fraction=0.05); cb.set_label(lab, fontsize=8); cb.ax.tick_params(labelsize=8)
         if kind == "top":
             ax[r, c].axvline(x0, color="w", lw=0.6, ls=":"); ax[r, c].axvline(x1, color="w", lw=0.6, ls=":")
-        ax[r, c].invert_yaxis(); ax[r, c].set_ylabel("$y$ (nm), oxide at bottom", fontsize=7.5); ax[r, c].tick_params(labelsize=7)
-        ax[r, c].set_title(f"({'abcd'[2 * r + c]}) {name}" if c == 0 else f"({'abcd'[2 * r + c]}) {name}", fontsize=7.5, loc="left")
+        ax[r, c].invert_yaxis(); ax[r, c].set_ylabel("$y$ (nm), oxide at bottom", fontsize=8); ax[r, c].tick_params(labelsize=8)
+        ax[r, c].set_title(f"({'abcd'[2 * r + c]}) {name}, " + ("hole density" if c == 0 else "temperature"), fontsize=8, loc="left")
 for c in range(2):
     ax[0, c].set_xlabel("$x$ (nm)", fontsize=8); ax[1, c].set_xlabel("$x$ (nm)", fontsize=8)
 fig.tight_layout()
