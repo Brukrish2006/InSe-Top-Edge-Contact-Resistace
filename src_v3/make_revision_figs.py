@@ -178,3 +178,85 @@ try:
     save(fig, "fig16_chen2019")
 except Exception as e:  # keep the other figures if the Chen data are missing
     print("fig16 skipped:", e)
+
+# ------------------------------------------------------------------ Fig 17: hole-mass anisotropy decides the geometry
+try:
+    md = ok(rd("mh_dir_map"))
+    fig, ax = plt.subplots(1, 2, figsize=(6.5, 3.0), gridspec_kw=dict(width_ratios=[1.25, 1]))
+    order = [("phiB=0.2", "0.2 eV", GREEN), ("unpinned", "Pt, unpinned", BLUE), ("interlayer (measured)", "Pt, interlayer", YELLOW),
+             ("phiB=0.6", "0.6 eV", GREY), ("phiB=1.0", "1.0 eV", INK), ("direct (measured)", "Pt, direct", ORANGE)]
+    xs_, ys_, arr = [], [], []
+    for case, lab_, col in order:
+        g = md[md["case"] == case].pivot_table(index="m_in", columns="geom", values="R_tot").dropna()
+        r = (g["top50"] / g["edge"]).sort_index()
+        ls = "--" if case.startswith("phiB") else "-"
+        ax[0].semilogy(r.index, r.values, color=col, ls=ls, marker="o", ms=3.5, label=lab_)
+        pb = float(md[(md["case"] == case) & (md.geom == "edge")].phiBp.iloc[0])
+        lr = np.log(r.values)
+        k = np.where((lr[:-1] > 0) & (lr[1:] <= 0))[0]
+        if len(k):
+            i = k[0]
+            mx = r.index[i] + (r.index[i + 1] - r.index[i]) * lr[i] / (lr[i] - lr[i + 1])
+            xs_.append(pb); ys_.append(mx)
+            ax[1].plot(pb, mx, "o", color=col, ms=5)
+        else:
+            arr.append(pb)
+            ax[1].annotate("", xy=(pb, 1.32), xytext=(pb, 1.12), arrowprops=dict(arrowstyle="->", color=col, lw=1.2))
+            ax[1].plot(pb, 1.12, "o", color=col, ms=5, mfc="white")
+    ax[0].axhline(1, color=GREY, lw=0.9)
+    ax[0].axvspan(0.85, 0.95, color=GREY, alpha=0.2, lw=0)
+    ax[0].text(0.9, 50, "calc.", ha="center", fontsize=7, color=INK)
+    ax[0].set_xlabel(r"In-plane hole mass $m_{\parallel}$ ($m_0$)")
+    ax[0].set_ylabel(r"$R_{\rm tot}^{\rm top}/R_{\rm tot}^{\rm edge}$ (on state)")
+    ax[0].text(1.21, 1.15, "edge better", fontsize=7, color=INK, va="bottom", ha="right")
+    ax[0].text(1.21, 0.87, "top better", fontsize=7, color=INK, va="top", ha="right")
+    ax[0].legend(frameon=False, fontsize=6.5, loc="lower left", ncol=2, columnspacing=0.6, handlelength=1.6)
+    ax[0].set_ylim(5e-4, 1e2)
+    ax[0].set_title("(a) top/edge ratio", loc="left", fontsize=9)
+    o = np.argsort(xs_)
+    ax[1].plot(np.array(xs_)[o], np.array(ys_)[o], color=INK, lw=1, ls=":")
+    ax[1].axhline(0.9, color=GREY, lw=0.9, ls="--"); ax[1].text(0.15, 0.92, "calculated, 6 layers", fontsize=7, color=GREY)
+    ax[1].fill_between([0.1, 1.15], 0.25, [0.25, 0.25], color="none")
+    ax[1].set_xlim(0.1, 1.15); ax[1].set_ylim(0.25, 1.4)
+    ax[1].set_xlabel(r"Hole barrier $\phi_{Bp}$ (eV)"); ax[1].set_ylabel(r"Crossover $m_{\parallel}$ ($m_0$)")
+    ax[1].text(0.6, 1.0, "top better above,\nedge better below", fontsize=7, color=INK)
+    ax[1].set_title("(b) crossover mass", loc="left", fontsize=9)
+    save(fig, "fig17_mass_anisotropy")
+    print("crossover", [(round(a, 2), round(b, 2)) for a, b in zip(xs_, ys_)], "none at", [round(a, 2) for a in arr])
+except Exception as e:
+    print("fig17 skipped:", e)
+
+# ------------------------------------------------------------------ Fig 18: gated Monte Carlo with direction-dependent hole mass
+try:
+    ud = ok(rd("uq_dir"))
+    ud = ud[np.isclose(ud.VG, -3.0)] if "VG" in ud else ud
+    sh = ud[ud.variant == "shared"].pivot_table(index="sample", columns="geom", values="R_tot").dropna()
+    mi = ud.groupby("sample").m_in.first()
+    fig, ax = plt.subplots(1, 3, figsize=(6.5, 2.96), gridspec_kw=dict(width_ratios=[1, 1.15, 1]))
+    for col, c_, lab_ in (("edge", BLUE, "Edge"), ("top50", ORANGE, "Top, 50 nm")):
+        y = np.sort(np.log10(sh[col].values))
+        ax[0].plot(y, np.arange(1, len(y) + 1) / len(y), color=c_, label=lab_)
+    ax[0].set_xlabel(r"$\log_{10}R_{\rm tot}$ ($\Omega$cm)"); ax[0].set_ylabel("Cumulative fraction")
+    ax[0].legend(frameon=False, fontsize=7, loc="lower right"); ax[0].set_title("(a)", loc="left", fontsize=9)
+    sc = ax[1].scatter(sh["top50"], sh["edge"], c=mi.reindex(sh.index), cmap="viridis", s=8, vmin=0.3, vmax=1.5)
+    lim = [sh.min().min() / 3, sh.max().max() * 3]
+    ax[1].plot(lim, lim, color=INK, lw=0.8); ax[1].set_xscale("log"); ax[1].set_yscale("log"); ax[1].set_xlim(lim); ax[1].set_ylim(lim)
+    ax[1].set_xlabel(r"$R_{\rm tot}^{\rm top}$ ($\Omega$cm)"); ax[1].set_ylabel(r"$R_{\rm tot}^{\rm edge}$ ($\Omega$cm)")
+    cb = fig.colorbar(sc, ax=ax[1], pad=0.02, fraction=0.06); cb.set_label(r"$m_\parallel$ ($m_0$)", fontsize=8); cb.ax.tick_params(labelsize=7)
+    ax[1].set_title("(b)", loc="left", fontsize=9)
+    r = (sh["edge"] / sh["top50"])
+    edges_ = np.array([0.3, 0.45, 0.6, 0.8, 1.05, 1.5])
+    xb, fb, nb = [], [], []
+    for lo, hi in zip(edges_[:-1], edges_[1:]):
+        sel = (mi.reindex(r.index) >= lo) & (mi.reindex(r.index) < hi)
+        if sel.sum():
+            xb.append(np.sqrt(lo * hi)); fb.append(100 * (r[sel] < 1).mean()); nb.append(int(sel.sum()))
+    ax[2].plot(xb, fb, "o-", color=INK, ms=4)
+    ax[2].axhline(50, color=GREY, lw=0.8, ls="--"); ax[2].axvspan(0.85, 0.95, color=GREY, alpha=0.2, lw=0)
+    ax[2].set_xscale("log"); ax[2].set_xticks([0.3, 0.5, 1.0, 1.5]); ax[2].set_xticklabels(["0.3", "0.5", "1", "1.5"]); ax[2].xaxis.set_minor_formatter(plt.NullFormatter())
+    ax[2].set_ylim(0, 100); ax[2].set_xlabel(r"$m_\parallel$ ($m_0$)"); ax[2].set_ylabel("Samples with edge < top (%)")
+    ax[2].set_title("(c)", loc="left", fontsize=9)
+    save(fig, "fig18_uq_dir")
+    print("uq_dir n=", len(r), "edge<top %", round(100 * (r < 1).mean(), 1), "bins", list(zip([round(x, 2) for x in xb], [round(f, 1) for f in fb], nb)))
+except Exception as e:
+    print("fig18 skipped:", e)

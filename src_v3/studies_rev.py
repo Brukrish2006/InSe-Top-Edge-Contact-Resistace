@@ -425,6 +425,23 @@ def tasks_uq_dir():
     return T
 
 
+def tasks_thickness_dir():
+    """Thickness dependence at the literature alignment (Pt, V_G=-3 V) with direction-dependent hole mass
+    (top: 0.17 m0 tunnelling; edge and DOS: 0.9 m0) and, for reference, the light isotropic mass."""
+    T = []
+    for N in (3, 4, 6, 8, 12):
+        t = N * 0.83 * NM
+        for case in ("direct (measured)", "interlayer (measured)"):
+            c = _cnl_cases(t)[case]
+            for kind in GEOMS:
+                P0 = dict(s.LIT, S_top=c["S"], S_edge=c["S"], Phi_CNL=c["CNL"], thermal=False)
+                sp = _spec("thickness_dir", kind, PT, _dir_mass(P0, kind, 0.9), dict(layers=N, case=case, masses="dir0.9"),
+                           [{"VG": -3.0, "save": False}, {"V": 0.05}], t=t)
+                sp["vg_step"] = 0.1
+                T.append(sp)
+    return T
+
+
 STUDIES = {"uq_gated": tasks_uq_gated, "thermal_lit": tasks_thermal_lit, "mesh_convergence": tasks_mesh_convergence,
            "thickness_lit": tasks_thickness_lit, "inse_electron": tasks_inse_electron,
            "chen2019": tasks_chen2019, "chen2019_300K": tasks_chen2019_300K,
@@ -432,4 +449,4 @@ STUDIES = {"uq_gated": tasks_uq_gated, "thermal_lit": tasks_thermal_lit, "mesh_c
            "mesh_ungated": tasks_mesh_ungated,
            "top_retry": tasks_top_retry, "mh_sweep": tasks_mh_sweep, "oblique": tasks_oblique,
            "uq_cnl": tasks_uq_cnl, "thermo_const": tasks_thermo_const, "heat_step": tasks_heat_step,
-           "mh_dir_map": tasks_mh_dir_map, "uq_dir": tasks_uq_dir}
+           "mh_dir_map": tasks_mh_dir_map, "uq_dir": tasks_uq_dir, "thickness_dir": tasks_thickness_dir}

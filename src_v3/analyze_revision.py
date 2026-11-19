@@ -251,3 +251,14 @@ if ud is not None:
         if sel.any():
             print(f"  m_in {lo}-{hi}: n={int(sel.sum())} edge<top in {100 * (r[sel] < 1).mean():.1f}%  "
                   f"median edge/top={r[sel].median():.3g}")
+
+td = rd("thickness_dir")
+if td is not None:
+    print("\n=== thickness_dir: Pt, V_G=-3 V, direction-dependent mass (m_par=0.9)")
+    if "failed" in td:
+        print("failed runs:", int(td["failed"].fillna(0).sum()), "of", len(td))
+        td = td[td["failed"].fillna(0) == 0]
+    pv = td.pivot_table(index=["case", "layers"], columns="geom", values="R_tot")
+    if "top50" in pv and "edge" in pv:
+        pv["top/edge"] = pv["top50"] / pv["edge"]
+    print(pv.to_string(float_format=lambda x: f"{x:.4g}"))
