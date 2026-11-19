@@ -146,3 +146,15 @@ if tr is not None:
     ok_ = tr[tr["failed"].fillna(0) == 0] if "failed" in tr else tr
     if len(ok_):
         print(ok_[["geom", "case", "metal", "variant", "phiBp", "R_tot", "tun_share"]].round(4).to_string(index=False))
+
+mh = rd("mh_sweep")
+if mh is not None:
+    print("\n=== mh_sweep: gated on state (Pt, V_G=-3 V, V_D=0.05 V) versus hole mass")
+    if "failed" in mh:
+        print("failed runs:", int(mh["failed"].fillna(0).sum()), "of", len(mh))
+        mh = mh[mh["failed"].fillna(0) == 0]
+    if len(mh):
+        pv = mh.pivot_table(index=["case", "variant", "mh"], columns="geom", values="R_tot")
+        if "top50" in pv and "edge" in pv:
+            pv["top/edge"] = pv["top50"] / pv["edge"]
+        print(pv.to_string(float_format=lambda x: f"{x:.4g}"))

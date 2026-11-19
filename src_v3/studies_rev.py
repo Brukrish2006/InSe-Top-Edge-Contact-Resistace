@@ -256,9 +256,30 @@ def tasks_chen2019_mu():
     return T
 
 
+def tasks_mh_sweep():
+    """Sensitivity of the gated on state (V_G = -3 V, V_D = 0.05 V, literature alignment, Pt) to the hole mass.
+    The baseline 0.17 m0 is light compared with the flat, ring-shaped ('Mexican-hat') valence band of few-layer
+    InSe. Variant 'tun': only the tunnelling mass changes (DOS mass 0.17); variant 'both': DOS and tunnelling."""
+    pc = s.pin_cases()
+    T = []
+    for case in ("direct (measured)", "interlayer (measured)", "unpinned"):
+        c = pc[case]
+        for kind in GEOMS:
+            for mh in (0.17, 0.5, 1.0, 2.0):
+                for var in (("tun", "both") if mh != 0.17 else ("tun",)):
+                    P = dict(s.LIT, S_top=c["S"], S_edge=c["S"], Phi_CNL=c["CNL"], thermal=False, mh_tun=mh,
+                             mh_dos=(mh if var == "both" else 0.17))
+                    sp = _spec("mh_sweep", kind, PT, P, dict(case=case, metal="Pt", S=c["S"], mh=mh, variant=var,
+                                                              study="gated"),
+                               [{"VG": -3.0, "save": False}, {"V": 0.05}])
+                    sp["vg_step"] = 0.1
+                    T.append(sp)
+    return T
+
+
 STUDIES = {"uq_gated": tasks_uq_gated, "thermal_lit": tasks_thermal_lit, "mesh_convergence": tasks_mesh_convergence,
            "thickness_lit": tasks_thickness_lit, "inse_electron": tasks_inse_electron,
            "chen2019": tasks_chen2019, "chen2019_300K": tasks_chen2019_300K,
            "chen2019_mu": tasks_chen2019_mu,
            "mesh_ungated": tasks_mesh_ungated,
-           "top_retry": tasks_top_retry}
+           "top_retry": tasks_top_retry, "mh_sweep": tasks_mh_sweep}

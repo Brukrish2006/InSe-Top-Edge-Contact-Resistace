@@ -156,7 +156,7 @@ try:
                          -np.polyfit(1 / (kB * g.T0.values), np.log(g.I.values / g.T0.values ** 2), 1)[0]))
     R = pd.DataFrame(rows, columns=["case", "metal", "Phi", "VG", "phiB"])
     R0 = R[R.VG == 0.0]
-    fig, ax = plt.subplots(1, 2, figsize=(6.5, 3.08), gridspec_kw=dict(width_ratios=[1.35, 1]))
+    fig, ax0 = plt.subplots(1, 1, figsize=(4.4, 3.2)); ax = [ax0]
     mk = dict(In="o", Ti="v", Cr="^", Pd="s")
     for case, col in (("control", BLUE), ("oxidized monolayer", ORANGE)):
         g = R0[R0["case"] == case]
@@ -167,30 +167,14 @@ try:
         xs = np.array([4.0, 5.25]); ax[0].plot(xs, sl * xs + ic, color=col, lw=1, ls="--")
         ax[0].text(4.05 if case == "control" else 4.75, 0.34 if case == "control" else 0.05,
                    f"$S_{{\\rm app}}$ = {sl:.2f}" + (" (excl. In)" if case != "control" else ""), color=col, fontsize=8)
-    ax[0].plot(4.12, 0.065, "*", color=INK, ms=9, label="Ref. [11], In + oxide")
-    ax[0].plot(5.12, 0.57, "D", color=INK, mfc="none", ms=6, label="Ref. [11], Pd + oxide")
+    ax[0].plot(4.12, 0.065, "*", color=INK, ms=9, label="Chen et al., In + oxide")
+    ax[0].plot(5.12, 0.57, "D", color=INK, mfc="none", ms=6, label="Chen et al., Pd + oxide")
     ax[0].axhline(0, color=GREY, lw=0.8)
     ax[0].set_xlabel(r"Metal work function $\Phi_M$ (eV)"); ax[0].set_ylabel("Arrhenius barrier at $V_G$=0 (eV)")
     h = [Line2D([], [], color=BLUE, marker="o", ls="none", label="control, $S$=0.05"),
          Line2D([], [], color=ORANGE, marker="o", ls="none", label="oxide, $S$=0.5")] + ax[0].get_legend_handles_labels()[0]
     ax[0].legend(handles=h, frameon=False, fontsize=7, loc="upper left")
-    ax[0].set_title("(a) barriers, 300--400 K", loc="left", fontsize=9)
-    cm = ok(rd("chen2019_mu"))
-    b0 = c[(c.part == "B_oncurrent") & np.isclose(c.VG, 80.0) & np.isclose(c.Lch_nm, 1000.0)].copy(); b0["mu_n"] = 1000.0
-    cm = pd.concat([cm[np.isclose(cm.VG, 80.0) & np.isclose(cm.Lch_nm, 1000.0)], b0], ignore_index=True)
-    cm = cm.assign(uA=cm.I * 100)                                                    # A/cm -> uA/um
-    for case, col, mkr in (("control", BLUE, "o"), ("oxidized monolayer", ORANGE, "s")):
-        g = cm[cm["case"] == case].sort_values("mu_n")
-        ax[1].plot(g.mu_n, g.uA, color=col, marker=mkr, ms=4, label=("control" if case == "control" else "oxide interlayer"))
-    ax[1].axhspan(103 / 6, 103 / 3, color=BLUE, alpha=0.18, lw=0)
-    ax[1].axhline(103, color=ORANGE, ls="--", lw=1)
-    ax[1].text(105, 118, "Ref. [11], oxide: 103", color=ORANGE, fontsize=8)
-    ax[1].text(105, 37, "Ref. [11], control (inferred)", color=BLUE, fontsize=8)
-    ax[1].set_xscale("log"); ax[1].set_yscale("log")
-    ax[1].set_xlabel(r"Assumed $\mu_n$ (cm$^2$/Vs)")
-    ax[1].set_ylabel(r"$I_D$ at $V_G$=80 V, $V_D$=1 V ($\mu$A/$\mu$m)")
-    ax[1].legend(frameon=False, fontsize=7, loc="lower right")
-    ax[1].set_ylim(6, 300); ax[1].set_title(r"(b) on-current, $L$=1 $\mu$m", loc="left", fontsize=9)
+    ax[0].set_title("Arrhenius barriers, 300–400 K", loc="left", fontsize=9)
     save(fig, "fig16_chen2019")
 except Exception as e:  # keep the other figures if the Chen data are missing
     print("fig16 skipped:", e)
