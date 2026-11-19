@@ -274,6 +274,15 @@ def tasks_mh_sweep():
                                [{"VG": -3.0, "save": False}, {"V": 0.05}])
                     sp["vg_step"] = 0.1
                     T.append(sp)
+            if kind == "top":  # direction-dependent: light c-axis tunnelling mass, heavier in-plane DOS mass
+                for mdos in (0.5, 1.0, 2.0):
+                    P = dict(s.LIT, S_top=c["S"], S_edge=c["S"], Phi_CNL=c["CNL"], thermal=False, mh_tun=0.17,
+                             mh_dos=mdos)
+                    sp = _spec("mh_sweep", kind, PT, P, dict(case=case, metal="Pt", S=c["S"], mh=mdos, variant="dir",
+                                                              study="gated"),
+                               [{"VG": -3.0, "save": False}, {"V": 0.05}])
+                    sp["vg_step"] = 0.1
+                    T.append(sp)
     return T
 
 
