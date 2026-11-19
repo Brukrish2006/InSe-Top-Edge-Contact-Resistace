@@ -365,10 +365,71 @@ def tasks_heat_step():
     return T
 
 
+def _dir_mass(P, kind, m_in, m_c=0.17):
+    """Direction-dependent hole mass: top contacts tunnel along c (light), edge contacts in-plane (heavy);
+    the density-of-states mass is the in-plane value for both."""
+    return dict(P, mh_dos=m_in, mh_tun=(m_c if kind == "top" else m_in))
+
+
+def tasks_mh_dir_map():
+    """Top/edge on-state ratio with direction-dependent hole masses versus in-plane mass and barrier."""
+    Ev = s.lit_Ev()
+    pc = s.pin_cases()
+    cases = [(f"phiB={b}", Ev - b, dict(s.LIT)) for b in (0.2, 0.6, 1.0)]
+    for case in ("direct (measured)", "interlayer (measured)", "unpinned"):
+        c = pc[case]
+        cases.append((case, PT, dict(s.LIT, S_top=c["S"], S_edge=c["S"], Phi_CNL=c["CNL"])))
+    T = []
+    for case, Phi, P0 in cases:
+        for m_in in (0.3, 0.5, 0.7, 0.9, 1.2):
+            for kind in GEOMS:
+                P = _dir_mass(dict(P0, thermal=False), kind, m_in)
+                sp = _spec("mh_dir_map", kind, Phi, P, dict(case=case, m_in=m_in, study="gated"),
+                           [{"VG": -3.0, "save": False}, {"V": 0.05}])
+                sp["vg_step"] = 0.1
+                T.append(sp)
+    return T
+
+
+def tasks_uq_dir():
+    """Gated Monte Carlo (same samples as tasks_uq_gated) with direction-dependent hole masses:
+    c-axis tunnelling mass 0.17 m0 for top contacts, in-plane mass log-uniform 0.3-1.5 m0 for edge tunnelling
+    and for the density of states of both."""
+    N = int(os.environ.get("UQ_N", "240"))
+    rng = np.random.default_rng(7)
+    rng2 = np.random.default_rng(11)
+    rng3 = np.random.default_rng(13)
+    T = []
+    for k in range(N):
+        lg = lambda a, b: 10 ** rng.uniform(math.log10(a), math.log10(b))
+        smp = dict(sample=k, dEV=rng.normal(0, 0.3), S=lg(0.05, 0.5), S_edge_indep=lg(0.05, 0.5),
+                   cnl_off=rng.uniform(0.1, 0.6), d_vdW=rng.uniform(0.2, 0.4), Phi_vdW=rng.uniform(1, 3),
+                   mu_p=lg(20, 100), rmu=lg(0.002, 0.1), NA=lg(1e15, 1e17), eps_r=rng.uniform(5, 8),
+                   mh=rng.uniform(0.1, 0.3))
+        smp["m_in"] = 10 ** rng3.uniform(math.log10(0.3), math.log10(1.5))
+        smp["cnl_edge"] = rng2.uniform(0.1, 0.6)
+        P = dict(s.LIT, chi_bulk=s.LIT["chi_bulk"] - smp["dEV"], d_vdW=smp["d_vdW"] * NM,
+                 Phi_vdW=smp["Phi_vdW"], mu_p=smp["mu_p"], mu_perp_ratio=smp["rmu"], NA=smp["NA"],
+                 eps_r=smp["eps_r"], thermal=False)
+        P0 = dict(m.DEFAULTS); P0.update(P)
+        Ec = m.band(P0, 5 * NM)[1]
+        P["Phi_CNL"] = Ec + smp["cnl_off"]
+        steps = [{"V": 0.05, "save": False}, {"VG": -3.0}]
+        for kind in GEOMS:
+            Pk = _dir_mass(dict(P, S_top=smp["S"], S_edge=smp["S"]), kind, smp["m_in"])
+            T.append(_spec("uq_dir", kind, PT, Pk, dict(smp, variant="shared"), steps))
+        Pk = _dir_mass(dict(P, S_top=smp["S"], S_edge=smp["S_edge_indep"]), "edge", smp["m_in"])
+        T.append(_spec("uq_dir", "edge", PT, Pk, dict(smp, variant="indep_edge"), steps))
+        Pk = _dir_mass(dict(P, S_top=smp["S"], S_edge=smp["S"], Phi_CNL=Ec + smp["cnl_edge"]), "edge", smp["m_in"])
+        T.append(_spec("uq_dir", "edge", PT, Pk, dict(smp, variant="indep_cnl"), steps))
+    return T
+
+
 STUDIES = {"uq_gated": tasks_uq_gated, "thermal_lit": tasks_thermal_lit, "mesh_convergence": tasks_mesh_convergence,
            "thickness_lit": tasks_thickness_lit, "inse_electron": tasks_inse_electron,
            "chen2019": tasks_chen2019, "chen2019_300K": tasks_chen2019_300K,
            "chen2019_mu": tasks_chen2019_mu,
            "mesh_ungated": tasks_mesh_ungated,
            "top_retry": tasks_top_retry, "mh_sweep": tasks_mh_sweep, "oblique": tasks_oblique,
-           "uq_cnl": tasks_uq_cnl, "thermo_const": tasks_thermo_const, "heat_step": tasks_heat_step}
+           "uq_cnl": tasks_uq_cnl, "thermo_const": tasks_thermo_const, "heat_step": tasks_heat_step,
+           "mh_dir_map": tasks_mh_dir_map, "uq_dir": tasks_uq_dir}

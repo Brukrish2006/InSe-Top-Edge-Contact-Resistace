@@ -214,3 +214,40 @@ if hs is not None:
         fin = dT[-1]
         t63 = float(np.interp(0.632 * fin, dT, g.t.values)) if fin > 0 else float("nan")
         print(f"{case:12s} {tun:8s} {geom:6s} final dT={fin:.2f} K  t63={t63:.3g} s")
+
+md = rd("mh_dir_map")
+if md is not None:
+    print("\n=== mh_dir_map: direction-dependent hole mass (top: m_c=0.17 tunnelling; edge: m_in), V_G=-3 V")
+    if "failed" in md:
+        print("failed runs:", int(md["failed"].fillna(0).sum()), "of", len(md))
+        md = md[md["failed"].fillna(0) == 0]
+    if len(md):
+        pv = md.pivot_table(index=["case", "m_in"], columns="geom", values="R_tot")
+        if "top50" in pv and "edge" in pv:
+            pv["top/edge"] = pv["top50"] / pv["edge"]
+        print(pv.to_string(float_format=lambda x: f"{x:.4g}"))
+
+ud = rd("uq_dir")
+if ud is not None:
+    print("\n=== uq_dir: gated Monte Carlo with direction-dependent hole mass")
+    if "failed" in ud:
+        print("failed runs:", int(ud["failed"].fillna(0).sum()), "of", len(ud))
+        ud = ud[ud["failed"].fillna(0) == 0]
+    sh = ud[ud.variant == "shared"].pivot_table(index="sample", columns="geom", values="R_tot").dropna()
+    r = sh["edge"] / sh["top50"]
+    print(f"shared S: n={len(r)} edge<top in {100 * (r < 1).mean():.1f}%  median edge/top={r.median():.3g}  "
+          f"5-95%: {r.quantile(0.05):.3g}-{r.quantile(0.95):.3g}")
+    ie = ud[ud.variant == "indep_edge"].set_index("sample").R_tot
+    j = ie.index.intersection(sh.index)
+    r2 = ie[j] / sh.loc[j, "top50"]
+    print(f"indep S_edge: n={len(r2)} edge<top in {100 * (r2 < 1).mean():.1f}%")
+    ic = ud[ud.variant == "indep_cnl"].set_index("sample").R_tot
+    j3 = ic.index.intersection(sh.index)
+    r3 = ic[j3] / sh.loc[j3, "top50"]
+    print(f"indep pinning level (edge): n={len(r3)} edge<top in {100 * (r3 < 1).mean():.1f}%")
+    mi = ud[ud.variant == "shared"].groupby("sample").m_in.first().reindex(r.index)
+    for lo, hi in ((0.3, 0.5), (0.5, 0.8), (0.8, 1.5)):
+        sel = (mi >= lo) & (mi < hi)
+        if sel.any():
+            print(f"  m_in {lo}-{hi}: n={int(sel.sum())} edge<top in {100 * (r[sel] < 1).mean():.1f}%  "
+                  f"median edge/top={r[sel].median():.3g}")
