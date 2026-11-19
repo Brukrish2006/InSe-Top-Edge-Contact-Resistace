@@ -158,3 +158,59 @@ if mh is not None:
         if "top50" in pv and "edge" in pv:
             pv["top/edge"] = pv["top50"] / pv["edge"]
         print(pv.to_string(float_format=lambda x: f"{x:.4g}"))
+
+ob = rd("oblique")
+if ob is not None:
+    print("\n=== oblique: gated on state (V_G=-3 V), normal-path vs minimum-action oblique tunnelling")
+    if "failed" in ob:
+        print("failed runs:", int(ob["failed"].fillna(0).sum()), "of", len(ob))
+        ob = ob[ob["failed"].fillna(0) == 0]
+    if len(ob):
+        pv = ob.pivot_table(index=["case", "oblique"], columns="geom", values="R_tot")
+        if "top50" in pv and "edge" in pv:
+            pv["top/edge"] = pv["top50"] / pv["edge"]
+        print(pv.to_string(float_format=lambda x: f"{x:.4g}"))
+
+uc = rd("uq_cnl")
+ug = rd("uq_gated")
+if uc is not None and ug is not None:
+    print("\n=== uq_cnl: edge with independent pinning level vs top (shared) from uq_gated")
+    okc = uc[uc["failed"].fillna(0) == 0] if "failed" in uc else uc
+    okg = ug[ug["failed"].fillna(0) == 0] if "failed" in ug else ug
+    okg = okg[(okg.variant == "shared") & (okg.geom == "top50")]
+    if "VG" in okg:
+        okg = okg[np.isclose(okg.VG, -3.0)]
+    if "VG" in okc:
+        okc = okc[np.isclose(okc.VG, -3.0)]
+    top = okg.set_index("sample").R_tot
+    for var, g in okc.groupby("variant"):
+        e = g.set_index("sample").R_tot
+        j = e.index.intersection(top.index)
+        r = (e[j] / top[j])
+        print(f"{var}: n={len(j)}  edge<top in {100 * (r < 1).mean():.1f}%  median edge/top={r.median():.3g}  "
+              f"5-95%: {r.quantile(0.05):.3g}-{r.quantile(0.95):.3g}")
+    print("failed edge runs:", int(uc["failed"].fillna(0).sum()) if "failed" in uc else 0)
+
+tc = rd("thermo_const")
+if tc is not None:
+    print("\n=== thermo_const: contact Peltier constant 2 vs 1.5 (Table-3 point)")
+    cols = [c_ for c_ in ("geom", "pelt_const", "V", "I", "Tmax", "P_el", "P_out", "T_source", "T_drain") if c_ in tc]
+    t2 = tc[cols].copy()
+    if "Tmax" in t2:
+        t2["dT"] = t2["Tmax"] - 300
+    if "P_out" in t2 and "P_el" in t2:
+        t2["balance_%"] = 100 * (t2["P_out"] / t2["P_el"] - 1)
+    print(t2.round(4).to_string(index=False))
+
+hs = rd("heat_step")
+if hs is not None:
+    print("\n=== heat_step: thermal response, time to 63% of final rise")
+    if "failed" in hs:
+        print("failed runs:", int(hs["failed"].fillna(0).sum()))
+        hs = hs[hs["failed"].fillna(0) == 0]
+    for (case, tun, geom), g in hs.groupby(["case", "tunneling", "geom"]):
+        g = g.sort_values("t")
+        dT = g.Tmax.values - 300
+        fin = dT[-1]
+        t63 = float(np.interp(0.632 * fin, dT, g.t.values)) if fin > 0 else float("nan")
+        print(f"{case:12s} {tun:8s} {geom:6s} final dT={fin:.2f} K  t63={t63:.3g} s")

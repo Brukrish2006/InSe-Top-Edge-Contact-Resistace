@@ -17,18 +17,7 @@ Units: cm, V, A, s, K. 2D results per unit width (A/cm, Ohm*cm).
 import math
 import os
 
-if os.name == "nt":
-    # Windows: point DEVSIM at the MKL runtime installed by "pip install mkl"
-    # (it lands in <python>\\Library\\bin, which is not on PATH).
-    import glob
-    import sys as _sys
-    for _d in {_sys.prefix, _sys.base_prefix, os.path.dirname(_sys.executable)}:
-        _hits = sorted(glob.glob(os.path.join(_d, "Library", "bin", "mkl_rt*.dll")))
-        if _hits and "DEVSIM_MATH_LIBS" not in os.environ:
-            os.add_dll_directory(os.path.dirname(_hits[-1]))
-            os.environ["PATH"] = os.path.dirname(_hits[-1]) + os.pathsep + os.environ.get("PATH", "")
-            os.environ["DEVSIM_MATH_LIBS"] = _hits[-1]
-else:
+if os.name != "nt":  # on Windows the pip "mkl" package is found automatically
     os.environ.setdefault(
         "DEVSIM_MATH_LIBS",
         "/usr/lib/x86_64-linux-gnu/liblapack.so.3:/usr/lib/x86_64-linux-gnu/libblas.so.3",
@@ -86,6 +75,10 @@ DEFAULTS = dict(
     T_vdW_top=None, d_vdW=0.30e-7, Phi_vdW=2.0,
     thermal=True, statistics="fd", nonisothermal=True, peltier=True, interface_heat=True,
     eps_ox=3.9, kappa_ox=0.014, cv_ox=1.6,
+    oblique=False,           # minimum-action tunnelling path among straight lines within obl_maxdeg of the normal
+    obl_angles=(0.0, 15.0, 30.0, 45.0, 60.0, 75.0),
+    obl_zone=15e-7,          # top contacts: oblique candidates only for nodes within this distance of the inner edge
+    pelt_const=2.0,          # kinetic-energy constant in the contact Peltier term (2: thermionic; 1.5: SG flux)
 )
 
 
@@ -491,12 +484,14 @@ class Device:
                   f"-{Te}*kq*({self.Jn_expr})*({en1}-{en0})*EdgeInverseLength")
         self.H_expr = H
         ds.edge_model(device=d, region=SEMI, name="Heat", equation=H)
-        _em(d, SEMI, "NegHeat", f"-({H})", ["Potential", "Holes", "Electrons", "T"])
+        ds.set_parameter(device=d, name="hscale", value=1.0)
+        ds.set_parameter(device=d, name="pelt_c", value=P["pelt_const"])
+        _em(d, SEMI, "NegHeat", f"-hscale*({H})", ["Potential", "Holes", "Electrons", "T"])
         _em(d, SEMI, "EdgeNodeVol", "0.5*EdgeCouple*EdgeLength")
         ds.set_parameter(name="edge_node0_volume_model", value="EdgeNodeVol")
         ds.set_parameter(name="edge_node1_volume_model", value="EdgeNodeVol")
         _nm(d, SEMI, "Cth", "cv*T", ["T"])
-        _nm(d, SEMI, "NegHtun", "-Htun")
+        _nm(d, SEMI, "NegHtun", "-hscale*Htun")
         ds.equation(device=d, region=SEMI, name="TE", variable_name="T", edge_model="Qflux",
                     edge_volume_model="NegHeat", node_model="NegHtun", time_node_model="Cth",
                     variable_update="default")
@@ -512,11 +507,11 @@ class Device:
                     Qs += (f"+{ce['Jps']}*kq*{T}*({es}-{eqp})"
                            f"+(-{ce['Jns']})*kq*{T}*({en}-{eqn})")
                 if P["peltier"]:
-                    Qs += (f"+{ce['Jps']}*{T}*kq*(2-{es})"
-                           f"+{ce['Jns']}*{T}*(-kq)*(2-{en})")
+                    Qs += (f"+{ce['Jps']}*{T}*kq*(pelt_c-{es})"
+                           f"+{ce['Jns']}*{T}*(-kq)*(pelt_c-{en})")
             self.Qs_expr = getattr(self, "Qs_expr", {})
             self.Qs_expr[c] = Qs
-            expr = f"(h_ct*(T-T0)-({Qs}))*ContactSurfaceArea/NodeVolume-Htun"
+            expr = f"(h_ct*(T-T0)-hscale*({Qs}))*ContactSurfaceArea/NodeVolume-hscale*Htun"
             _cnm(d, c, f"{c}_tbc", expr, ["T", "Holes", "Electrons"])
             ds.contact_equation(device=d, contact=c, name="TE", node_model=f"{c}_tbc", edge_model="Qflux",
                                 edge_volume_model="NegHeat", edge_current_model="Qflux")
@@ -540,7 +535,7 @@ class Device:
                                 edge_model="Qflux", edge_current_model="Qflux")
         else:
             ds.contact_node_model(device=d, contact="substrate", name="sub_tbc",
-                                  equation="h_sub*(T-T0)*ContactSurfaceArea/NodeVolume-Htun")
+                                  equation="h_sub*(T-T0)*ContactSurfaceArea/NodeVolume-hscale*Htun")
             ds.contact_node_model(device=d, contact="substrate", name="sub_tbc:T",
                                   equation="h_sub*ContactSurfaceArea/NodeVolume")
             ds.contact_equation(device=d, contact="substrate", name="TE", node_model="sub_tbc",
@@ -578,6 +573,54 @@ class Device:
                     row = row[np.argsort(sgn * x[row])]
                     paths.append(row)
                 self.cnodes[c], self.cpaths[c] = ids, paths
+        if self.P.get("oblique") and self.kind in ("top", "edge"):
+            self._oblique_paths()
+
+    def _oblique_paths(self):
+        """Candidate straight tunnelling paths from every contact node at angles of 0..75 degrees from the
+        inward normal, on both sides, traced through the nearest grid nodes (structured grid)."""
+        x, y = self.x, self.y
+        xs, ys = np.unique(x), np.unique(y)
+        grid = -np.ones((len(xs), len(ys)), dtype=int)
+        grid[np.searchsorted(xs, x), np.searchsorted(ys, y)] = np.arange(len(x))
+        x0, x1, y0, y1 = xs[0], xs[-1], ys[0], ys[-1]
+
+        def nearest(a, v):
+            k = np.clip(np.searchsorted(a, v), 1, len(a) - 1)
+            return np.where(np.abs(a[k] - v) < np.abs(a[k - 1] - v), k, k - 1)
+
+        h = 0.05e-7
+        s_ = np.arange(0.0, self.P["tun_maxlen"], h)
+        self.cands = {}
+        for c in ("source", "drain"):
+            if self.kind == "top":
+                nrm, tan = np.array([0.0, 1.0]), np.array([1.0, 0.0])
+            else:
+                nrm = np.array([1.0, 0.0]) if c == "source" else np.array([-1.0, 0.0])
+                tan = np.array([0.0, 1.0])
+            out = []
+            xin = self.geo["x_ch0"] if c == "source" else self.geo["x_ch1"]
+            for kk, i in enumerate(self.cnodes[c]):
+                if self.kind == "top" and abs(x[i] - xin) > self.P["obl_zone"]:
+                    out.append([self.cpaths[c][kk]])
+                    continue
+                cl = []
+                for deg in self.P["obl_angles"]:
+                    for sg in ((1.0,) if deg == 0 else (1.0, -1.0)):
+                        th = math.radians(deg)
+                        dvec = math.cos(th) * nrm + sg * math.sin(th) * tan
+                        px, py = x[i] + s_ * dvec[0], y[i] + s_ * dvec[1]
+                        ok = (px >= x0 - 1e-12) & (px <= x1 + 1e-12) & (py >= y0 - 1e-12) & (py <= y1 + 1e-12)
+                        stop = np.argmin(ok) if not ok.all() else len(ok)
+                        px, py = px[:stop], py[:stop]
+                        nodes = grid[nearest(xs, px), nearest(ys, py)]
+                        keep = np.r_[True, nodes[1:] != nodes[:-1]]
+                        nodes = nodes[keep]
+                        nodes = nodes[nodes >= 0]
+                        if len(nodes) >= 3:
+                            cl.append(nodes)
+                out.append(cl)
+            self.cands[c] = out
 
     # ------------------------------------------------------------------ tunnelling
     def _tsu_esaki(self, path, carrier, c, psi, eF):
@@ -644,12 +687,19 @@ class Device:
                 if self.contact_bc[c] != "schottky":
                     continue
                 Vc = ds.get_parameter(device=d, name=f"{c}_bias")
-                for path in self.cpaths[c]:
+                for kk, path in enumerate(self.cpaths[c]):
                     acsa = csa[path[0]]
+                    cands = self.cands[c][kk] if (self.P.get("oblique") and hasattr(self, "cands")) else [path]
                     for car in ("p", "n"):
                         eFs = ph["phip"] if car == "p" else -ph["phin"]
                         eFm = Vc if car == "p" else -Vc
-                        pp, bins, B = self._tsu_esaki(path, car, c, psi, eFs)
+                        best = None
+                        for cp in cands:  # minimum-action (largest supply-weighted transmission) path
+                            res_ = self._tsu_esaki(cp, car, c, psi, eFs)
+                            sc = sum(tw * np.logaddexp(0, (eFm - eps) / Vt) for _, eps, tw in res_[1])
+                            if best is None or sc > best[0]:
+                                best = (sc, res_)
+                        pp, bins, B = best[1]
                         pref = A[car] * self.P["T0"] / kq * self.T_vdW
                         for i, eps, tw in bins:
                             node = pp[i]
@@ -893,6 +943,26 @@ class Device:
         for tk in np.geomspace(t_ramp * 1.5, t_end, nsteps):
             ds.solve(type="transient_bdf1", absolute_error=1e30, relative_error=1e-8,
                      maximum_iterations=60, tdelta=tk - t_prev, charge_error=1e30)
+            t_prev = tk
+            pb = self.power_balance()
+            res.append((tk, pb["Tmax"], pb["P_el"], pb["P_out"]))
+        return np.array(res)
+
+    def heat_step(self, t_end, nsteps=40, t0=1e-13):
+        """Thermal response at fixed bias: the electrical DC state (with tunnelling converged) is found with
+        all heat sources switched off (T = T0), then the sources are switched on at t = 0 and the lattice
+        heat equation is integrated to t_end (carriers quasi-static, tunnelling sources frozen at t = 0).
+        Returns rows (t, Tmax, P_el, P_out)."""
+        d = self.name
+        ds.set_parameter(device=d, name="hscale", value=0.0)
+        self._solve()
+        self.update_tunnel()
+        ds.solve(type="transient_dc", absolute_error=1e30, relative_error=1e-9, maximum_iterations=60)
+        ds.set_parameter(device=d, name="hscale", value=1.0)
+        res, t_prev = [], 0.0
+        for tk in np.geomspace(t0, t_end, nsteps):
+            ds.solve(type="transient_bdf1", absolute_error=1e30, relative_error=1e-8,
+                     maximum_iterations=80, tdelta=tk - t_prev, charge_error=1e30)
             t_prev = tk
             pb = self.power_balance()
             res.append((tk, pb["Tmax"], pb["P_el"], pb["P_out"]))

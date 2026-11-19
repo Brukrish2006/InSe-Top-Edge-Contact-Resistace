@@ -51,6 +51,11 @@ def run_dev(spec):
                     dv.set_gate(st["VG"])
             if "V" in st:
                 dv.set_bias(st["V"])
+            if "heat_step" in st:
+                arr = dv.heat_step(st["heat_step"])
+                rows += [dict(tag, geom=s.lab(kind, spec["Lc"]), Phi_M=spec["Phi"], t=a, Tmax=b, P_el=c_, P_out=d_)
+                         for a, b, c_, d_ in arr]
+                continue
             if st.get("save", True):  # a step with save=False only moves the operating point
                 rows.append(s.summarize(dv, dict(tag, **st.get("tag", {}))))
         return spec["out"], rows
@@ -286,9 +291,84 @@ def tasks_mh_sweep():
     return T
 
 
+def tasks_oblique():
+    """Gated on state (V_G=-3 V, V_D=0.05 V, literature alignment) with tunnelling along the contact normal and
+    along the minimum-action straight path within 75 degrees of the normal (both geometries)."""
+    Ev = s.lit_Ev()
+    pc = s.pin_cases()
+    cases = [(f"phiB={b}", Ev - b, dict(s.LIT)) for b in (0.2, 0.6, 1.0)]
+    for case in ("direct (measured)", "interlayer (measured)"):
+        c = pc[case]
+        cases.append((case, PT, dict(s.LIT, S_top=c["S"], S_edge=c["S"], Phi_CNL=c["CNL"])))
+    T = []
+    for case, Phi, P0 in cases:
+        for kind in GEOMS:
+            for obl in (False, True):
+                P = dict(P0, thermal=False, oblique=obl)
+                sp = _spec("oblique", kind, Phi, P, dict(case=case, oblique=int(obl), study="gated"),
+                           [{"VG": -3.0, "save": False}, {"V": 0.05}])
+                sp["vg_step"] = 0.1
+                T.append(sp)
+    return T
+
+
+def tasks_uq_cnl():
+    """Edge contacts of the gated Monte Carlo with a pinning level drawn independently of the top contact.
+    Reproduces the samples of tasks_uq_gated (same seed and draw order); top-contact results are reused."""
+    N = int(os.environ.get("UQ_N", "240"))
+    rng = np.random.default_rng(7)
+    rng2 = np.random.default_rng(11)
+    T = []
+    for k in range(N):
+        lg = lambda a, b: 10 ** rng.uniform(math.log10(a), math.log10(b))
+        smp = dict(sample=k, dEV=rng.normal(0, 0.3), S=lg(0.05, 0.5), S_edge_indep=lg(0.05, 0.5),
+                   cnl_off=rng.uniform(0.1, 0.6), d_vdW=rng.uniform(0.2, 0.4), Phi_vdW=rng.uniform(1, 3),
+                   mu_p=lg(20, 100), rmu=lg(0.002, 0.1), NA=lg(1e15, 1e17), eps_r=rng.uniform(5, 8),
+                   mh=rng.uniform(0.1, 0.3))
+        smp["cnl_edge"] = rng2.uniform(0.1, 0.6)
+        P = dict(s.LIT, chi_bulk=s.LIT["chi_bulk"] - smp["dEV"], d_vdW=smp["d_vdW"] * NM,
+                 Phi_vdW=smp["Phi_vdW"], mu_p=smp["mu_p"], mu_perp_ratio=smp["rmu"], NA=smp["NA"],
+                 eps_r=smp["eps_r"], mh_dos=smp["mh"], mh_tun=smp["mh"], thermal=False)
+        P0 = dict(m.DEFAULTS); P0.update(P)
+        Ec = m.band(P0, 5 * NM)[1]
+        P["Phi_CNL"] = Ec + smp["cnl_edge"]
+        steps = [{"V": 0.05}, {"VG": -3.0}]
+        T.append(_spec("uq_cnl", "edge", PT, dict(P, S_top=smp["S"], S_edge=smp["S"]),
+                       dict(smp, variant="indep_cnl"), steps))
+        T.append(_spec("uq_cnl", "edge", PT, dict(P, S_top=smp["S"], S_edge=smp["S_edge_indep"]),
+                       dict(smp, variant="indep_cnl_S"), steps))
+    return T
+
+
+def tasks_thermo_const():
+    """Table-3 operating point with the contact Peltier constant of the SG flux (1.5) instead of 2."""
+    T = []
+    for pcst in (2.0, 1.5):
+        for kind in GEOMS:
+            T.append(_spec("thermo_const", kind, 5.0, dict(pelt_const=pcst), dict(pelt_const=pcst),
+                           [{"VG": -2.0, "save": False}, {"V": 0.5}, {"V": 1.0}]))
+    return T
+
+
+def tasks_heat_step():
+    """Thermal response to switching on the heat sources at fixed bias, with and without tunnelling."""
+    T = []
+    for kind in GEOMS:
+        for tun in ("nonlocal", "off"):
+            T.append(_spec("heat_step", kind, 5.0, dict(tunneling=tun), dict(case="reference", tunneling=tun),
+                           [{"VG": -2.0, "save": False}, {"V": 1.0, "save": False}, {"heat_step": 1e-6}]))
+    c = s.pin_cases()["unpinned"]
+    for kind in GEOMS:
+        T.append(_spec("heat_step", kind, PT, dict(s.LIT, S_top=1.0, S_edge=1.0, Phi_CNL=c["CNL"]),
+                       dict(case="unpinned Pt", tunneling="nonlocal"),
+                       [{"VG": -3.0, "save": False}, {"V": 1.0, "save": False}, {"heat_step": 1e-6}]))
+    return T
+
+
 STUDIES = {"uq_gated": tasks_uq_gated, "thermal_lit": tasks_thermal_lit, "mesh_convergence": tasks_mesh_convergence,
            "thickness_lit": tasks_thickness_lit, "inse_electron": tasks_inse_electron,
            "chen2019": tasks_chen2019, "chen2019_300K": tasks_chen2019_300K,
            "chen2019_mu": tasks_chen2019_mu,
            "mesh_ungated": tasks_mesh_ungated,
-           "top_retry": tasks_top_retry, "mh_sweep": tasks_mh_sweep}
+           "top_retry": tasks_top_retry, "mh_sweep": tasks_mh_sweep, "oblique": tasks_oblique,
+           "uq_cnl": tasks_uq_cnl, "thermo_const": tasks_thermo_const, "heat_step": tasks_heat_step}
