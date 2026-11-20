@@ -442,6 +442,115 @@ def tasks_thickness_dir():
     return T
 
 
+def _tensor(P, m_par, m_c=0.17, disp="kane", obl=False, m_dos=None):
+    """Anisotropic hole mass: tunnelling mass along each path from the inverse-mass tensor (c axis m_c,
+    in-plane m_par), density-of-states mass (m_par^2 m_c)^(1/3), imaginary dispersion 'parabolic' or 'kane'."""
+    md = m_dos if m_dos is not None else (m_par * m_par * m_c) ** (1.0 / 3.0)
+    return dict(P, mh_tun_c=m_c, mh_tun_par=m_par, mh_dos=md, tun_disp=disp, oblique=obl)
+
+
+def _mass_cases():
+    Ev = s.lit_Ev()
+    pc = s.pin_cases()
+    cases = [(f"phiB={b}", Ev - b, dict(s.LIT)) for b in (0.2, 0.6, 1.0)]
+    for case in ("direct (measured)", "interlayer (measured)", "unpinned"):
+        c = pc[case]
+        cases.append((case, PT, dict(s.LIT, S_top=c["S"], S_edge=c["S"], Phi_CNL=c["CNL"])))
+    return cases
+
+
+def _gs(out, kind, Phi, P, tag, vg_step=0.1, t=5 * NM):
+    sp = _spec(out, kind, Phi, P, tag, [{"VG": -3.0, "save": False}, {"V": 0.05}], t=t)
+    sp["vg_step"] = vg_step
+    return sp
+
+
+def tasks_mass_controls():
+    """Separate the hole-mass anisotropy from the direction of the gate field (m=0.9, Kane, normal paths):
+    'iso': 0.9 m0 in every direction; 'swapped': heavy along c (0.9), light in-plane (0.17); DOS mass fixed."""
+    md = (0.9 * 0.9 * 0.17) ** (1.0 / 3.0)
+    T = []
+    for case, Phi, P0 in _mass_cases():
+        for var, mc, mp in (("iso", 0.9, 0.9), ("swapped", 0.9, 0.17)):
+            for kind in GEOMS:
+                P = _tensor(dict(P0, thermal=False), mp, m_c=mc, m_dos=md)
+                T.append(_gs("mass_controls", kind, Phi, P, dict(case=case, variant=var)))
+    return T
+
+
+def tasks_edge_T():
+    """Edge-contact interface transmission needed to reverse the low-barrier ranking (Kane, tensor 0.9)."""
+    Ev = s.lit_Ev()
+    pc = s.pin_cases()
+    cases = [(f"phiB={b}", Ev - b, dict(s.LIT)) for b in (0.2, 0.6)]
+    for case in ("interlayer (measured)", "unpinned"):
+        c = pc[case]
+        cases.append((case, PT, dict(s.LIT, S_top=c["S"], S_edge=c["S"], Phi_CNL=c["CNL"])))
+    T = []
+    for case, Phi, P0 in cases:
+        for Te in (0.3, 0.1, 0.03, 0.01, 0.003, 0.001):
+            P = _tensor(dict(P0, thermal=False, T_edge=Te), 0.9)
+            T.append(_gs("edge_T", "edge", Phi, P, dict(case=case, T_edge=Te)))
+    return T
+
+
+def tasks_kane_map():
+    """Top/edge ratio vs in-plane mass with the mass tensor: parabolic and Kane dispersion, and Kane with
+    minimum-action oblique paths."""
+    T = []
+    for case, Phi, P0 in _mass_cases():
+        for m_par in (0.3, 0.5, 0.7, 0.9, 1.2):
+            for var, disp, obl in (("parabolic", "parabolic", False), ("kane", "kane", False), ("kane_oblique", "kane", True)):
+                for kind in GEOMS:
+                    P = _tensor(dict(P0, thermal=False), m_par, disp=disp, obl=obl)
+                    T.append(_gs("kane_map", kind, Phi, P, dict(case=case, m_par=m_par, variant=var)))
+    return T
+
+
+def tasks_thickness_kane():
+    T = []
+    for N in (3, 4, 6, 8, 12):
+        t = N * 0.83 * NM
+        for case in ("direct (measured)", "interlayer (measured)"):
+            c = _cnl_cases(t)[case]
+            for kind in GEOMS:
+                P = _tensor(dict(s.LIT, S_top=c["S"], S_edge=c["S"], Phi_CNL=c["CNL"], thermal=False), 0.9)
+                T.append(_gs("thickness_kane", kind, PT, P, dict(layers=N, case=case), vg_step=0.02, t=t))
+    return T
+
+
+def tasks_uq_kane():
+    """Gated Monte Carlo (same samples as uq_gated/uq_dir) with the mass tensor and Kane dispersion."""
+    N = int(os.environ.get("UQ_N", "240"))
+    rng = np.random.default_rng(7)
+    rng2 = np.random.default_rng(11)
+    rng3 = np.random.default_rng(13)
+    T = []
+    for k in range(N):
+        lg = lambda a, b: 10 ** rng.uniform(math.log10(a), math.log10(b))
+        smp = dict(sample=k, dEV=rng.normal(0, 0.3), S=lg(0.05, 0.5), S_edge_indep=lg(0.05, 0.5),
+                   cnl_off=rng.uniform(0.1, 0.6), d_vdW=rng.uniform(0.2, 0.4), Phi_vdW=rng.uniform(1, 3),
+                   mu_p=lg(20, 100), rmu=lg(0.002, 0.1), NA=lg(1e15, 1e17), eps_r=rng.uniform(5, 8),
+                   mh=rng.uniform(0.1, 0.3))
+        smp["m_in"] = 10 ** rng3.uniform(math.log10(0.3), math.log10(1.5))
+        smp["cnl_edge"] = rng2.uniform(0.1, 0.6)
+        P = dict(s.LIT, chi_bulk=s.LIT["chi_bulk"] - smp["dEV"], d_vdW=smp["d_vdW"] * NM,
+                 Phi_vdW=smp["Phi_vdW"], mu_p=smp["mu_p"], mu_perp_ratio=smp["rmu"], NA=smp["NA"],
+                 eps_r=smp["eps_r"], thermal=False)
+        P0 = dict(m.DEFAULTS); P0.update(P)
+        Ec = m.band(P0, 5 * NM)[1]
+        P["Phi_CNL"] = Ec + smp["cnl_off"]
+        steps = [{"V": 0.05, "save": False}, {"VG": -3.0}]
+        for kind in GEOMS:
+            T.append(_spec("uq_kane", kind, PT, _tensor(dict(P, S_top=smp["S"], S_edge=smp["S"]), smp["m_in"]),
+                           dict(smp, variant="shared"), steps))
+        T.append(_spec("uq_kane", "edge", PT, _tensor(dict(P, S_top=smp["S"], S_edge=smp["S_edge_indep"]), smp["m_in"]),
+                       dict(smp, variant="indep_edge"), steps))
+        T.append(_spec("uq_kane", "edge", PT, _tensor(dict(P, S_top=smp["S"], S_edge=smp["S"], Phi_CNL=Ec + smp["cnl_edge"]),
+                                                      smp["m_in"]), dict(smp, variant="indep_cnl"), steps))
+    return T
+
+
 STUDIES = {"uq_gated": tasks_uq_gated, "thermal_lit": tasks_thermal_lit, "mesh_convergence": tasks_mesh_convergence,
            "thickness_lit": tasks_thickness_lit, "inse_electron": tasks_inse_electron,
            "chen2019": tasks_chen2019, "chen2019_300K": tasks_chen2019_300K,
@@ -449,4 +558,6 @@ STUDIES = {"uq_gated": tasks_uq_gated, "thermal_lit": tasks_thermal_lit, "mesh_c
            "mesh_ungated": tasks_mesh_ungated,
            "top_retry": tasks_top_retry, "mh_sweep": tasks_mh_sweep, "oblique": tasks_oblique,
            "uq_cnl": tasks_uq_cnl, "thermo_const": tasks_thermo_const, "heat_step": tasks_heat_step,
-           "mh_dir_map": tasks_mh_dir_map, "uq_dir": tasks_uq_dir, "thickness_dir": tasks_thickness_dir}
+           "mh_dir_map": tasks_mh_dir_map, "uq_dir": tasks_uq_dir, "thickness_dir": tasks_thickness_dir,
+           "mass_controls": tasks_mass_controls, "edge_T": tasks_edge_T, "kane_map": tasks_kane_map,
+           "thickness_kane": tasks_thickness_kane, "uq_kane": tasks_uq_kane}

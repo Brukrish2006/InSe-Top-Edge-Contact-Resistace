@@ -262,3 +262,43 @@ if td is not None:
     if "top50" in pv and "edge" in pv:
         pv["top/edge"] = pv["top50"] / pv["edge"]
     print(pv.to_string(float_format=lambda x: f"{x:.4g}"))
+
+
+def _ratio_table(df, idx, title):
+    print(title)
+    if df is None:
+        return
+    if "failed" in df:
+        print("failed runs:", int(df["failed"].fillna(0).sum()), "of", len(df))
+        df = df[df["failed"].fillna(0) == 0]
+    pv = df.pivot_table(index=idx, columns="geom", values="R_tot")
+    if "top50" in pv and "edge" in pv:
+        pv["top/edge"] = pv["top50"] / pv["edge"]
+    print(pv.to_string(float_format=lambda x: f"{x:.4g}"))
+
+
+_ratio_table(rd("mass_controls"), ["case", "variant"], "\n=== mass_controls (Kane, m=0.9): iso vs swapped anisotropy")
+et = rd("edge_T")
+if et is not None:
+    print("\n=== edge_T: edge R_tot vs interface transmission (Kane, tensor 0.9)")
+    if "failed" in et:
+        print("failed runs:", int(et["failed"].fillna(0).sum()), "of", len(et)); et = et[et["failed"].fillna(0) == 0]
+    print(et.pivot_table(index="T_edge", columns="case", values="R_tot").to_string(float_format=lambda x: f"{x:.4g}"))
+_ratio_table(rd("kane_map"), ["case", "variant", "m_par"], "\n=== kane_map: mass tensor, parabolic vs Kane vs Kane+oblique")
+_ratio_table(rd("thickness_kane"), ["case", "layers"], "\n=== thickness_kane: Kane, tensor 0.9")
+uk = rd("uq_kane")
+if uk is not None:
+    print("\n=== uq_kane: Monte Carlo with mass tensor and Kane dispersion")
+    if "failed" in uk:
+        print("failed runs:", int(uk["failed"].fillna(0).sum()), "of", len(uk)); uk = uk[uk["failed"].fillna(0) == 0]
+    sh = uk[uk.variant == "shared"].pivot_table(index="sample", columns="geom", values="R_tot").dropna()
+    r = sh["edge"] / sh["top50"]
+    print(f"shared: n={len(r)} edge<top {100 * (r < 1).mean():.1f}%  median edge/top={r.median():.3g}  5-95%: {r.quantile(0.05):.3g}-{r.quantile(0.95):.3g}")
+    for var in ("indep_edge", "indep_cnl"):
+        e = uk[uk.variant == var].set_index("sample").R_tot
+        j = e.index.intersection(sh.index)
+        print(f"{var}: n={len(j)} edge<top {100 * (e[j] / sh.loc[j, 'top50'] < 1).mean():.1f}%")
+    mi = uk[uk.variant == "shared"].groupby("sample").m_in.first().reindex(r.index)
+    for lo, hi in ((0.3, 0.5), (0.5, 0.8), (0.8, 1.5)):
+        sel = (mi >= lo) & (mi < hi)
+        print(f"  m_par {lo}-{hi}: n={int(sel.sum())} edge<top {100 * (r[sel] < 1).mean():.1f}%  median edge/top={r[sel].median():.3g}")

@@ -79,6 +79,9 @@ DEFAULTS = dict(
     obl_angles=(0.0, 15.0, 30.0, 45.0, 60.0, 75.0),
     obl_zone=15e-7,          # top contacts: oblique candidates only for nodes within this distance of the inner edge
     pelt_const=2.0,          # kinetic-energy constant in the contact Peltier term (2: thermionic; 1.5: SG flux)
+    tun_disp="parabolic",    # imaginary dispersion in the gap: "parabolic" or "kane" (two-band)
+    mh_tun_c=None, mh_tun_par=None,  # anisotropic hole tunnelling mass (c axis = y, in-plane = x); overrides mh_tun
+    T_edge=1.0,              # interface transmission of edge contacts
 )
 
 
@@ -206,7 +209,7 @@ class Device:
         self.phiBn = self.Eg - self.phiBp
         self.contact_bc = dict(zip(("source", "drain"), contact_bc))
         self.v_override = v_override
-        self.T_vdW = wkb_vdw(P) if kind == "top" else 1.0
+        self.T_vdW = wkb_vdw(P) if kind == "top" else P.get("T_edge", 1.0)
         self.thermal = P["thermal"] and kind != "1d"
         self.noniso = P["nonisothermal"] and self.thermal
         self.bias = 0.0
@@ -634,6 +637,13 @@ class Device:
         Ev = -psi[path] + self.Cv
         B = -Ev if carrier == "p" else Ev + self.Eg
         m = P["mh_tun"] if carrier == "p" else P["me_tun"]
+        if carrier == "p" and P.get("mh_tun_c") and P.get("mh_tun_par") and len(path) > 1:
+            dx = self.x[path[-1]] - self.x[path[0]]; dy = self.y[path[-1]] - self.y[path[0]]
+            nrm = math.hypot(dx, dy)
+            if nrm > 0:
+                cx, cy = dx / nrm, dy / nrm
+                m = 1.0 / (cy * cy / P["mh_tun_c"] + cx * cx / P["mh_tun_par"])
+        kane = P.get("tun_disp", "parabolic") == "kane"
         out = []
         if len(path) < 3:
             return path, out, B
@@ -646,6 +656,8 @@ class Device:
             for w, f in ((0.5, 0.211324865), (0.5, 0.788675134)):
                 eps = lo + f * (hi - lo)
                 over = np.clip(B[: i + 1] - eps, 0.0, None)
+                if kane:  # two-band (Kane) imaginary dispersion: kappa^2 ~ U (1 - U/Eg)
+                    over = np.clip(over * (1.0 - over / self.Eg), 0.0, None)
                 integ = np.trapezoid(np.sqrt(over), dist[: i + 1])
                 out.append((i, eps, math.exp(-2 * kap0 * integ) * w * (hi - lo)))
         return path, out, B
