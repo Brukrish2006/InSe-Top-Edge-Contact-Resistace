@@ -38,7 +38,7 @@
 
 \section{Verification}
 \label{sec:ver}
-Table~\ref{tab:ver} and Fig.~\ref{fig:ver} summarise nine tests: (V1) an ohmic resistor; (V2) a finite-velocity contact resistor; (V3) Mott--Gurney space-charge-limited current with Boltzmann and Fermi--Dirac statistics \cite{simott}; (V4) thermionic emission at 300 and 350~K; (V5) energy and charge conservation in 2D, gated and ungated (heat out equals $IV$ within 0.3\% except 1.2\% in the hottest gated case, where Thomson heat from temperature gradients is not separately balanced); (V6) nonlocal tunnelling against an independent quadrature on the same band profile (0.17\%), and on a depletion-approximation profile (13\%, the approximation's own error); (V7) a degenerate contact at equilibrium; (V8) transient energy conservation and approach to the DC state; and (V9) Gauss's law with a gate. $R_{\rm tot}$ changes by less than 1.3\% between 0.5$\times$ and 3$\times$ mesh density in the ungated device (\texttt{data\_v3/mesh\_ungated.csv}), and by at most 1.5\% (with $\Delta T_{\max}$ changing by at most 0.6~K) at the operating points of Table~\ref{M-tab:therm} between 1$\times$ and 3$\times$. Convergence is slower in the tunnelling-dominated on state at the measured pinning: between 1$\times$ and 3$\times$ the edge-contact resistance changes non-monotonically by up to 12\% and the top-contact resistance by up to 5\% (Fig.~\ref{fig:electron}c). On-state resistances and top/edge ratios there carry a mesh uncertainty of about 15\%.
+Table~\ref{tab:ver} and Fig.~\ref{fig:ver} summarise nine tests: (V1) an ohmic resistor; (V2) a finite-velocity contact resistor; (V3) Mott--Gurney space-charge-limited current with Boltzmann and Fermi--Dirac statistics \cite{simott}; (V4) thermionic emission at 300 and 350~K; (V5) energy and charge conservation in 2D, gated and ungated (heat out equals $IV$ within 0.3\% except 1.2\% in the hottest gated case, where Thomson heat from temperature gradients is not separately balanced); (V6) nonlocal tunnelling against an independent quadrature on the same band profile (0.17\%), and on a depletion-approximation profile (13\%, the approximation's own error); (V7) a degenerate contact at equilibrium; (V8) transient energy conservation and approach to the DC state; and (V9) Gauss's law with a gate. $R_{\rm tot}$ changes by less than 1.3\% between 0.5$\times$ and 3$\times$ mesh density in the ungated device (\texttt{data\_v3/mesh\_ungated.csv}), and by at most 1.5\% (with $\Delta T_{\max}$ changing by at most 0.6~K) at the operating points of Table~\ref{tab:therm} between 1$\times$ and 3$\times$. Convergence is slower in the tunnelling-dominated on state at the measured pinning: between 1$\times$ and 3$\times$ the edge-contact resistance changes non-monotonically by up to 12\% and the top-contact resistance by up to 5\% (Fig.~\ref{fig:electron}c). On-state resistances and top/edge ratios there carry a mesh uncertainty of about 15\%.
 
 \begin{table}[!htbp]
 \centering
@@ -95,13 +95,25 @@ As a consistency check against the measured electron barriers, we applied the mo
 
 \begin{figure}[!htbp]
 \centering\includegraphics[width=0.96\textwidth]{fig15_electron_mesh.pdf}
-\caption{(a) Arrhenius plots of electron injection at $V_G=0$ with the measured direct pinning ($S=0.05$, input barrier 0.30~eV) for In, Ti and Pd; filled: edge, open: top. (b) Arrhenius barrier versus $V_G$. (c) Change of $R_{\rm tot}$ with mesh factor for the operating point of Table~\ref{M-tab:therm} and for the gated on state at the measured pinning (Pt, $V_G=-3$~V).}
+\caption{(a) Arrhenius plots of electron injection at $V_G=0$ with the measured direct pinning ($S=0.05$, input barrier 0.30~eV) for In, Ti and Pd; filled: edge, open: top. (b) Arrhenius barrier versus $V_G$. (c) Change of $R_{\rm tot}$ with mesh factor for the operating point of Table~\ref{tab:therm} and for the gated on state at the measured pinning (Pt, $V_G=-3$~V).}
 \label{fig:electron}
+\end{figure}
+
+\section{Comparison with the barrier extraction of Chen \textit{et al.}}
+\label{sec:chen}
+We repeated the barrier extraction of Ref.~\cite{sichen} as closely as its description allows: top contacts on 15-nm n-type InSe with a 300-nm SiO$_2$ back gate, In, Ti, Cr and Pd contacts, Arrhenius barriers from 300 to 400~K, which is the range in which Ref.~\cite{sichen} found the extraction applicable, and the reported pinning of the control ($S=0.05$, $\Phi_{\rm CNL}=4.9$~eV) and oxidized-monolayer ($S=0.5$, $\Phi_{\rm CNL}=5.2$~eV) contacts (Fig.~\ref{fig:chen}). The experimental devices sat on hBN, which the simulation does not include. Our Arrhenius fits use $\ln(I/T^2)$, whereas Ref.~\cite{sichen} used $I/T^{3/2}$; over 300--400~K the difference shifts extracted barriers by about 15~meV. Because the pinning parameters are inputs, this comparison tests the numerics and the extraction chain, not the InSe physics. The apparent pinning factors recover the inputs: 0.05 for the control and 0.53 (0.58 including In) for the oxide interlayer, against the reported 0.05 and 0.5. The Pd contact with the interlayer gives 0.54~eV, against about 0.57~eV in Ref.~\cite{sichen}. The In contact with the interlayer gives an Arrhenius slope of $-0.06$~eV, below the reported 65~meV; here the channel, not the contact, sets the slope.
+
+The on-currents of Ref.~\cite{sichen}, 103~$\mu$A/$\mu$m for the interlayer device and a threefold to sixfold gain over the control, were measured at 2~K, where a drift-diffusion model with thermionic emission does not apply, so we do not compare them with the simulation. At 300~K Ref.~\cite{sichen} reports a two-terminal field-effect mobility of 940~cm$^2$/Vs for the interlayer device. That value includes the contacts and the channel length is not reported, so it does not fix the intrinsic mobility either. No InSe contact measurement therefore serves as a calibrated benchmark of contact resistance, and the absolute resistances in this paper are predictions conditional on the inputs of Table~\ref{M-tab:params}.
+
+\begin{figure}[!htbp]
+\centering\includegraphics[width=0.62\textwidth]{fig16_chen2019.pdf}
+\caption{Arrhenius barrier at flat band ($V_G=0$, 300--400~K) for the control ($S=0.05$) and oxide-interlayer ($S=0.5$) contacts on 15-nm n-InSe, following the protocol of Ref.~\cite{sichen}. Dashed lines are fits to the apparent pinning factor; the interlayer fit excludes In, whose slope is set by the channel. Values reported in Ref.~\cite{sichen} for the interlayer contacts are marked.}
+\label{fig:chen}
 \end{figure}
 
 \section{Thickness and self-heating at the measured alignment}
 \label{sec:thickalign}
-Figure~\ref{fig:measuredalign} repeats the thickness and thermal analyses at the literature alignment. With Pt contacts ($V_G=-3$~V) edge contacts improve monotonically from 3 to 12 layers (oxide interlayer: 25$\to$4.5~\ohmcm), and top contacts have an optimum at five layers (interlayer, 207~\ohmcm) or six layers (direct pinning). At the reference alignment, changing the valence-band share of the confinement shift to 0.2 or 0.5 moves the top-contact optimum between four and five layers (Fig.~\ref{fig:measuredalign}c). Panel (a) gives the temperature rises at the measured alignment quoted in Sec.~\ref{M-sec:heat}.
+Figure~\ref{fig:measuredalign} repeats the thickness and thermal analyses at the literature alignment. With Pt contacts ($V_G=-3$~V) edge contacts improve monotonically from 3 to 12 layers (oxide interlayer: 25$\to$4.5~\ohmcm), and top contacts have an optimum at five layers (interlayer, 207~\ohmcm) or six layers (direct pinning). At the reference alignment, changing the valence-band share of the confinement shift to 0.2 or 0.5 moves the top-contact optimum between four and five layers (Fig.~\ref{fig:measuredalign}c). Panel (a) gives the temperature rises at the measured alignment quoted in Sec.~\ref{sec:heat}.
 
 \begin{figure}[!htbp]
 \centering\includegraphics[width=0.96\textwidth]{fig14_measured_alignment.pdf}
@@ -109,13 +121,43 @@ Figure~\ref{fig:measuredalign} repeats the thickness and thermal analyses at the
 \label{fig:measuredalign}
 \end{figure}
 
+\section{Self-heating}
+\label{sec:heat}
+Table~\ref{tab:therm} compares the geometries at the same gated operating point ($\Phi_M=5.0$~eV, $V_G=-2$~V, reference alignment). At $V_D=1$~V the edge-contacted device carries 3.7~A/cm and heats by 150~K; the 50-nm top contact carries 1.16~A/cm and heats by 24~K. Per unit power the edge device is also about twice as hot (41 vs 21~K\,cm/W), because its footprint on the oxide is a third of that of the top-contacted film. In the on state at $V_G=-3$~V (Fig.~\ref{fig:thermal}a) the edge device reaches about 490~K at 1~V, so its usable bias is thermally limited, not contact-limited. In the top-contacted device the hottest point lies at the drain-side channel end, and the edge-contacted film is hot throughout and coolest at the oxide interface (Supplementary Section~\ref{sec:heatterms}). Temperatures are quoted to $\pm3$~K, the residual of the energy balance in the hottest case.
+
+At the measured alignment (Pt, $V_G=-3$~V, $V_D=1$~V) self-heating depends on the pinning. Directly pinned contacts carry so little current that the edge device heats by only 0.2~K. With the oxide interlayer or the calculated ideal pinning ($\phi_{Bp}\approx0.52$~eV) the edge device heats by 24~K and the top-contacted one by 0.2~K, and an unpinned Pt contact ($\phi_{Bp}=0.25$~eV) heats the edge device by 128~K (top: 4.4~K). Self-heating is therefore a concern only once the contacts are depinned.
+
+The individual heat terms change $\Delta T_{\max}$ by 7--42\% (Fig.~\ref{fig:thermal}b): bulk Joule heat alone underestimates it by 7--8\%, the measured out-of-plane conductivity raises it by 8\% (edge) and 17\% (top), and heat sinking through the metal lowers it by 23\% (edge) and 42\% (top). Peltier heat changes $\Delta T_{\max}$ by about 1~K. The contact Peltier coefficient uses the thermionic kinetic-energy constant of 2 (in units of $kT$), whereas the Scharfetter--Gummel flux implies 3/2. With 3/2 the edge rise at 1~V falls from 150 to 147~K and the top rise is unchanged, and the energy-balance residual moves from $+1.2$ to $+1.9$\% to between $-0.3$ and $+0.5$\% (edge) and from $+0.2$--0.5\% to between $-2.1$ and $-0.8$\% (top); temperatures are therefore quoted to $\pm3$~K. When the heat sources are switched on at fixed bias with tunnelling included, the peak temperature reaches 63\% of its final rise after 0.19~ns (edge) and 0.22~ns (top), against 0.25 and 0.21~ns without tunnelling, and 0.20--0.22~ns for unpinned Pt contacts at the measured alignment (Supplementary Section~\ref{sec:heatterms}). DC temperatures therefore apply to pulses longer than about a nanosecond. Two assumptions bound these numbers in opposite directions. Adiabatic metal contacts make them upper bounds. The model has no thermal boundary resistance at the InSe/SiO$_2$ interface, however, and the value measured for MoS$_2$/SiO$_2$, about $7\times10^{-8}$~m$^2$K/W \cite{siyalon}, is seven times the boundary resistance placed at the gate; a three times larger gate-side resistance already raises the rises by 58--73\%. The temperatures of edge-contacted, depinned devices are therefore likely underestimated, which strengthens the conclusion that they need heat removal.
+
+\begin{table}[!htbp]
+\centering
+\caption{Gated operating points ($\Phi_M=5.0$~eV, $V_G=-2$~V, reference alignment, baseline thermal model). All quantities in a row refer to the same bias.}
+\label{tab:therm}\small
+\begin{tabular}{lcccccc}
+\toprule
+Geometry & $V_D$ (V) & $I_D$ (A/cm) & $IV$ (W/cm) & $\Delta T_{\max}$ (K) & $\Delta T_{\rm source}$ (K) & $\Delta T_{\rm drain}$ (K) \\
+\midrule
+Top, 50 nm & 0.5 & 0.618 & 0.309 & 5.9 & 3.5 & 5.6 \\
+Top, 50 nm & 1.0 & 1.164 & 1.164 & 24.0 & 11.9 & 21.6 \\
+Edge & 0.5 & 2.228 & 1.114 & 47.0 & 40.8 & 46.2 \\
+Edge & 1.0 & 3.693 & 3.693 & 149.9 & 144.4 & 144.6 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[!htbp]
+\centering\includegraphics[width=0.96\textwidth]{fig7_thermal.pdf}
+\caption{(a) Peak temperature rise versus dissipated power, gated on state. (b) Effect of each heat-model term at $V_D=1$~V, $V_G=-2$~V, $\Phi_M=5.0$~eV. (c) Response to a 0$\to$1~V drain step at $V_G=-2$~V, simulated without tunnelling (steady-state rises of 48~K and 2~K); only the time constant is used in the text.}
+\label{fig:thermal}
+\end{figure}
+
 \section{Heat distribution and heat-model terms}
 \label{sec:heatterms}
-The two-dimensional maps in Fig.~\ref{fig:maps} show where the heat sits: in the top-contacted device the hottest point lies at the drain-side channel end on the contact side of the film, and the whole film stays within 24~K of ambient; in the edge-contacted device the film is 126--150~K hot everywhere and is coolest at the oxide interface, through which heat leaves to the substrate. At the operating points of Table~\ref{M-tab:therm} the heat leaving the device equals $IV$ within 0.5\% (top) and 1.2--1.9\% (edge, 0.5 and 1~V). For the 150~K edge rise this is about 3~K, larger than the Peltier effect, so temperatures are quoted to $\pm3$~K.
+The two-dimensional maps in Fig.~\ref{fig:maps} show where the heat sits: in the top-contacted device the hottest point lies at the drain-side channel end on the contact side of the film, and the whole film stays within 24~K of ambient; in the edge-contacted device the film is 126--150~K hot everywhere and is coolest at the oxide interface, through which heat leaves to the substrate. At the operating points of Table~\ref{tab:therm} the heat leaving the device equals $IV$ within 0.5\% (top) and 1.2--1.9\% (edge, 0.5 and 1~V). For the 150~K edge rise this is about 3~K, larger than the Peltier effect, so temperatures are quoted to $\pm3$~K.
 
-The individual heat terms (Fig.~\ref{M-fig:thermal}b) change $\Delta T_{\max}$ as follows. Using bulk Joule heat only underestimates $\Delta T_{\max}$ by 7--8\% and misses 8--15\% of the dissipated power. The measured out-of-plane conductivity, compared with isotropic $\kappa$, raises $\Delta T_{\max}$ by 8\% (edge) and 17\% (top). Heat sinking through the metal contacts lowers it by 23\% (edge) and 42\% (top). A ten times smaller thermal boundary resistance at the gate lowers it by 35--37\%, and a three times larger one raises it by 58--73\%. Peltier heat cools the hole-injecting contact and heats the collecting one (top, 1~V: source $+11.9$~K, drain $+21.6$~K with Peltier, against $+13.5$ and $+20.9$~K without). Temperature-dependent statistics change temperatures by less than 1\%. After a drain step simulated without tunnelling (Fig.~\ref{M-fig:thermal}c), 63\% of the final rise is reached at 0.20~ns (top) and 0.25~ns (edge). To include tunnelling, we also found the electrical state at fixed bias with all heat sources off and then switched them on at $t=0$, integrating the heat equation with the tunnelling sources frozen at their initial values (\texttt{data\_v3/heat\_step.csv}). At the operating point of Table~\ref{M-tab:therm} (1~V) the final rises are 156~K (edge) and 24~K (top), and 63\% is reached at 0.19 and 0.22~ns; without tunnelling the same protocol gives 0.25 and 0.21~ns. For unpinned Pt contacts at the measured alignment ($V_G=-3$~V, 1~V) the edge device heats by 149~K with 0.20~ns, and the top device by 4.4~K with 0.22~ns. The time constant is therefore set by the heat path, not by the injection mechanism.
+The individual heat terms (Fig.~\ref{fig:thermal}b) change $\Delta T_{\max}$ as follows. Using bulk Joule heat only underestimates $\Delta T_{\max}$ by 7--8\% and misses 8--15\% of the dissipated power. The measured out-of-plane conductivity, compared with isotropic $\kappa$, raises $\Delta T_{\max}$ by 8\% (edge) and 17\% (top). Heat sinking through the metal contacts lowers it by 23\% (edge) and 42\% (top). A ten times smaller thermal boundary resistance at the gate lowers it by 35--37\%, and a three times larger one raises it by 58--73\%. Peltier heat cools the hole-injecting contact and heats the collecting one (top, 1~V: source $+11.9$~K, drain $+21.6$~K with Peltier, against $+13.5$ and $+20.9$~K without). Temperature-dependent statistics change temperatures by less than 1\%. After a drain step simulated without tunnelling (Fig.~\ref{fig:thermal}c), 63\% of the final rise is reached at 0.20~ns (top) and 0.25~ns (edge). To include tunnelling, we also found the electrical state at fixed bias with all heat sources off and then switched them on at $t=0$, integrating the heat equation with the tunnelling sources frozen at their initial values (\texttt{data\_v3/heat\_step.csv}). At the operating point of Table~\ref{tab:therm} (1~V) the final rises are 156~K (edge) and 24~K (top), and 63\% is reached at 0.19 and 0.22~ns; without tunnelling the same protocol gives 0.25 and 0.21~ns. For unpinned Pt contacts at the measured alignment ($V_G=-3$~V, 1~V) the edge device heats by 149~K with 0.20~ns, and the top device by 4.4~K with 0.22~ns. The time constant is therefore set by the heat path, not by the injection mechanism.
 
-The contact Peltier term uses $J_sT(k/q)(c-\eta_s)$ with the thermionic constant $c=2$. The Scharfetter--Gummel flux with a mobility independent of carrier energy implies $c=3/2$, so the two are consistent only to within $kT/2$ per carrier. Rerunning the operating points of Table~\ref{M-tab:therm} with $c=3/2$ (\texttt{data\_v3/thermo\_const.csv}) changes $\Delta T_{\max}$ by $-3.3$~K (edge, 1~V), $-0.1$~K (edge, 0.5~V) and less than 0.1~K (top). The energy-balance residual becomes $-0.3$\% and $+0.5$\% for the edge device (from $+1.2$\% and $+1.9$\%) and $-2.1$\% and $-0.8$\% for the top device (from $+0.2$\% and $+0.5$\%).
+The contact Peltier term uses $J_sT(k/q)(c-\eta_s)$ with the thermionic constant $c=2$. The Scharfetter--Gummel flux with a mobility independent of carrier energy implies $c=3/2$, so the two are consistent only to within $kT/2$ per carrier. Rerunning the operating points of Table~\ref{tab:therm} with $c=3/2$ (\texttt{data\_v3/thermo\_const.csv}) changes $\Delta T_{\max}$ by $-3.3$~K (edge, 1~V), $-0.1$~K (edge, 0.5~V) and less than 0.1~K (top). The energy-balance residual becomes $-0.3$\% and $+0.5$\% for the edge device (from $+1.2$\% and $+1.9$\%) and $-2.1$\% and $-0.8$\% for the top device (from $+0.2$\% and $+0.5$\%).
 
 \begin{figure}[!htbp]
 \centering\includegraphics[width=0.96\textwidth]{fig11_field_maps.pdf}
@@ -167,32 +209,50 @@ Pt, direct & 5200 & $8.84\times10^5$ & 170 & 4150 & $3.72\times10^5$ & 89.6 \\
 
 \section{Hole mass}
 \label{sec:mass}
-Table~\ref{tab:mass} gives the on-state resistances for Pt contacts with heavier hole masses (\texttt{data\_v3/mh\_sweep.csv}, \texttt{data\_v3/mh\_dir\_map.csv}). With the same mass for both geometries, a heavier mass widens the edge advantage. With direction-dependent masses (top: 0.17~$m_0$ for tunnelling; edge: $m_\parallel$ for tunnelling; density of states $m_\parallel$ for both) top contacts win at high barriers. Changing only the tunnelling mass, with the density-of-states mass kept at 0.17~$m_0$, gives top/edge ratios within a factor of 1.6 of those obtained by changing both, so the tunnelling mass is the main effect. Three directly pinned top-contact runs with isotropic masses of 1--2~$m_0$ did not converge.
+\texttt{data\_v3/mh\_sweep.csv} varies an isotropic hole mass with parabolic dispersion. With the same mass for both geometries a heavier mass widens the edge advantage: for direct Pt the top/edge ratio is 170 (0.17~$m_0$), 667 (0.5~$m_0$) and 1790 (1.0~$m_0$); with the interlayer 46 and 752 (0.17 and 1.0~$m_0$); unpinned 19 and 98. Changing only the tunnelling mass, with the density-of-states mass kept at 0.17~$m_0$, gives ratios within a factor of 1.6 of those obtained by changing both. Three directly pinned top-contact runs with isotropic masses of 1--2~$m_0$ did not converge.
+
+The anisotropic mass (\texttt{data\_v3/kane\_map.csv}) uses $m_c=0.17~m_0$ and $m_\parallel=0.3$--1.2~$m_0$, with the tunnelling mass along each path from the inverse-mass tensor and the density-of-states mass $(m_\parallel^2m_c)^{1/3}$. Table~\ref{tab:mass} summarises the three model variants. All 180 runs converged.
 
 \begin{table}[!htbp]
 \centering
-\caption{On-state $R_{\rm tot}$ (\ohmcm) of Pt contacts ($V_G=-3$~V, $V_D=0.05$~V) for isotropic and direction-dependent hole masses. --: not converged.}
+\caption{Crossover in-plane mass ($m_0$; --: none up to 1.2~$m_0$) and top/edge on-state ratio at $m_\parallel=0.9~m_0$ ($V_G=-3$~V, $V_D=0.05$~V). P: parabolic dispersion, normal paths; K: two-band dispersion, normal paths; KO: two-band dispersion, most favourable straight path.}
 \label{tab:mass}\small
-\begin{tabular}{llrrr}
+\begin{tabular}{lrrrrrrr}
 \toprule
-Pinning & Masses & Edge & Top & Top/edge \\
+ & & \multicolumn{3}{c}{Crossover $m_\parallel$} & \multicolumn{3}{c}{Top/edge at 0.9~$m_0$} \\
+Case & $\phi_{Bp}$ (eV) & P & K & KO & P & K & KO \\
 \midrule
-Direct & 0.17 isotropic & 5200 & $8.84\times10^5$ & 170 \\
- & 0.5 isotropic & $2.99\times10^6$ & $2.00\times10^9$ & 667 \\
- & 1.0 isotropic & $2.35\times10^8$ & $4.20\times10^{11}$ & 1790 \\
- & $m_\parallel=0.5$, dir. & $2.99\times10^6$ & $7.73\times10^5$ & 0.26 \\
- & $m_\parallel=0.9$, dir. & $1.25\times10^8$ & $6.95\times10^5$ & 0.0056 \\
-Interlayer & 0.17 isotropic & 7.20 & 330 & 45.9 \\
- & 1.0 isotropic & 560 & $4.21\times10^5$ & 752 \\
- & $m_\parallel=0.5$, dir. & 84.9 & 304 & 3.58 \\
- & $m_\parallel=0.9$, dir. & 420 & 288 & 0.69 \\
-Unpinned & 0.17 isotropic & 0.504 & 9.52 & 18.9 \\
- & 1.0 isotropic & 1.79 & 176 & 98.1 \\
- & $m_\parallel=0.5$, dir. & 1.01 & 9.46 & 9.39 \\
- & $m_\parallel=0.9$, dir. & 1.64 & 8.95 & 5.47 \\
+fixed barrier & 0.20 & -- & -- & -- & 5.5 & 5.1 & 11.5 \\
+Pt, unpinned & 0.25 & -- & -- & -- & 4.7 & 4.2 & 12.5 \\
+Pt, interlayer & 0.52 & 0.77 & 0.67 & -- & 0.62 & 0.41 & 2.1 \\
+fixed barrier & 0.60 & 0.63 & 0.54 & 0.86 & 0.27 & 0.16 & 0.90 \\
+fixed barrier & 1.00 & 0.43 & 0.41 & 0.44 & 0.0078 & 0.0052 & 0.051 \\
+Pt, direct & 1.05 & 0.42 & 0.40 & 0.42 & 0.0053 & 0.0039 & 0.036 \\
 \bottomrule
 \end{tabular}
 \end{table}
+
+Two controls (\texttt{data\_v3/mass\_controls.csv}; two-band dispersion, normal paths, density-of-states mass fixed at $(0.9^2\cdot0.17)^{1/3}~m_0$) separate the mass anisotropy from the direction of the gate field (Table~\ref{tab:controls}). With 0.9~$m_0$ in every direction, edge contacts win at every barrier, so the gate-field geometry alone does not favour top contacts. With the anisotropy swapped, the edge advantage becomes enormous.
+
+\begin{table}[!htbp]
+\centering
+\caption{Top/edge on-state ratio for the mass controls ($V_G=-3$~V, $V_D=0.05$~V). Isotropic: 0.9~$m_0$ in every direction; swapped: 0.9~$m_0$ along $c$ and 0.17~$m_0$ in-plane; anisotropic: 0.17~$m_0$ along $c$ and 0.9~$m_0$ in-plane (variant K of Table~\ref{tab:mass}).}
+\label{tab:controls}\small
+\begin{tabular}{lrrrr}
+\toprule
+Case & $\phi_{Bp}$ (eV) & isotropic & swapped & anisotropic \\
+\midrule
+fixed barrier & 0.20 & 58 & 178 & 5.1 \\
+Pt, unpinned & 0.25 & 107 & 532 & 4.2 \\
+Pt, interlayer & 0.52 & 708 & $5.2\times10^4$ & 0.41 \\
+fixed barrier & 0.60 & 854 & $1.4\times10^5$ & 0.16 \\
+fixed barrier & 1.00 & 585 & $6.3\times10^6$ & 0.0052 \\
+Pt, direct & 1.05 & 518 & $9.4\times10^6$ & 0.0039 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\texttt{data\_v3/edge\_T.csv} lowers the interface transmission of edge contacts (two-band dispersion, $m_\parallel=0.9~m_0$, normal paths). The edge-contact resistance scales almost exactly as $1/\mathcal{T}_{\rm edge}$: at 0.2~eV it is 2.29, 6.59, 21.7 and 64.7~\ohmcm\ for $\mathcal{T}_{\rm edge}=0.3$, 0.1, 0.03 and 0.01, against 0.78~\ohmcm\ for a perfect interface and 3.97~\ohmcm\ for the top contact; for unpinned Pt it is 5.6, 16.5, 54.7 and 164~\ohmcm, against 1.79 (perfect) and 7.60~\ohmcm\ (top). Top contacts therefore win at these low barriers once $\mathcal{T}_{\rm edge}$ falls below 0.17 (0.2~eV) and 0.22 (unpinned Pt).
 
 \section{Gated Monte Carlo analysis with the light isotropic hole mass}
 \label{sec:uqgated}
@@ -204,29 +264,29 @@ With the light isotropic baseline mass we propagated the uncertainty of the leas
 \label{fig:uqgated}
 \end{figure}
 
-The direction-dependent analysis of Sec.~\ref{M-sec:pin} (\texttt{data\_v3/uq\_dir.csv}) uses the same 240 samples, drawn with the same seed, and adds an in-plane mass, log-uniform between 0.3 and 1.5~$m_0$, and an independent edge pinning level, uniform 0.1--0.6~eV below $E_C$.
+The anisotropic analysis of Sec.~\ref{M-sec:pin} (\texttt{data\_v3/uq\_kane.csv}) uses the same 240 samples, drawn with the same seed, with the two-band dispersion and normal paths, and adds an in-plane mass, log-uniform between 0.3 and 1.5~$m_0$, and an independent edge pinning level, uniform 0.1--0.6~eV below $E_C$. An earlier run with parabolic dispersion (\texttt{data\_v3/uq\_dir.csv}) gave 26\% instead of 20\% of samples with lower edge resistance.
 
-\section{Thickness with direction-dependent hole mass}
+\section{Thickness with the anisotropic hole mass}
 \label{sec:thickdir}
-Table~\ref{tab:thickdir} repeats the thickness dependence at the literature alignment with direction-dependent masses ($m_\parallel=0.9~m_0$; \texttt{data\_v3/thickness\_dir.csv}). Three directly pinned runs (3 layers, both geometries; 4 layers, top) did not converge.
+Table~\ref{tab:thickdir} repeats the thickness dependence at the literature alignment with the anisotropic mass ($m_\parallel=0.9~m_0$, two-band dispersion, normal paths; \texttt{data\_v3/thickness\_kane.csv}). The gate was stepped in 0.02-V increments; three directly pinned runs (3 layers, both geometries; 4 layers, top) still did not converge.
 
 \begin{table}[!htbp]
 \centering
-\caption{On-state $R_{\rm tot}$ (\ohmcm) of Pt contacts versus layer number ($V_G=-3$~V, $V_D=0.05$~V, $m_\parallel=0.9~m_0$, top-contact tunnelling mass 0.17~$m_0$). --: not converged.}
+\caption{On-state $R_{\rm tot}$ (\ohmcm) of Pt contacts versus layer number ($V_G=-3$~V, $V_D=0.05$~V, $m_\parallel=0.9~m_0$, $m_c=0.17~m_0$, two-band dispersion, normal paths). --: not converged.}
 \label{tab:thickdir}\small
 \begin{tabular}{lrrrr}
 \toprule
 Pinning & Layers & Edge & Top & Top/edge \\
 \midrule
-Interlayer & 3 & $1.25\times10^4$ & $1.33\times10^4$ & 1.07 \\
- & 4 & 1990 & 189 & 0.095 \\
- & 6 & 424 & 281 & 0.66 \\
- & 8 & 219 & 1960 & 9.0 \\
- & 12 & 130 & $3.04\times10^4$ & 235 \\
-Direct & 4 & $7.42\times10^8$ & -- & -- \\
- & 6 & $1.27\times10^8$ & $7.02\times10^5$ & 0.0055 \\
- & 8 & $5.92\times10^7$ & $1.80\times10^6$ & 0.031 \\
- & 12 & $3.26\times10^7$ & $6.47\times10^8$ & 19.9 \\
+Interlayer & 3 & 5490 & 9850 & 1.8 \\
+ & 4 & 1130 & 126 & 0.11 \\
+ & 6 & 292 & 116 & 0.40 \\
+ & 8 & 163 & 746 & 4.6 \\
+ & 12 & 101 & $1.88\times10^4$ & 186 \\
+Direct & 4 & $3.99\times10^7$ & -- & -- \\
+ & 6 & $1.28\times10^7$ & $5.13\times10^4$ & 0.0040 \\
+ & 8 & $7.90\times10^6$ & $3.08\times10^4$ & 0.0039 \\
+ & 12 & $5.35\times10^6$ & $5.92\times10^6$ & 1.1 \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -237,5 +297,6 @@ Direct & 4 & $7.42\times10^8$ & -- & -- \\
 \bibitem{simott} N.F.~Mott and R.W.~Gurney, \textit{Electronic Processes in Ionic Crystals}, 2nd ed., Oxford (1940).
 \bibitem{sienglish} C.D.~English, G.~Shine, V.E.~Dorgan, K.C.~Saraswat and E.~Pop, \textit{Improved contacts to MoS$_2$ transistors by ultra-high vacuum metal deposition}, Nano Lett.\ \textbf{16}, 3824 (2016), \doi{10.1021/acs.nanolett.6b01309}.
 \bibitem{sichen} Y.-H.~Chen \textit{et al.}, \textit{Oxidized-monolayer tunneling barrier for strong Fermi-level depinning in layered InSe transistors}, npj 2D Mater.\ Appl.\ \textbf{3}, 49 (2019), \doi{10.1038/s41699-019-0133-3}.
+\bibitem{siyalon} E.~Yalon \textit{et al.}, \textit{Energy dissipation in monolayer MoS$_2$ electronics}, Nano Lett.\ \textbf{17}, 3429 (2017), \doi{10.1021/acs.nanolett.7b00252}.
 \end{thebibliography}
 \end{document}
