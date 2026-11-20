@@ -302,3 +302,12 @@ if uk is not None:
     for lo, hi in ((0.3, 0.5), (0.5, 0.8), (0.8, 1.5)):
         sel = (mi >= lo) & (mi < hi)
         print(f"  m_par {lo}-{hi}: n={int(sel.sum())} edge<top {100 * (r[sel] < 1).mean():.1f}%  median edge/top={r[sel].median():.3g}")
+
+_mp = rd("mass_phase")
+if _mp is not None:
+    if "failed" in _mp:
+        print("\n=== mass_phase failed runs:", int(_mp["failed"].fillna(0).sum()), "of", len(_mp)); _mp = _mp[_mp["failed"].fillna(0) == 0]
+    pv = _mp.pivot_table(index=["case", "m_c", "m_par"], columns="geom", values="R_tot")
+    pv["top/edge"] = pv["top50"] / pv["edge"]
+    print("=== mass_phase: top/edge ratio (two-band, best straight path)")
+    print(pv["top/edge"].unstack("m_par").to_string(float_format=lambda x: f"{x:.3g}"))

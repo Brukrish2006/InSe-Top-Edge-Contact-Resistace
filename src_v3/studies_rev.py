@@ -551,6 +551,26 @@ def tasks_uq_kane():
     return T
 
 
+def tasks_mass_phase():
+    """Geometry phase diagram in (m_c, m_par) at four barriers: two-band dispersion, most favourable straight path.
+    m_c spans the GW c-axis value (0.078), the bulk value (0.17) and heavy effective values up to the out-of-plane
+    transport mass reported for thick flakes (2.5)."""
+    Ev = s.lit_Ev()
+    pc = s.pin_cases()
+    cases = [("phiB=0.8", Ev - 0.8, dict(s.LIT))]
+    for case in ("direct (measured)", "interlayer (measured)", "unpinned"):
+        c = pc[case]
+        cases.append((case, PT, dict(s.LIT, S_top=c["S"], S_edge=c["S"], Phi_CNL=c["CNL"])))
+    T = []
+    for case, Phi, P0 in cases:
+        for m_c in (0.078, 0.17, 0.4, 0.9, 2.5):
+            for m_par in (0.3, 0.6, 0.9, 1.9):
+                for kind in GEOMS:
+                    P = _tensor(dict(P0, thermal=False), m_par, m_c=m_c, disp="kane", obl=True)
+                    T.append(_gs("mass_phase", kind, Phi, P, dict(case=case, m_c=m_c, m_par=m_par)))
+    return T
+
+
 STUDIES = {"uq_gated": tasks_uq_gated, "thermal_lit": tasks_thermal_lit, "mesh_convergence": tasks_mesh_convergence,
            "thickness_lit": tasks_thickness_lit, "inse_electron": tasks_inse_electron,
            "chen2019": tasks_chen2019, "chen2019_300K": tasks_chen2019_300K,
@@ -560,4 +580,4 @@ STUDIES = {"uq_gated": tasks_uq_gated, "thermal_lit": tasks_thermal_lit, "mesh_c
            "uq_cnl": tasks_uq_cnl, "thermo_const": tasks_thermo_const, "heat_step": tasks_heat_step,
            "mh_dir_map": tasks_mh_dir_map, "uq_dir": tasks_uq_dir, "thickness_dir": tasks_thickness_dir,
            "mass_controls": tasks_mass_controls, "edge_T": tasks_edge_T, "kane_map": tasks_kane_map,
-           "thickness_kane": tasks_thickness_kane, "uq_kane": tasks_uq_kane}
+           "thickness_kane": tasks_thickness_kane, "uq_kane": tasks_uq_kane, "mass_phase": tasks_mass_phase}
