@@ -571,6 +571,109 @@ def tasks_mass_phase():
     return T
 
 
+def _aniso(P, m_par=0.9, m_c=0.17, obl=True, disp="kane"):
+    return _tensor(P, m_par, m_c=m_c, disp=disp, obl=obl)
+
+
+def tasks_aniso_metals():
+    """Barrier sweep and five metals x four pinning cases in the gated on state with the anisotropic model
+    (m_c 0.17, m_par 0.9, two-band, most favourable straight path)."""
+    Ev = s.lit_Ev()
+    T = []
+    for b in (0.0, 0.2, 0.4, 0.6, 0.8, 1.0):
+        for kind in GEOMS:
+            T.append(_gs("aniso_metals", kind, Ev - b, _aniso(dict(s.LIT, thermal=False)), dict(study="barrier", phiB_set=b)))
+    for case, c in s.pin_cases().items():
+        for metal in ("Ti", "Cr", "Au", "Pd", "Pt"):
+            for kind in GEOMS:
+                P = _aniso(dict(s.LIT, S_top=c["S"], S_edge=c["S"], Phi_CNL=c["CNL"], thermal=False))
+                T.append(_gs("aniso_metals", kind, s.METALS[metal], P, dict(study="metals", case=case, metal=metal, S=c["S"])))
+    return T
+
+
+def tasks_aniso_thermal():
+    """Self-heating with the anisotropic model: reference point (Phi 5.0, V_G=-2 V) and Pt at the literature
+    alignment (V_G=-3 V) for the four pinning cases, V_D = 0.5 and 1 V."""
+    T = []
+    for kind in GEOMS:
+        T.append(_spec("aniso_thermal", kind, 5.0, _aniso({}), dict(case="reference"),
+                       [{"VG": -2.0, "save": False}, {"V": 0.5}, {"V": 1.0}]))
+    for case, c in s.pin_cases().items():
+        for kind in GEOMS:
+            P = _aniso(dict(s.LIT, S_top=c["S"], S_edge=c["S"], Phi_CNL=c["CNL"]))
+            sp = _spec("aniso_thermal", kind, PT, P, dict(case=case, metal="Pt"),
+                       [{"VG": -3.0, "save": False}, {"V": 0.5}, {"V": 1.0}])
+            sp["vg_step"] = 0.1
+            T.append(sp)
+    return T
+
+
+def tasks_thickness_obl():
+    T = []
+    for N in (3, 4, 6, 8, 12):
+        t = N * 0.83 * NM
+        for case in ("direct (measured)", "interlayer (measured)"):
+            c = _cnl_cases(t)[case]
+            for kind in GEOMS:
+                P = _aniso(dict(s.LIT, S_top=c["S"], S_edge=c["S"], Phi_CNL=c["CNL"], thermal=False))
+                T.append(_gs("thickness_obl", kind, PT, P, dict(layers=N, case=case), vg_step=0.02, t=t))
+    return T
+
+
+def tasks_uq_obl():
+    """uq_kane with the most favourable straight paths."""
+    T = []
+    for sp in tasks_uq_kane():
+        sp = dict(sp, out="uq_obl", P=dict(sp["P"], oblique=True))
+        T.append(sp)
+    return T
+
+
+def tasks_mass_phase_fine():
+    Ev = s.lit_Ev()
+    pc = s.pin_cases()
+    cases = [("phiB=0.8", Ev - 0.8, dict(s.LIT))]
+    for case in ("direct (measured)", "interlayer (measured)", "unpinned"):
+        c = pc[case]
+        cases.append((case, PT, dict(s.LIT, S_top=c["S"], S_edge=c["S"], Phi_CNL=c["CNL"])))
+    T = []
+    for case, Phi, P0 in cases:
+        for m_c in (0.078, 0.12, 0.17, 0.25, 0.4, 0.6, 0.9):
+            for m_par in (0.3, 0.45, 0.6, 0.9, 1.3, 1.9):
+                for kind in GEOMS:
+                    P = _tensor(dict(P0, thermal=False), m_par, m_c=m_c, disp="kane", obl=True)
+                    T.append(_gs("mass_phase_fine", kind, Phi, P, dict(case=case, m_c=m_c, m_par=m_par)))
+    return T
+
+
+def tasks_hybrid():
+    """Hybrid (edge + top) contacts with the same models as top and edge contacts."""
+    T = []
+    for case, Phi, P0 in _mass_cases():
+        for (m_c, m_par, var) in ((0.17, 0.9, "aniso"), (0.078, 0.9, "aniso_gw"), (0.17, 0.3, "aniso_light")):
+            P = _tensor(dict(P0, thermal=False), m_par, m_c=m_c, disp="kane", obl=True)
+            T.append(_gs("hybrid", "hybrid", Phi, P, dict(case=case, m_c=m_c, m_par=m_par, variant=var)))
+            if var == "aniso":
+                for kind in GEOMS:  # same-run references (best straight path)
+                    T.append(_gs("hybrid", kind, Phi, P, dict(case=case, m_c=m_c, m_par=m_par, variant=var)))
+        P = dict(P0, thermal=False)
+        for kind in ("hybrid", "top", "edge"):
+            T.append(_gs("hybrid", kind, Phi, P, dict(case=case, variant="isotropic_baseline")))
+    return T
+
+
+def tasks_physics_sens():
+    """Image-force lowering and a two-band dispersion only along c (parabolic in-plane), anisotropic model."""
+    T = []
+    for case, Phi, P0 in _mass_cases():
+        for var, extra in (("image_force", dict(image_force=True)), ("kane_c", dict(tun_disp="kane_c"))):
+            for kind in GEOMS:
+                P = _aniso(dict(P0, thermal=False))
+                P.update(extra)
+                T.append(_gs("physics_sens", kind, Phi, P, dict(case=case, variant=var)))
+    return T
+
+
 STUDIES = {"uq_gated": tasks_uq_gated, "thermal_lit": tasks_thermal_lit, "mesh_convergence": tasks_mesh_convergence,
            "thickness_lit": tasks_thickness_lit, "inse_electron": tasks_inse_electron,
            "chen2019": tasks_chen2019, "chen2019_300K": tasks_chen2019_300K,
@@ -580,4 +683,7 @@ STUDIES = {"uq_gated": tasks_uq_gated, "thermal_lit": tasks_thermal_lit, "mesh_c
            "uq_cnl": tasks_uq_cnl, "thermo_const": tasks_thermo_const, "heat_step": tasks_heat_step,
            "mh_dir_map": tasks_mh_dir_map, "uq_dir": tasks_uq_dir, "thickness_dir": tasks_thickness_dir,
            "mass_controls": tasks_mass_controls, "edge_T": tasks_edge_T, "kane_map": tasks_kane_map,
-           "thickness_kane": tasks_thickness_kane, "uq_kane": tasks_uq_kane, "mass_phase": tasks_mass_phase}
+           "thickness_kane": tasks_thickness_kane, "uq_kane": tasks_uq_kane, "mass_phase": tasks_mass_phase,
+           "aniso_metals": tasks_aniso_metals, "aniso_thermal": tasks_aniso_thermal, "thickness_obl": tasks_thickness_obl,
+           "uq_obl": tasks_uq_obl, "mass_phase_fine": tasks_mass_phase_fine, "hybrid": tasks_hybrid,
+           "physics_sens": tasks_physics_sens}

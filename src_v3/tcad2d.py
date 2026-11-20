@@ -81,7 +81,9 @@ DEFAULTS = dict(
     pelt_const=2.0,          # kinetic-energy constant in the contact Peltier term (2: thermionic; 1.5: SG flux)
     tun_disp="parabolic",    # imaginary dispersion in the gap: "parabolic" or "kane" (two-band)
     mh_tun_c=None, mh_tun_par=None,  # anisotropic hole tunnelling mass (c axis = y, in-plane = x); overrides mh_tun
-    T_edge=1.0,              # interface transmission of edge contacts
+    T_edge=1.0,              # interface transmission of edge contacts (and of the end faces of hybrid contacts)
+    image_force=False,       # image-potential lowering of the tunnelling barrier, -q/(16 pi eps d)
+    img_dmin=0.2e-7,         # cm, cut-off distance of the image potential
 )
 
 
@@ -199,7 +201,7 @@ class Device:
         self.t = t if kind != "1d" else None
         self.Eg, self.chi, self.Nlayers = band(P, self.t)
         self.D = derived(P, self.Eg)
-        S = {"top": P["S_top"], "edge": P["S_edge"], "1d": P["S_1d"]}[kind]
+        S = {"top": P["S_top"], "edge": P["S_edge"], "hybrid": P["S_top"], "1d": P["S_1d"]}[kind]
         Pe = phi_eff(P, Phi_M, S)
         Ev = self.chi + self.Eg
         self.fd = P["statistics"] == "fd"
@@ -209,7 +211,7 @@ class Device:
         self.phiBn = self.Eg - self.phiBp
         self.contact_bc = dict(zip(("source", "drain"), contact_bc))
         self.v_override = v_override
-        self.T_vdW = wkb_vdw(P) if kind == "top" else P.get("T_edge", 1.0)
+        self.T_vdW = wkb_vdw(P) if kind in ("top", "hybrid") else P.get("T_edge", 1.0)
         self.thermal = P["thermal"] and kind != "1d"
         self.noniso = P["nonisothermal"] and self.thermal
         self.bias = 0.0
@@ -218,6 +220,8 @@ class Device:
             self._mesh_top(Lc, Lch, t, mf)
         elif kind == "edge":
             self._mesh_edge(Lch, t, mf)
+        elif kind == "hybrid":
+            self._mesh_hybrid(Lc, Lch, t, mf)
         else:
             self._mesh_1d(L1d, ps1d)
         self._build()
@@ -254,6 +258,34 @@ class Device:
         ds.finalize_mesh(mesh=n)
         ds.create_device(mesh=n, device=n)
         self.geo = dict(x_ch0=Lc, x_ch1=Lc + Lch, Lc=Lc, Lch=Lch, t=t, geom="top", L=L)
+
+    def _mesh_hybrid(self, Lc, Lch, t, mf):
+        """Top contacts that also cover the end faces of the film (edge + top)."""
+        n = self.name
+        ds.create_2d_mesh(mesh=n)
+        L = 2 * Lc + Lch
+        po = min(max(2e-7, Lc / 25), 10e-7) if Lc > 8e-7 else min(2e-7, Lc / 4)
+        xs = [(-1e-7, 0.5e-7), (0.0, 0.25e-7), (Lc, 0.25e-7), (Lc + 0.5 * Lch, 2e-7), (Lc + Lch, 0.25e-7),
+              (L, 0.25e-7), (L + 1e-7, 0.5e-7)]
+        for x, ps in xs:
+            ds.add_2d_mesh_line(mesh=n, dir="x", pos=x, ps=ps / mf)
+        ys = [(-1e-7, 0.5e-7), (0.0, 0.1e-7), (0.5 * t, 0.5e-7), (t, 0.2e-7)]
+        ys += self._gate_lines(mf) if self.gate else [(t + 1e-7, 0.5e-7)]
+        for y, ps in ys:
+            ds.add_2d_mesh_line(mesh=n, dir="y", pos=y, ps=ps / mf)
+        ds.add_2d_region(mesh=n, material="semi", region=SEMI, xl=0, xh=L, yl=0, yh=t)
+        ds.add_2d_region(mesh=n, material="metal", region="m_src", xl=0, xh=Lc, yl=-1e-7, yh=0)
+        ds.add_2d_region(mesh=n, material="metal", region="m_srcs", xl=-1e-7, xh=0, yl=-1e-7, yh=t)
+        ds.add_2d_region(mesh=n, material="metal", region="m_drn", xl=Lc + Lch, xh=L, yl=-1e-7, yh=0)
+        ds.add_2d_region(mesh=n, material="metal", region="m_drns", xl=L, xh=L + 1e-7, yl=-1e-7, yh=t)
+        b = 1e-10
+        ytop = t - 1e-9  # excludes the boundary segment ending at the oxide interface
+        ds.add_2d_contact(mesh=n, name="source", material="metal", region=SEMI, xl=0, xh=Lc, yl=0, yh=ytop, bloat=b)
+        ds.add_2d_contact(mesh=n, name="drain", material="metal", region=SEMI, xl=Lc + Lch, xh=L, yl=0, yh=ytop, bloat=b)
+        self._bottom(n, 0, L, t)
+        ds.finalize_mesh(mesh=n)
+        ds.create_device(mesh=n, device=n)
+        self.geo = dict(x_ch0=Lc, x_ch1=Lc + Lch, Lc=Lc, Lch=Lch, t=t, geom="hybrid", L=L)
 
     def _mesh_edge(self, Lch, t, mf):
         n = self.name
@@ -440,6 +472,13 @@ class Device:
                 continue
             T = self.Tn()
             ds.set_parameter(device=d, name=f"{c}_tv", value=self.T_vdW)
+            ds.set_parameter(device=d, name=f"{c}_tve", value=P.get("T_edge", 1.0))
+            if self.kind == "hybrid":  # end-face nodes: edge transmission; top-face nodes: vdW transmission
+                L_ = self.geo["L"]
+                tvx = (f"ifelse(x > 1e-10, {c}_tv, {c}_tve)" if c == "source"
+                       else f"ifelse(x < {L_ - 1e-10!r}, {c}_tv, {c}_tve)")
+            else:
+                tvx = f"{c}_tv"
             if self.v_override:
                 vp = f"({self.v_override})"; vn = vp
             else:
@@ -451,8 +490,8 @@ class Device:
             else:
                 peq = f"(Nv300*pow({T}/300,1.5)*exp(-phiBp/(kq*{T})))"
                 neq = f"(Nc300*pow({T}/300,1.5)*exp(-phiBn/(kq*{T})))"
-            Jps = f"(q*{vp}*{c}_tv*(1+Gp)*(Holes-{peq}))"           # hole current density leaving semi
-            Jns = f"(-q*{vn}*{c}_tv*(1+Gn)*(Electrons-{neq}))"      # conventional current leaving semi
+            Jps = f"(q*{vp}*{tvx}*(1+Gp)*(Holes-{peq}))"           # hole current density leaving semi
+            Jns = f"(-q*{vn}*{tvx}*(1+Gn)*(Electrons-{neq}))"      # conventional current leaving semi
             self.cexpr[c] = dict(Jps=Jps, Jns=Jns, peq=peq, neq=neq)
             cdeps_p = ["Holes"] + (["T"] if self.noniso else [])
             cdeps_n = ["Electrons"] + (["T"] if self.noniso else [])
@@ -555,6 +594,26 @@ class Device:
         self.x, self.y = x, y
         tol = 1e-12
         self.cnodes, self.cpaths = {}, {}
+        self.cnorm, self.ctv = {}, {}
+        if self.kind == "hybrid":
+            L_, t_ = self.geo["L"], self.geo["t"]
+            for c, xc, sgn, top_sel in (("source", 0.0, 1, lambda xx: xx <= self.geo["Lc"] + tol),
+                                        ("drain", L_, -1, lambda xx: xx >= self.geo["Lc"] + self.geo["Lch"] - tol)):
+                ids, paths, nrms, tvs = [], [], [], []
+                topn = np.where((np.abs(y) < tol) & top_sel(x) & (np.abs(x - xc) > tol))[0]
+                for i in topn:
+                    col = np.where(np.abs(x - x[i]) < tol)[0]
+                    ids.append(i); paths.append(col[np.argsort(y[col])]); nrms.append((0.0, 1.0)); tvs.append(self.T_vdW)
+                face = np.where((np.abs(x - xc) < tol) & (y < t_ - 1e-9))[0]
+                for i in face:
+                    row = np.where(np.abs(y - y[i]) < tol)[0]
+                    ids.append(i); paths.append(row[np.argsort(sgn * x[row])]); nrms.append((float(sgn), 0.0))
+                    tvs.append(self.P.get("T_edge", 1.0))
+                self.cnodes[c], self.cpaths[c] = np.array(ids), paths
+                self.cnorm[c], self.ctv[c] = nrms, tvs
+            if self.P.get("oblique"):
+                self._oblique_paths()
+            return
         if self.kind == "top":
             top = np.where(np.abs(y) < tol)[0]
             sets = {"source": top[x[top] <= self.geo["Lc"] + tol],
@@ -576,6 +635,12 @@ class Device:
                     row = row[np.argsort(sgn * x[row])]
                     paths.append(row)
                 self.cnodes[c], self.cpaths[c] = ids, paths
+        for c in self.cpaths:
+            if self.kind == "top":
+                self.cnorm[c] = [(0.0, 1.0)] * len(self.cpaths[c])
+            else:
+                self.cnorm[c] = [((1.0 if c == "source" else -1.0), 0.0)] * len(self.cpaths[c])
+            self.ctv[c] = [self.T_vdW] * len(self.cpaths[c])
         if self.P.get("oblique") and self.kind in ("top", "edge"):
             self._oblique_paths()
 
@@ -596,15 +661,11 @@ class Device:
         s_ = np.arange(0.0, self.P["tun_maxlen"], h)
         self.cands = {}
         for c in ("source", "drain"):
-            if self.kind == "top":
-                nrm, tan = np.array([0.0, 1.0]), np.array([1.0, 0.0])
-            else:
-                nrm = np.array([1.0, 0.0]) if c == "source" else np.array([-1.0, 0.0])
-                tan = np.array([0.0, 1.0])
             out = []
             xin = self.geo["x_ch0"] if c == "source" else self.geo["x_ch1"]
             for kk, i in enumerate(self.cnodes[c]):
-                if self.kind == "top" and abs(x[i] - xin) > self.P["obl_zone"]:
+                nrm = np.array(self.cnorm[c][kk]); tan = np.array([abs(nrm[1]), abs(nrm[0])])
+                if nrm[1] != 0 and abs(x[i] - xin) > self.P["obl_zone"]:
                     out.append([self.cpaths[c][kk]])
                     continue
                 cl = []
@@ -636,14 +697,21 @@ class Device:
         path, dist = path[keep], dist[keep]
         Ev = -psi[path] + self.Cv
         B = -Ev if carrier == "p" else Ev + self.Eg
+        if P.get("image_force"):  # image-potential lowering along the path
+            coef = q / (16 * math.pi * P["eps_r"] * eps0)  # V cm
+            B = B - coef / np.maximum(dist, P["img_dmin"])
         m = P["mh_tun"] if carrier == "p" else P["me_tun"]
-        if carrier == "p" and P.get("mh_tun_c") and P.get("mh_tun_par") and len(path) > 1:
+        cx, cy = 1.0, 0.0
+        if len(path) > 1:
             dx = self.x[path[-1]] - self.x[path[0]]; dy = self.y[path[-1]] - self.y[path[0]]
             nrm = math.hypot(dx, dy)
             if nrm > 0:
                 cx, cy = dx / nrm, dy / nrm
-                m = 1.0 / (cy * cy / P["mh_tun_c"] + cx * cx / P["mh_tun_par"])
-        kane = P.get("tun_disp", "parabolic") == "kane"
+        if carrier == "p" and P.get("mh_tun_c") and P.get("mh_tun_par") and len(path) > 1:
+            m = 1.0 / (cy * cy / P["mh_tun_c"] + cx * cx / P["mh_tun_par"])
+        disp = P.get("tun_disp", "parabolic")
+        kane = disp in ("kane", "kane_c")
+        kw = 1.0 if disp == "kane" else cy * cy  # "kane_c": two-band form only along c, parabolic in-plane
         out = []
         if len(path) < 3:
             return path, out, B
@@ -657,7 +725,7 @@ class Device:
                 eps = lo + f * (hi - lo)
                 over = np.clip(B[: i + 1] - eps, 0.0, None)
                 if kane:  # two-band (Kane) imaginary dispersion: kappa^2 ~ U (1 - U/Eg)
-                    over = np.clip(over * (1.0 - over / self.Eg), 0.0, None)
+                    over = np.clip(over * (1.0 - kw * over / self.Eg), 0.0, None)
                 integ = np.trapezoid(np.sqrt(over), dist[: i + 1])
                 out.append((i, eps, math.exp(-2 * kap0 * integ) * w * (hi - lo)))
         return path, out, B
@@ -712,7 +780,7 @@ class Device:
                             if best is None or sc > best[0]:
                                 best = (sc, res_)
                         pp, bins, B = best[1]
-                        pref = A[car] * self.P["T0"] / kq * self.T_vdW
+                        pref = A[car] * self.P["T0"] / kq * self.ctv[c][kk]
                         for i, eps, tw in bins:
                             node = pp[i]
                             sup = pref * tw * np.logaddexp(0, (eFm - eps) / Vt)

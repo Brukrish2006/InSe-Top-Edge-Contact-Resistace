@@ -311,3 +311,55 @@ if _mp is not None:
     pv["top/edge"] = pv["top50"] / pv["edge"]
     print("=== mass_phase: top/edge ratio (two-band, best straight path)")
     print(pv["top/edge"].unstack("m_par").to_string(float_format=lambda x: f"{x:.3g}"))
+
+def _flt(df, name):
+    if df is None:
+        return None
+    if "failed" in df:
+        print(f"{name} failed runs:", int(df["failed"].fillna(0).sum()), "of", len(df))
+        df = df[df["failed"].fillna(0) == 0]
+    return df
+
+
+ps_ = _flt(rd("physics_sens"), "physics_sens")
+if ps_ is not None and len(ps_):
+    print("\n=== physics_sens: image force / Kane only along c (m_c 0.17, m_par 0.9, best path)")
+    pv = ps_.pivot_table(index=["case", "variant"], columns="geom", values="R_tot"); pv["top/edge"] = pv["top50"] / pv["edge"]
+    print(pv.to_string(float_format=lambda x: f"{x:.4g}"))
+hy = _flt(rd("hybrid"), "hybrid")
+if hy is not None and len(hy):
+    print("\n=== hybrid: R_tot of hybrid, top and edge contacts")
+    print(hy.pivot_table(index=["case", "variant"], columns="geom", values="R_tot").to_string(float_format=lambda x: f"{x:.4g}"))
+am = _flt(rd("aniso_metals"), "aniso_metals")
+if am is not None and len(am):
+    print("\n=== aniso_metals: barrier sweep (anisotropic model)")
+    b = am[am.study == "barrier"].pivot_table(index="phiB_set", columns="geom", values="R_tot"); b["top/edge"] = b["top50"] / b["edge"]
+    print(b.to_string(float_format=lambda x: f"{x:.4g}"))
+    print("=== aniso_metals: metals x pinning")
+    mm = am[am.study == "metals"].pivot_table(index=["case", "metal"], columns="geom", values="R_tot"); mm["top/edge"] = mm["top50"] / mm["edge"]
+    mm["phiBp"] = am[(am.study == "metals") & (am.geom == "edge")].set_index(["case", "metal"]).phiBp
+    print(mm.to_string(float_format=lambda x: f"{x:.4g}"))
+at = _flt(rd("aniso_thermal"), "aniso_thermal")
+if at is not None and len(at):
+    print("\n=== aniso_thermal")
+    at = at.assign(dT=at.Tmax - 300)
+    print(at[["case", "geom", "V", "I", "dT", "P_el", "P_out"]].round(4).to_string(index=False))
+_ratio_table(_flt(rd("thickness_obl"), "thickness_obl"), ["case", "layers"], "\n=== thickness_obl: anisotropic, best path")
+mf = _flt(rd("mass_phase_fine"), "mass_phase_fine")
+if mf is not None and len(mf):
+    pv = mf.pivot_table(index=["case", "m_c", "m_par"], columns="geom", values="R_tot"); pv["top/edge"] = pv["top50"] / pv["edge"]
+    print("\n=== mass_phase_fine: top/edge")
+    print(pv["top/edge"].unstack("m_par").to_string(float_format=lambda x: f"{x:.3g}"))
+uo = _flt(rd("uq_obl"), "uq_obl")
+if uo is not None and len(uo):
+    print("\n=== uq_obl: Monte Carlo, anisotropic, best path")
+    sh = uo[uo.variant == "shared"].pivot_table(index="sample", columns="geom", values="R_tot").dropna()
+    r = sh["edge"] / sh["top50"]
+    print(f"shared: n={len(r)} edge<top {100 * (r < 1).mean():.1f}%  median edge/top={r.median():.3g}  5-95%: {r.quantile(0.05):.3g}-{r.quantile(0.95):.3g}")
+    for var in ("indep_edge", "indep_cnl"):
+        e = uo[uo.variant == var].set_index("sample").R_tot; j = e.index.intersection(sh.index)
+        print(f"{var}: n={len(j)} edge<top {100 * (e[j] / sh.loc[j, 'top50'] < 1).mean():.1f}%")
+    mi = uo[uo.variant == "shared"].groupby("sample").m_in.first().reindex(r.index)
+    for lo, hi in ((0.3, 0.5), (0.5, 0.8), (0.8, 1.5)):
+        sel = (mi >= lo) & (mi < hi)
+        print(f"  m_par {lo}-{hi}: n={int(sel.sum())} edge<top {100 * (r[sel] < 1).mean():.1f}%  median edge/top={r[sel].median():.3g}")
