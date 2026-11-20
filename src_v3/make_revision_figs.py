@@ -270,3 +270,33 @@ try:
     print("uq_kane n=", len(r), "edge<top %", round(100 * (r < 1).mean(), 1), "bins", list(zip([round(x, 2) for x in xb], [round(f, 1) for f in fb], nb)))
 except Exception as e:
     print("fig18 skipped:", e)
+
+# ------------------------------------------------------------------ Fig 19: geometry phase diagram in (m_par, m_c)
+try:
+    mp = ok(rd("mass_phase"))
+    cases = [("unpinned", "(a) Pt, unpinned"), ("interlayer (measured)", "(b) Pt, interlayer"),
+             ("phiB=0.8", "(c) 0.8 eV"), ("direct (measured)", "(d) Pt, direct")]
+    fig, ax = plt.subplots(1, 4, figsize=(6.5, 2.3), sharey=True)
+    from matplotlib.colors import TwoSlopeNorm
+    norm = TwoSlopeNorm(vmin=-3, vcenter=0, vmax=3)
+    for k, (case, ttl) in enumerate(cases):
+        d = mp[mp["case"] == case].pivot_table(index=["m_c", "m_par"], columns="geom", values="R_tot").dropna()
+        r = np.log10(d["top50"] / d["edge"]).unstack("m_par")
+        mc = r.index.values; mpar = r.columns.values
+        pb = float(mp[(mp["case"] == case) & (mp.geom == "edge")].phiBp.iloc[0])
+        im = ax[k].pcolormesh(np.log10(mpar), np.log10(mc), np.clip(r.values, -3, 3), cmap="RdBu", norm=norm, shading="nearest")
+        if np.nanmin(r.values) < 0 < np.nanmax(r.values):
+            ax[k].contour(np.log10(mpar), np.log10(mc), r.values, levels=[0], colors=INK, linewidths=1.2)
+        for (mc_, mp_), mk_ in (((0.17, 0.9), "*"), ((0.078, 0.9), "o")):
+            ax[k].plot(np.log10(mp_), np.log10(mc_), mk_, color="k", mfc="white", ms=7 if mk_ == "*" else 5)
+        ax[k].plot(np.log10([0.3, 1.9]), np.log10([0.3, 1.9]), color=GREY, lw=0.8, ls=":")
+        ax[k].set_xticks(np.log10([0.3, 0.6, 0.9, 1.9])); ax[k].set_xticklabels(["0.3", "0.6", "0.9", "1.9"], fontsize=7)
+        ax[k].set_title(f"{ttl}\n$\\phi_{{Bp}}$={pb:.2f} eV", loc="left", fontsize=8)
+        ax[k].set_xlabel(r"$m_\parallel$ ($m_0$)", fontsize=8)
+    ax[0].set_yticks(np.log10([0.078, 0.17, 0.4, 0.9, 2.5])); ax[0].set_yticklabels(["0.078", "0.17", "0.4", "0.9", "2.5"], fontsize=7)
+    ax[0].set_ylabel(r"$m_c$ ($m_0$)", fontsize=8)
+    cb = fig.colorbar(im, ax=ax, pad=0.02, fraction=0.03); cb.set_label(r"$\log_{10}(R^{\rm top}/R^{\rm edge})$", fontsize=8); cb.ax.tick_params(labelsize=7)
+    fig.savefig(os.path.join(F, "fig19_mass_phase.png"), bbox_inches="tight"); fig.savefig(os.path.join(F, "fig19_mass_phase.pdf"), bbox_inches="tight")
+    plt.close(fig); print("saved fig19_mass_phase")
+except Exception as e:
+    print("fig19 skipped:", e)
