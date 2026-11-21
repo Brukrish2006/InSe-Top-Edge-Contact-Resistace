@@ -741,7 +741,17 @@ def tasks_image_aniso():
     return T
 
 
-STUDIES = {"uq_gated": tasks_uq_gated, "bottom": tasks_bottom, "mass_gw": tasks_mass_gw, "image_aniso": tasks_image_aniso, "image_force": tasks_image_force, "hybrid_overlap": tasks_hybrid_overlap, "thermal_lit": tasks_thermal_lit, "mesh_convergence": tasks_mesh_convergence,
+def tasks_bottom_retry():
+    """Isotropic-baseline bottom contacts at high barrier, with 0.02-V gate steps."""
+    T = []
+    for case, Phi, P0 in _mass_cases():
+        if case in ("direct (measured)", "phiB=1.0"):
+            T.append(_gs("bottom_retry", "bottom", Phi, dict(P0, thermal=False),
+                         dict(case=case, variant="isotropic_baseline"), vg_step=0.02))
+    return T
+
+
+STUDIES = {"uq_gated": tasks_uq_gated, "bottom_retry": tasks_bottom_retry, "bottom": tasks_bottom, "mass_gw": tasks_mass_gw, "image_aniso": tasks_image_aniso, "image_force": tasks_image_force, "hybrid_overlap": tasks_hybrid_overlap, "thermal_lit": tasks_thermal_lit, "mesh_convergence": tasks_mesh_convergence,
            "thickness_lit": tasks_thickness_lit, "inse_electron": tasks_inse_electron,
            "chen2019": tasks_chen2019, "chen2019_300K": tasks_chen2019_300K,
            "chen2019_mu": tasks_chen2019_mu,
