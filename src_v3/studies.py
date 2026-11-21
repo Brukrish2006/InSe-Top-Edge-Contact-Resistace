@@ -25,7 +25,9 @@ def write(name, rows):
 def lab(kind, Lc):
     if kind == "edge":
         return "edge"
-    return f"hybrid{Lc / NM:.0f}" if kind == "hybrid" else f"top{Lc / NM:.0f}"
+    if kind in ("hybrid", "bottom"):
+        return f"{kind}{Lc / NM:.0f}"
+    return f"top{Lc / NM:.0f}"
 
 
 def summarize(dv, extra=None):

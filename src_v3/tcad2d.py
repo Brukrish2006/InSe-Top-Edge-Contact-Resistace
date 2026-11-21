@@ -83,7 +83,9 @@ DEFAULTS = dict(
     mh_tun_c=None, mh_tun_par=None,  # anisotropic hole tunnelling mass (c axis = y, in-plane = x); overrides mh_tun
     T_edge=1.0,              # interface transmission of edge contacts (and of the end faces of hybrid contacts)
     image_force=False,       # image-potential lowering of the tunnelling barrier, -q/(16 pi eps d)
-    img_dmin=0.2e-7,         # cm, cut-off distance of the image potential
+    img_dmin=0.2e-7,
+    img_eps_in=None,         # in-plane permittivity for the image potential (None: eps_r)
+    img_eps_c=None,          # c-axis permittivity for the image potential (None: eps_r)         # cm, cut-off distance of the image potential
 )
 
 
@@ -201,7 +203,7 @@ class Device:
         self.t = t if kind != "1d" else None
         self.Eg, self.chi, self.Nlayers = band(P, self.t)
         self.D = derived(P, self.Eg)
-        S = {"top": P["S_top"], "edge": P["S_edge"], "hybrid": P["S_top"], "1d": P["S_1d"]}[kind]
+        S = {"top": P["S_top"], "edge": P["S_edge"], "hybrid": P["S_top"], "bottom": P["S_top"], "1d": P["S_1d"]}[kind]
         Pe = phi_eff(P, Phi_M, S)
         Ev = self.chi + self.Eg
         self.fd = P["statistics"] == "fd"
@@ -211,7 +213,7 @@ class Device:
         self.phiBn = self.Eg - self.phiBp
         self.contact_bc = dict(zip(("source", "drain"), contact_bc))
         self.v_override = v_override
-        self.T_vdW = wkb_vdw(P) if kind in ("top", "hybrid") else P.get("T_edge", 1.0)
+        self.T_vdW = wkb_vdw(P) if kind in ("top", "hybrid", "bottom") else P.get("T_edge", 1.0)
         self.thermal = P["thermal"] and kind != "1d"
         self.noniso = P["nonisothermal"] and self.thermal
         self.bias = 0.0
@@ -222,6 +224,8 @@ class Device:
             self._mesh_edge(Lch, t, mf)
         elif kind == "hybrid":
             self._mesh_hybrid(Lc, Lch, t, mf)
+        elif kind == "bottom":
+            self._mesh_bottom(Lc, Lch, t, mf)
         else:
             self._mesh_1d(L1d, ps1d)
         self._build()
@@ -258,6 +262,40 @@ class Device:
         ds.finalize_mesh(mesh=n)
         ds.create_device(mesh=n, device=n)
         self.geo = dict(x_ch0=Lc, x_ch1=Lc + Lch, Lc=Lc, Lch=Lch, t=t, geom="top", L=L)
+
+    def _mesh_bottom(self, Lc, Lch, t, mf):
+        """Bottom contacts: metal under the film on the gate side; the oxide and the gate lie only under the
+        channel, so the metal screens the gate from the film above it. A 0.25-nm free segment separates each
+        contact from the film/oxide interface."""
+        if not self.gate:
+            raise ValueError("bottom contacts need a gate")
+        n = self.name
+        ds.create_2d_mesh(mesh=n)
+        L = 2 * Lc + Lch
+        g = 0.25e-7
+        po = min(max(2e-7, Lc / 25), 10e-7) if Lc > 8e-7 else min(2e-7, Lc / 4)
+        xs = [(0.0, po), (Lc - g, 0.25e-7), (Lc, 0.25e-7), (Lc + 0.5 * Lch, 2e-7), (Lc + Lch, 0.25e-7),
+              (Lc + Lch + g, 0.25e-7), (L, po)]
+        for x, ps in xs:
+            ds.add_2d_mesh_line(mesh=n, dir="x", pos=x, ps=ps / mf)
+        ys = [(0.0, 0.2e-7), (0.5 * t, 0.5e-7), (t, 0.1e-7)] + self._gate_lines(mf)
+        for y, ps in ys:
+            ds.add_2d_mesh_line(mesh=n, dir="y", pos=y, ps=ps / mf)
+        tox = self.gate["t_ox"]
+        ds.add_2d_region(mesh=n, material="semi", region=SEMI, xl=0, xh=L, yl=0, yh=t)
+        ds.add_2d_region(mesh=n, material="metal", region="m_src", xl=0, xh=Lc - g, yl=t, yh=t + tox)
+        ds.add_2d_region(mesh=n, material="metal", region="m_drn", xl=Lc + Lch + g, xh=L, yl=t, yh=t + tox)
+        ds.add_2d_region(mesh=n, material="oxide", region=OX, xl=Lc, xh=Lc + Lch, yl=t, yh=t + tox)
+        ds.add_2d_region(mesh=n, material="metal", region="m_gate", xl=Lc, xh=Lc + Lch, yl=t + tox, yh=t + tox + 1e-7)
+        ds.add_2d_interface(mesh=n, name="semi_ox", region0=SEMI, region1=OX)
+        b = 1e-10
+        ds.add_2d_contact(mesh=n, name="source", material="metal", region=SEMI, xl=0, xh=Lc - g, yl=t, yh=t, bloat=b)
+        ds.add_2d_contact(mesh=n, name="drain", material="metal", region=SEMI, xl=Lc + Lch + g, xh=L, yl=t, yh=t, bloat=b)
+        ds.add_2d_contact(mesh=n, name="gate", material="metal", region=OX, xl=Lc, xh=Lc + Lch,
+                          yl=t + tox, yh=t + tox, bloat=b)
+        ds.finalize_mesh(mesh=n)
+        ds.create_device(mesh=n, device=n)
+        self.geo = dict(x_ch0=Lc, x_ch1=Lc + Lch, Lc=Lc, Lch=Lch, t=t, geom="bottom", L=L)
 
     def _mesh_hybrid(self, Lc, Lch, t, mf):
         """Top contacts that also cover the end faces of the film (edge + top)."""
@@ -614,6 +652,22 @@ class Device:
             if self.P.get("oblique"):
                 self._oblique_paths()
             return
+        if self.kind == "bottom":
+            t_ = self.geo["t"]; g = 0.25e-7
+            bot = np.where(np.abs(y - t_) < tol)[0]
+            sets = {"source": bot[x[bot] <= self.geo["Lc"] - g + tol],
+                    "drain": bot[x[bot] >= self.geo["Lc"] + self.geo["Lch"] + g - tol]}
+            for c, ids in sets.items():
+                paths = []
+                for i in ids:
+                    col = np.where(np.abs(x - x[i]) < tol)[0]
+                    paths.append(col[np.argsort(-y[col])])
+                self.cnodes[c], self.cpaths[c] = ids, paths
+                self.cnorm[c] = [(0.0, -1.0)] * len(ids)
+                self.ctv[c] = [self.T_vdW] * len(ids)
+            if self.P.get("oblique"):
+                self._oblique_paths()
+            return
         if self.kind == "top":
             top = np.where(np.abs(y) < tol)[0]
             sets = {"source": top[x[top] <= self.geo["Lc"] + tol],
@@ -699,8 +753,14 @@ class Device:
         B = -Ev if carrier == "p" else Ev + self.Eg
         B0 = B[0] if len(B) else 0.0
         if P.get("image_force"):  # image-potential lowering along the path
-            coef = q / (16 * math.pi * P["eps_r"] * eps0)  # V cm
-            B = B - coef / np.maximum(dist, P["img_dmin"])
+            i0 = path[0]
+            plane_c = self.kind in ("top", "bottom") or (self.kind == "hybrid" and abs(self.y[i0]) < 1e-12)
+            e_in = P.get("img_eps_in") or P["eps_r"]; e_c = P.get("img_eps_c") or P["eps_r"]
+            # uniaxial medium: metal plane normal to c -> eps_in; plane normal in-plane -> sqrt(eps_in eps_c)
+            eps_img = e_in if plane_c else math.sqrt(e_in * e_c)
+            coef = q / (16 * math.pi * eps_img * eps0)  # V cm
+            dperp = np.abs(self.y[path] - self.y[i0]) if plane_c else np.abs(self.x[path] - self.x[i0])
+            B = B - coef / np.maximum(dperp, P["img_dmin"])
         m = P["mh_tun"] if carrier == "p" else P["me_tun"]
         cx, cy = 1.0, 0.0
         if len(path) > 1:

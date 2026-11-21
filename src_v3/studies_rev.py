@@ -702,7 +702,46 @@ def tasks_image_force():
     return T
 
 
-STUDIES = {"uq_gated": tasks_uq_gated, "image_force": tasks_image_force, "hybrid_overlap": tasks_hybrid_overlap, "thermal_lit": tasks_thermal_lit, "mesh_convergence": tasks_mesh_convergence,
+def tasks_bottom():
+    """Bottom contacts (metal under the film, gate screened under the contact), anisotropic model and
+    isotropic baseline, for the six barrier cases; top/edge references are in hybrid.csv."""
+    T = []
+    for case, Phi, P0 in _mass_cases():
+        P = _tensor(dict(P0, thermal=False), 0.9, m_c=0.17, disp="kane", obl=True)
+        T.append(_gs("bottom", "bottom", Phi, P, dict(case=case, variant="aniso")))
+        T.append(_gs("bottom", "bottom", Phi, dict(P0, thermal=False), dict(case=case, variant="isotropic_baseline")))
+    return T
+
+
+def tasks_mass_gw():
+    """Phase diagram extended to the heavy in-plane GW masses (m_par 3.0 and 5.35 m0) for m_c 0.078 and 0.17."""
+    cases = {k: v for k, v in ((c, (Phi, P0)) for c, Phi, P0 in _mass_cases())}
+    sel = [c for c in ("direct (measured)", "interlayer (measured)", "unpinned") if c in cases]
+    T = []
+    for c in sel:
+        Phi, P0 = cases[c]
+        for m_c in (0.078, 0.17):
+            for m_par in (3.0, 5.35):
+                for kind in GEOMS:
+                    P = _tensor(dict(P0, thermal=False), m_par, m_c=m_c, disp="kane", obl=True)
+                    T.append(_gs("mass_gw", kind, Phi, P, dict(case=c, m_c=m_c, m_par=m_par)))
+    return T
+
+
+def tasks_image_aniso():
+    """Image-force lowering with perpendicular distance, isotropic and uniaxial permittivity
+    (top: eps_in; edge: sqrt(eps_in eps_c)); anisotropic mass model, best straight path."""
+    T = []
+    for case, Phi, P0 in _mass_cases():
+        for var, ex in (("iso_6.4", {}), ("eps_c_half", dict(img_eps_in=6.4, img_eps_c=3.2)),
+                        ("eps_c_double", dict(img_eps_in=6.4, img_eps_c=12.8))):
+            for kind in GEOMS:
+                P = _aniso(dict(P0, thermal=False)); P.update(image_force=True, **ex)
+                T.append(_gs("image_aniso", kind, Phi, P, dict(case=case, variant=var)))
+    return T
+
+
+STUDIES = {"uq_gated": tasks_uq_gated, "bottom": tasks_bottom, "mass_gw": tasks_mass_gw, "image_aniso": tasks_image_aniso, "image_force": tasks_image_force, "hybrid_overlap": tasks_hybrid_overlap, "thermal_lit": tasks_thermal_lit, "mesh_convergence": tasks_mesh_convergence,
            "thickness_lit": tasks_thickness_lit, "inse_electron": tasks_inse_electron,
            "chen2019": tasks_chen2019, "chen2019_300K": tasks_chen2019_300K,
            "chen2019_mu": tasks_chen2019_mu,
