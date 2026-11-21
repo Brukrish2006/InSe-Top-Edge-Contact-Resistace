@@ -751,7 +751,60 @@ def tasks_bottom_retry():
     return T
 
 
-STUDIES = {"uq_gated": tasks_uq_gated, "bottom_retry": tasks_bottom_retry, "bottom": tasks_bottom, "mass_gw": tasks_mass_gw, "image_aniso": tasks_image_aniso, "image_force": tasks_image_force, "hybrid_overlap": tasks_hybrid_overlap, "thermal_lit": tasks_thermal_lit, "mesh_convergence": tasks_mesh_convergence,
+def tasks_deylgat_cond():
+    """Edge, top and hybrid contacts under conditions close to Deylgat et al. (PR Applied 2026): very thin film,
+    heavy doping, isotropic mass 0.5 m0, 5-nm contacts; then one change at a time (low doping, six layers,
+    anisotropic mass) to find which assumption decides the ranking."""
+    T = []
+    for b in (0.3, 0.7):
+        for var, N, NA, aniso in (("deylgat", 2, 1e20, False), ("low_doping", 2, 1e16, False),
+                                  ("six_layer", 6, 1e20, False), ("aniso_mass", 2, 1e20, True)):
+            t = N * 0.83 * NM
+            Phi = s.lit_Ev(t) - b
+            P0 = dict(s.LIT, NA=NA, thermal=False)
+            if aniso:
+                P = _tensor(P0, 0.9, m_c=0.17, disp="kane", obl=True)
+            else:
+                P = dict(P0, mh_tun=0.5, mh_dos=0.5, oblique=True)
+            for kind in ("top", "edge", "hybrid"):
+                sp = _gs("deylgat_cond", kind, Phi, P, dict(case=f"phiB={b}", variant=var, layers=N), t=t)
+                sp["Lc"] = 5 * NM
+                T.append(sp)
+    return T
+
+
+def tasks_bottom_lowbar():
+    """Bottom, top and edge contacts at near-zero hole barriers (anisotropic model)."""
+    Ev = s.lit_Ev()
+    T = []
+    for b in (0.0, 0.1):
+        P = _tensor(dict(s.LIT, thermal=False), 0.9, m_c=0.17, disp="kane", obl=True)
+        for kind in ("bottom", "top", "edge"):
+            T.append(_gs("bottom_lowbar", kind, Ev - b, P, dict(case=f"phiB={b}", variant="aniso")))
+    return T
+
+
+def tasks_mass_heavy():
+    """Phase diagram extended to m_par = 3.0 and 5.35 m0 (bulk GW in-plane mass) for every m_c of the fine grid."""
+    Ev = s.lit_Ev()
+    pc = s.pin_cases()
+    cases = [("phiB=0.8", Ev - 0.8, dict(s.LIT))]
+    for case in ("direct (measured)", "interlayer (measured)", "unpinned"):
+        c = pc[case]
+        cases.append((case, PT, dict(s.LIT, S_top=c["S"], S_edge=c["S"], Phi_CNL=c["CNL"])))
+    T = []
+    for case, Phi, P0 in cases:
+        for m_c in (0.078, 0.12, 0.17, 0.25, 0.4, 0.6, 0.9):
+            for m_par in (3.0, 5.35):
+                if case != "phiB=0.8" and m_c in (0.078, 0.17):
+                    continue  # already in mass_gw.csv
+                for kind in GEOMS:
+                    P = _tensor(dict(P0, thermal=False), m_par, m_c=m_c, disp="kane", obl=True)
+                    T.append(_gs("mass_heavy", kind, Phi, P, dict(case=case, m_c=m_c, m_par=m_par)))
+    return T
+
+
+STUDIES = {"uq_gated": tasks_uq_gated, "deylgat_cond": tasks_deylgat_cond, "bottom_lowbar": tasks_bottom_lowbar, "mass_heavy": tasks_mass_heavy, "bottom_retry": tasks_bottom_retry, "bottom": tasks_bottom, "mass_gw": tasks_mass_gw, "image_aniso": tasks_image_aniso, "image_force": tasks_image_force, "hybrid_overlap": tasks_hybrid_overlap, "thermal_lit": tasks_thermal_lit, "mesh_convergence": tasks_mesh_convergence,
            "thickness_lit": tasks_thickness_lit, "inse_electron": tasks_inse_electron,
            "chen2019": tasks_chen2019, "chen2019_300K": tasks_chen2019_300K,
            "chen2019_mu": tasks_chen2019_mu,
