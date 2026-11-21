@@ -206,7 +206,8 @@ def mc_section(name, quoted):
 
 mc_section("uq_kane", dict(failed=4, n=239, shared=20, indep_edge=19, indep_cnl=22, median=13, p5=0.25, p95=2700,
                            bins=(57, 11, 0)))
-mc_section("uq_obl", {})
+mc_section("uq_obl", dict(failed=0, n=240, shared=29, indep_edge=28, indep_cnl=33, median=3.8, p5=0.11, p95=82,
+                          bins=(66, 24, 7)))
 
 # ---------------------------------------------------------------- Sec. 3.7: thickness with anisotropic mass
 tk = rd("thickness_kane")
@@ -315,6 +316,46 @@ if ath is not None:
     q("unpinned edge dT (K)", a.loc[("unpinned", "edge", 1.0), "dT"], 126, 0.01)
     q("unpinned top dT (K)", a.loc[("unpinned", "top50", 1.0), "dT"], 10, 0.05)
     q("energy balance edge 1 V (%)", 100 * (a.loc[("reference", "edge", 1.0), "P_out"] / a.loc[("reference", "edge", 1.0), "P_el"] - 1), 1.4, 0.05)
+
+imf = rd("image_force"); hyb = rd("hybrid")
+if imf is not None and hyb is not None:
+    head("Sec. 3.3  image-force lowering (image_force.csv vs hybrid.csv aniso references)")
+    r = ratio(imf, ["case"])
+    base = hyb[(hyb.variant == "aniso") & (hyb.geom != "hybrid50")].pivot_table(index="case", columns="geom", values="R_tot")
+    pi = imf.pivot_table(index="case", columns="geom", values="R_tot")
+    q("image interlayer ratio", r["interlayer (measured)"], 4.8, 0.03)
+    q("image phiB=0.6 ratio", r["phiB=0.6"], 2.0, 0.03)
+    q("image min ratio 1.0-1.05", min(r["phiB=1.0"], r["direct (measured)"]), 0.055, 0.03)
+    q("image max ratio 1.0-1.05", max(r["phiB=1.0"], r["direct (measured)"]), 0.070, 0.03)
+    q("image min ratio 0.2-0.25", min(r["phiB=0.2"], r["unpinned"]), 26, 0.03)
+    q("image max ratio 0.2-0.25", max(r["phiB=0.2"], r["unpinned"]), 38, 0.03)
+    hi = ["interlayer (measured)", "phiB=0.6", "phiB=1.0", "direct (measured)"]
+    fe = base.loc[hi, "edge"] / pi.loc[hi, "edge"]; ft = base.loc[hi, "top50"] / pi.loc[hi, "top50"]
+    q("edge R fall min (>=0.52 eV)", fe.min(), 1.9, 0.04); q("edge R fall max", fe.max(), 4.6, 0.03)
+    q("top R fall min", ft.min(), 1.3, 0.04); q("top R fall max", ft.max(), 2.0, 0.03)
+
+ho = rd("hybrid_overlap")
+if ho is not None and hyb is not None:
+    head("Sec. 3.4  hybrid contacts (hybrid.csv, hybrid_overlap.csv)")
+    a = hyb[hyb.variant == "aniso"].pivot_table(index="case", columns="geom", values="R_tot")
+    o = ho[ho.variant == "aniso"].pivot_table(index="case", columns="Lc_set", values="R_tot")
+    hi = ["phiB=0.6", "phiB=1.0", "direct (measured)"]; lo = ["phiB=0.2", "unpinned", "interlayer (measured)"]
+    q("hybrid50/top min (0.6-1.05)", (a.loc[hi, "hybrid50"] / a.loc[hi, "top50"]).min(), 1.02, 0.01)
+    q("hybrid50/top max (0.6-1.05)", (a.loc[hi, "hybrid50"] / a.loc[hi, "top50"]).max(), 1.04, 0.01)
+    q("hybrid50/edge min (0.2-0.52)", (a.loc[lo, "hybrid50"] / a.loc[lo, "edge"]).min(), 1.6, 0.03)
+    q("hybrid50/edge max (0.2-0.52)", (a.loc[lo, "hybrid50"] / a.loc[lo, "edge"]).max(), 1.9, 0.03)
+    q("hybrid2/edge min (0.2-0.25)", (o.loc[["phiB=0.2", "unpinned"], 2] / a.loc[["phiB=0.2", "unpinned"], "edge"]).min(), 1.13, 0.01)
+    q("hybrid2/edge max (0.2-0.25)", (o.loc[["phiB=0.2", "unpinned"], 2] / a.loc[["phiB=0.2", "unpinned"], "edge"]).max(), 1.16, 0.01)
+    hh = ["phiB=1.0", "direct (measured)"]
+    q("hybrid2/edge min (1.0-1.05)", (o.loc[hh, 2] / a.loc[hh, "edge"]).min(), 2.7, 0.03)
+    q("hybrid2/edge max (1.0-1.05)", (o.loc[hh, 2] / a.loc[hh, "edge"]).max(), 2.8, 0.03)
+    q("hybrid2/top min (1.0-1.05)", (o.loc[hh, 2] / a.loc[hh, "top50"]).min(), 54, 0.02)
+    q("hybrid2/top max (1.0-1.05)", (o.loc[hh, 2] / a.loc[hh, "top50"]).max(), 78, 0.02)
+    best = pd.concat([a["edge"], a["top50"]], axis=1).min(axis=1)
+    allh = pd.concat([o, a["hybrid50"].rename(50)], axis=1)
+    worst = (allh.div(best, axis=0)).max(axis=0)
+    q("best overlap: worst-case hybrid/best-geometry (must be > 1.5)", worst.min(), 1.5, tol=-1e9)
+    q("any hybrid better than best geometry? (min ratio, must be > 1)", allh.div(best, axis=0).min().min(), 1.0, tol=-1e9)
 
 # ---------------------------------------------------------------- revision batch rev15 (printed for the text)
 for name, idx in (("physics_sens", ["case", "variant"]), ("hybrid", ["case", "variant"])):

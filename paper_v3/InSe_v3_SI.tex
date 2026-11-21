@@ -139,7 +139,7 @@ Geometry & $V_D$ (V) & $I_D$ (A/cm) & $IV$ (W/cm) & $\Delta T_{\max}$ (K) & $\De
 \midrule
 Top, 50 nm & 0.5 & 0.618 & 0.309 & 5.9 & 3.5 & 5.6 \\
 Top, 50 nm & 1.0 & 1.164 & 1.164 & 24.0 & 11.9 & 21.6 \\
-Edge & 0.5 & 2.228 & 1.114 & 47.0 & 40.8 & 46.2 \\
+Edge & 0.5 & 2.228 & 1.114 & 47.0 & 40.7 & 46.2 \\
 Edge & 1.0 & 3.693 & 3.693 & 149.9 & 144.4 & 144.6 \\
 \bottomrule
 \end{tabular}
@@ -264,34 +264,116 @@ With the light isotropic baseline mass we propagated the uncertainty of the leas
 \label{fig:uqgated}
 \end{figure}
 
-The anisotropic analysis of Sec.~\ref{M-sec:pin} (\texttt{data\_v3/uq\_kane.csv}) uses the same 240 samples, drawn with the same seed, with the two-band dispersion and normal paths, and adds an in-plane mass, log-uniform between 0.3 and 1.5~$m_0$, and an independent edge pinning level, uniform 0.1--0.6~eV below $E_C$. An earlier run with parabolic dispersion (\texttt{data\_v3/uq\_dir.csv}) gave 26\% instead of 20\% of samples with lower edge resistance.
+The anisotropic analysis of Sec.~\ref{M-sec:pin} (\texttt{data\_v3/uq\_obl.csv}) uses the same 240 samples, drawn with the same seed, with the two-band dispersion and the most favourable straight paths, and adds an in-plane mass, log-uniform between 0.3 and 1.5~$m_0$, and an independent edge pinning level, uniform 0.1--0.6~eV below $E_C$. With normal paths (\texttt{data\_v3/uq\_kane.csv}) the edge contact has the lower resistance in 20\% of the 239 converged samples with shared pinning, 19\% with independent $S_{\rm edge}$ and 22\% with an independent edge pinning level (median edge/top ratio 13, 5--95\%: 0.25--2700), and in 57\%, 11\% and 0\% of samples in the three $m_\parallel$ bins; four runs did not converge. A run with parabolic dispersion and normal paths (\texttt{data\_v3/uq\_dir.csv}) gave 26\%.
 
 \section{Thickness with the anisotropic hole mass}
 \label{sec:thickdir}
-Table~\ref{tab:thickdir} repeats the thickness dependence at the literature alignment with the anisotropic mass ($m_\parallel=0.9~m_0$, two-band dispersion, normal paths; \texttt{data\_v3/thickness\_kane.csv}). The gate was stepped in 0.02-V increments; three directly pinned runs (3 layers, both geometries; 4 layers, top) still did not converge.
+Table~\ref{tab:thickdir} gives the thickness dependence at the literature alignment with the anisotropic mass ($m_\parallel=0.9~m_0$, $m_c=0.17~m_0$, two-band dispersion), for the most favourable straight paths used in the main text (\texttt{data\_v3/thickness\_obl.csv}) and for normal paths (\texttt{data\_v3/thickness\_kane.csv}). The gate was stepped in 0.02-V increments for the normal paths and 0.1-V increments for the best paths. The best paths lower the edge-contact resistance by 2.5--5$\times$ with the interlayer, because edge contacts can then tunnel partly along the light $c$ axis, and change the top-contact resistance by less than 5\%. They move the crossover with the interlayer from between six and eight layers to between four and six. The 3-layer, directly pinned runs did not converge with either path choice.
 
 \begin{table}[!htbp]
 \centering
-\caption{On-state $R_{\rm tot}$ (\ohmcm) of Pt contacts versus layer number ($V_G=-3$~V, $V_D=0.05$~V, $m_\parallel=0.9~m_0$, $m_c=0.17~m_0$, two-band dispersion, normal paths). --: not converged.}
+\caption{On-state $R_{\rm tot}$ (\ohmcm) of Pt contacts versus layer number ($V_G=-3$~V, $V_D=0.05$~V, $m_\parallel=0.9~m_0$, $m_c=0.17~m_0$, two-band dispersion). --: not converged.}
 \label{tab:thickdir}\small
-\begin{tabular}{lrrrr}
+\begin{tabular}{llrrrrrr}
 \toprule
-Pinning & Layers & Edge & Top & Top/edge \\
+ & & \multicolumn{3}{c}{Most favourable straight path} & \multicolumn{3}{c}{Normal path} \\
+Pinning & Layers & Edge & Top & Top/edge & Edge & Top & Top/edge \\
 \midrule
-Interlayer & 3 & 5490 & 9850 & 1.8 \\
- & 4 & 1130 & 126 & 0.11 \\
- & 6 & 292 & 116 & 0.40 \\
- & 8 & 163 & 746 & 4.6 \\
- & 12 & 101 & $1.88\times10^4$ & 186 \\
-Direct & 4 & $3.99\times10^7$ & -- & -- \\
- & 6 & $1.28\times10^7$ & $5.13\times10^4$ & 0.0040 \\
- & 8 & $7.90\times10^6$ & $3.08\times10^4$ & 0.0039 \\
- & 12 & $5.35\times10^6$ & $5.92\times10^6$ & 1.1 \\
+Interlayer & 3 & 1060 & 1600 & 1.5 & 5490 & 9850 & 1.8 \\
+ & 4 & 216 & 120 & 0.56 & 1130 & 126 & 0.11 \\
+ & 6 & 56.5 & 116 & 2.0 & 292 & 116 & 0.40 \\
+ & 8 & 33.3 & 746 & 22 & 163 & 746 & 4.6 \\
+ & 12 & 21.5 & $1.84\times10^4$ & 855 & 101 & $1.88\times10^4$ & 186 \\
+Direct & 4 & $3.01\times10^6$ & $2.50\times10^5$ & 0.083 & $3.99\times10^7$ & -- & -- \\
+ & 6 & $9.21\times10^5$ & $3.38\times10^4$ & 0.037 & $1.28\times10^7$ & $5.13\times10^4$ & 0.0040 \\
+ & 8 & $6.74\times10^5$ & $3.09\times10^4$ & 0.046 & $7.90\times10^6$ & $3.08\times10^4$ & 0.0039 \\
+ & 12 & $5.03\times10^5$ & $5.94\times10^6$ & 12 & $5.35\times10^6$ & $5.92\times10^6$ & 1.1 \\
 \bottomrule
 \end{tabular}
 \end{table}
 
+\section{Metals and further approximations with the anisotropic hole mass}
+\label{sec:anisometals}
+Table~\ref{tab:anisometals} repeats the metals and pinning cases of Sec.~\ref{M-sec:measured} with the anisotropic model of Sec.~\ref{M-sec:mass} ($m_c=0.17~m_0$, $m_\parallel=0.9~m_0$, two-band dispersion, most favourable straight path; \texttt{data\_v3/aniso\_metals.csv}). The unpinned Ti and Cr contacts (hole barriers of 1.4--1.6~eV) did not converge in either geometry. The fixed-barrier sweep in the same file gives top/edge ratios of 4.2, 11.5, 6.7, 0.90, 0.12 and 0.051 at $\phi_{Bp}=0$, 0.2, 0.4, 0.6, 0.8 and 1.0~eV (Fig.~\ref{M-fig:measured}b, dashed).
 
+\begin{table}[!htbp]
+\centering
+\caption{On-state $R_{\rm tot}$ (\ohmcm) and top/edge ratio with the anisotropic hole mass ($V_G=-3$~V, $V_D=0.05$~V, literature alignment). Ratios below 1 mean that the top contact is better.}
+\label{tab:anisometals}\small
+\begin{tabular}{llrrrr}
+\toprule
+Pinning & Metal & $\phi_{Bp}$ (eV) & Edge & Top & Top/edge \\
+\midrule
+Direct ($S=0.05$) & Pt & 1.05 & $9.24\times10^5$ & $3.36\times10^4$ & 0.036 \\
+ & Pd & 1.08 & $1.43\times10^6$ & $4.28\times10^4$ & 0.030 \\
+ & Au & 1.08 & $1.45\times10^6$ & $4.31\times10^4$ & 0.030 \\
+ & Cr & 1.11 & $2.35\times10^6$ & $5.61\times10^4$ & 0.024 \\
+ & Ti & 1.12 & $2.68\times10^6$ & $6.04\times10^4$ & 0.023 \\
+Interlayer ($S=0.5$) & Pt & 0.52 & 56.0 & 118 & 2.1 \\
+ & Pd & 0.79 & 8610 & 1150 & 0.13 \\
+ & Au & 0.80 & $1.04\times10^4$ & 1270 & 0.12 \\
+ & Cr & 1.10 & $1.99\times10^6$ & $5.14\times10^4$ & 0.026 \\
+ & Ti & 1.18 & $7.30\times10^6$ & $1.09\times10^5$ & 0.015 \\
+Calculated ($S=0.18$) & Pt & 0.52 & 55.3 & 117 & 2.1 \\
+ & Pd & 0.62 & 340 & 259 & 0.76 \\
+ & Au & 0.62 & 363 & 267 & 0.73 \\
+ & Cr & 0.73 & 2800 & 655 & 0.23 \\
+ & Ti & 0.76 & 5030 & 867 & 0.17 \\
+Unpinned ($S=1$) & Pt & 0.25 & 0.61 & 7.60 & 12.5 \\
+ & Pd & 0.78 & 7900 & 1090 & 0.14 \\
+ & Au & 0.80 & $1.15\times10^4$ & 1350 & 0.12 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Table~\ref{tab:physsens} tests two further approximations with the same model (\texttt{data\_v3/physics\_sens.csv}; image force: \texttt{data\_v3/image\_force.csv}). Image-force lowering adds $-q/(16\pi\varepsilon_r\varepsilon_0 d)$ to the band edge along each tunnelling path, with $d$ the distance from the contact and a cut-off at 0.2~nm. The energies between the lowered and the unlowered barrier top, which the thermionic boundary condition does not cover, are counted with the transmission over the lowered barrier. At 0.52--1.05~eV image-force lowering reduces the edge resistance by 1.9--4.6$\times$ and the top resistance by 1.3--2.0$\times$. At 0.2--0.25~eV it raises both, because the image potential enters only the tunnelling integral and not the drift-diffusion band edge, so carriers that pass over the lowered barrier are deposited next to the contact; at these barriers the variant is a test of the ratio only. In every case it favours edge contacts. The second variant applies the two-band form only to the $c$-axis component of each path (weight $c_y^2$), so in-plane paths see a parabolic band.
+
+\begin{table}[!htbp]
+\centering
+\caption{Top/edge on-state ratio with the anisotropic model ($m_c=0.17~m_0$, $m_\parallel=0.9~m_0$, most favourable straight path; $V_G=-3$~V, $V_D=0.05$~V) for the baseline two-band dispersion, with image-force lowering added, and with the two-band form only along $c$.}
+\label{tab:physsens}\small
+\begin{tabular}{lrrrr}
+\toprule
+Case & $\phi_{Bp}$ (eV) & baseline & image force & two-band along $c$ only \\
+\midrule
+fixed barrier & 0.20 & 11.5 & 26 & 11.1 \\
+Pt, unpinned & 0.25 & 12.5 & 38 & 11.6 \\
+Pt, interlayer & 0.52 & 2.1 & 4.8 & 1.3 \\
+fixed barrier & 0.60 & 0.90 & 2.0 & 0.47 \\
+fixed barrier & 1.00 & 0.051 & 0.070 & 0.0068 \\
+Pt, direct & 1.05 & 0.036 & 0.055 & 0.0039 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Hybrid contacts}
+\label{sec:hybrid}
+A hybrid contact is a top contact of length $L_c$ whose metal also covers the end face of the film down to 1~nm above the oxide. Top-face nodes inject with the vdW-gap transmission and end-face nodes with $\mathcal{T}_{\rm edge}=1$, each along its own most favourable straight path (\texttt{data\_v3/hybrid.csv}, \texttt{data\_v3/hybrid\_overlap.csv}; all runs converged). Table~\ref{tab:hybrid} compares them with the edge and 50-nm top contacts of the same runs.
+
+\begin{table}[!htbp]
+\centering
+\caption{On-state $R_{\rm tot}$ (\ohmcm) of hybrid contacts with top overlap $L_c$, against edge and 50-nm top contacts (anisotropic model: $m_c=0.17~m_0$, $m_\parallel=0.9~m_0$, two-band dispersion, most favourable straight path; Pt, $V_G=-3$~V, $V_D=0.05$~V). Bold: lowest in each row.}
+\label{tab:hybrid}\footnotesize\setlength{\tabcolsep}{3pt}
+\begin{tabular}{lrrrrrrr}
+\toprule
+ & & \multicolumn{4}{c}{Hybrid, $L_c$ (nm)} & & \\
+Case & $\phi_{Bp}$ (eV) & 2 & 5 & 10 & 20 & Hybrid 50 & Edge / Top 50 \\
+\midrule
+fixed barrier & 0.20 & 0.389 & 0.421 & 0.452 & 0.504 & 0.653 & \textbf{0.344} / 3.97 \\
+Pt, unpinned & 0.25 & 0.707 & 0.783 & 0.833 & 0.885 & 1.03 & \textbf{0.608} / 7.60 \\
+Pt, interlayer & 0.52 & 88.0 & 173 & 215 & 163 & 90.5 & \textbf{56.0} / 118 \\
+fixed barrier & 0.60 & 435 & 1030 & 1020 & 560 & 235 & 251 / \textbf{227} \\
+fixed barrier & 1.00 & $1.11\times10^6$ & $3.42\times10^5$ & $4.98\times10^4$ & $2.57\times10^4$ & $2.13\times10^4$ & $4.04\times10^5$ / $\mathbf{2.05\times10^4}$ \\
+Pt, direct & 1.05 & $2.62\times10^6$ & $5.29\times10^5$ & $7.70\times10^4$ & $3.85\times10^4$ & $3.42\times10^4$ & $9.24\times10^5$ / $\mathbf{3.36\times10^4}$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+With the light isotropic mass the same holds: at direct pinning a 2-nm hybrid contact has 3.5$\times$ the edge resistance (18\,100 against 5\,200~\ohmcm), and a 50-nm one behaves like the top contact (8.9 against 8.8$\times10^5$~\ohmcm). With $m_c=0.078~m_0$ the 50-nm hybrid contact at direct pinning falls to 1\,490~\ohmcm, because its top face then tunnels along a lighter $c$ axis.
+
+\section{Self-heating with the anisotropic hole mass}
+\label{sec:anisoheat}
+\texttt{data\_v3/aniso\_thermal.csv} repeats the self-heating runs with the anisotropic model. At the reference operating point ($\Phi_M=5.0$~eV, $V_G=-2$~V) the edge device carries 2.59 and 4.10~A/cm at 0.5 and 1~V and heats by 54 and 172~K; the top device carries 0.97 and 2.04~A/cm and heats by 8.3 and 34~K. Heat out equals $IV$ within 1.4\% (edge) and 0.5\% (top). At the measured alignment (Pt, $V_G=-3$~V, 1~V) the edge device heats by 14~K with the interlayer or the calculated pinning and by 126~K when unpinned, and the top device by 1.0 and 9.6~K; directly pinned contacts heat by less than 0.1~K.
 
 \begin{thebibliography}{9}
 \bibitem{simott} N.F.~Mott and R.W.~Gurney, \textit{Electronic Processes in Ionic Crystals}, 2nd ed., Oxford (1940).

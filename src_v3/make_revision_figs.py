@@ -238,7 +238,7 @@ except Exception as e:
 
 # ------------------------------------------------------------------ Fig 18: gated Monte Carlo with direction-dependent hole mass
 try:
-    ud = ok(rd("uq_kane"))
+    ud = ok(rd("uq_obl")) if rd("uq_obl") is not None else ok(rd("uq_kane"))
     ud = ud[np.isclose(ud.VG, -3.0)] if "VG" in ud else ud
     sh = ud[ud.variant == "shared"].pivot_table(index="sample", columns="geom", values="R_tot").dropna()
     mi = ud.groupby("sample").m_in.first()
@@ -266,8 +266,8 @@ try:
     ax[2].set_xscale("log"); ax[2].set_xticks([0.3, 0.5, 1.0, 1.5]); ax[2].set_xticklabels(["0.3", "0.5", "1", "1.5"]); ax[2].xaxis.set_minor_formatter(plt.NullFormatter())
     ax[2].set_ylim(0, 100); ax[2].set_xlabel(r"$m_\parallel$ ($m_0$)"); ax[2].set_ylabel("Samples with edge < top (%)")
     ax[2].set_title("(c)", loc="left", fontsize=9)
-    save(fig, "fig18_uq_kane")
-    print("uq_kane n=", len(r), "edge<top %", round(100 * (r < 1).mean(), 1), "bins", list(zip([round(x, 2) for x in xb], [round(f, 1) for f in fb], nb)))
+    save(fig, "fig18_uq_mc")
+    print("uq MC n=", len(r), "edge<top %", round(100 * (r < 1).mean(), 1), "bins", list(zip([round(x, 2) for x in xb], [round(f, 1) for f in fb], nb)))
 except Exception as e:
     print("fig18 skipped:", e)
 
