@@ -176,6 +176,20 @@ def phase_section(name, quoted_thr):
 
 
 phase_section("mass_phase", {"direct (measured)": (2.1, 2.6), "phiB=0.8": (2.9, 3.3)})
+
+_mf = rd("mass_phase_fine")
+if _mf is not None:
+    head("Sec. 3.4  WKB form ln(Rtop/Redge) = A + B sqrt(m_c) - C sqrt(m_par) fitted to mass_phase_fine")
+    rr = np.log(ratio(_mf, ["case", "m_c", "m_par"]))
+    for case, (qr2lo, qr2hi), qthr, qI in (("direct (measured)", (0.90, 0.97), 2.3, 1.5), ("phiB=0.8", (0.90, 0.97), 4.5, 2.1),
+                                             ("interlayer (measured)", (0.90, 0.97), 9.0, 3.0), ("unpinned", (0.90, 0.97), 32, 5.7)):
+        d = rr[case].reset_index(); d.columns = ["mc", "mp", "y"]
+        X = np.c_[np.ones(len(d)), np.sqrt(d.mc), np.sqrt(d.mp)]
+        b, *_ = np.linalg.lstsq(X, d.y, rcond=None); pred = X @ b
+        R2 = 1 - ((d.y - pred) ** 2).sum() / ((d.y - d.y.mean()) ** 2).sum()
+        q(f"R2 of WKB fit, {case} (within {qr2lo}-{qr2hi})", R2, (qr2lo + qr2hi) / 2, tol=-0.0375)
+        q(f"(B/C)^2 threshold, {case}", (b[1] / -b[2]) ** 2, qthr, 0.04)
+        q(f"I_top/I_edge = B/C, {case}", b[1] / -b[2], qI, 0.04)
 phase_section("mass_phase_fine", {"direct (measured)": (2.1, 2.8), "phiB=0.8": (2.7, 3.0), "interlayer (measured)": (11.3, 11.8)})
 
 # ---------------------------------------------------------------- Sec. 3.6: Monte Carlo with anisotropic mass
