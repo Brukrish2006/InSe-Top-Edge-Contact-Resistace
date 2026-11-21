@@ -326,25 +326,47 @@ Unpinned ($S=1$) & Pt & 0.25 & 0.61 & 7.60 & 12.5 \\
 \end{tabular}
 \end{table}
 
-Table~\ref{tab:physsens} tests two further approximations with the same model (\texttt{data\_v3/physics\_sens.csv}; image force: \texttt{data\_v3/image\_force.csv}). Image-force lowering adds $-q/(16\pi\varepsilon_r\varepsilon_0 d)$ to the band edge along each tunnelling path, with $d$ the distance from the contact and a cut-off at 0.2~nm. The energies between the lowered and the unlowered barrier top, which the thermionic boundary condition does not cover, are counted with the transmission over the lowered barrier. At 0.52--1.05~eV image-force lowering reduces the edge resistance by 1.9--4.6$\times$ and the top resistance by 1.3--2.0$\times$. At 0.2--0.25~eV it raises both, because the image potential enters only the tunnelling integral and not the drift-diffusion band edge, so carriers that pass over the lowered barrier are deposited next to the contact; at these barriers the variant is a test of the ratio only. In every case it favours edge contacts. The second variant applies the two-band form only to the $c$-axis component of each path (weight $c_y^2$), so in-plane paths see a parabolic band.
+Table~\ref{tab:seppin} pairs top and edge contacts with different pinning (Pt, anisotropic model; each entry is $R^{\rm top}(S_{\rm top})/R^{\rm edge}(S_{\rm edge})$ from the runs of Table~\ref{tab:anisometals}). The diagonal is the shared-pinning comparison of the main text. The calculated ($S=0.18$) and interlayer ($S=0.5$) cases give nearly the same Pt barrier (0.52~eV), so their rows and columns nearly coincide.
 
 \begin{table}[!htbp]
 \centering
-\caption{Top/edge on-state ratio with the anisotropic model ($m_c=0.17~m_0$, $m_\parallel=0.9~m_0$, most favourable straight path; $V_G=-3$~V, $V_D=0.05$~V) for the baseline two-band dispersion, with image-force lowering added, and with the two-band form only along $c$.}
-\label{tab:physsens}\small
+\caption{Top/edge on-state ratio for Pt when the two geometries are pinned differently (anisotropic model, $V_G=-3$~V, $V_D=0.05$~V). Values above 1 favour the edge contact.}
+\label{tab:seppin}\small
 \begin{tabular}{lrrrr}
 \toprule
-Case & $\phi_{Bp}$ (eV) & baseline & image force & two-band along $c$ only \\
+ & \multicolumn{4}{c}{$S_{\rm top}$ ($\phi_{Bp}$ of the top contact)} \\
+$S_{\rm edge}$ & 0.05 (1.05~eV) & 0.18 (0.52~eV) & 0.5 (0.52~eV) & 1 (0.25~eV) \\
 \midrule
-fixed barrier & 0.20 & 11.5 & 26 & 11.1 \\
-Pt, unpinned & 0.25 & 12.5 & 38 & 11.6 \\
-Pt, interlayer & 0.52 & 2.1 & 4.8 & 1.3 \\
-fixed barrier & 0.60 & 0.90 & 2.0 & 0.47 \\
-fixed barrier & 1.00 & 0.051 & 0.070 & 0.0068 \\
-Pt, direct & 1.05 & 0.036 & 0.055 & 0.0039 \\
+0.05 & 0.036 & $1.3\times10^{-4}$ & $1.3\times10^{-4}$ & $8\times10^{-6}$ \\
+0.18 & 608 & 2.1 & 2.1 & 0.14 \\
+0.5 & 601 & 2.1 & 2.1 & 0.14 \\
+1 & $5.5\times10^4$ & 193 & 194 & 12.5 \\
 \bottomrule
 \end{tabular}
 \end{table}
+
+Table~\ref{tab:physsens} tests two further approximations with the same model (\texttt{data\_v3/physics\_sens.csv}; image force: \texttt{data\_v3/image\_aniso.csv}). Image-force lowering adds $-q/(16\pi\varepsilon_{\rm img}\varepsilon_0 d)$ to the band edge along each tunnelling path, with $d$ the distance from the contact plane (not along the path) and a cut-off at 0.2~nm. In a uniaxial medium with permittivities $\varepsilon_\parallel$ (in-plane) and $\varepsilon_c$, the image potential of a metal plane normal to $c$ (top and bottom contacts) has $\varepsilon_{\rm img}=\varepsilon_\parallel$, and that of a plane normal to the layers (edge contacts) $\varepsilon_{\rm img}=\sqrt{\varepsilon_\parallel\varepsilon_c}$. We used $\varepsilon_\parallel=6.4$ and $\varepsilon_c=6.4$, 3.2 or 12.8; Poisson's equation keeps the isotropic $\varepsilon_r=6.4$. The energies between the lowered and the unlowered barrier top, which the thermionic boundary condition does not cover, are counted with the transmission over the lowered barrier. With the isotropic permittivity, image-force lowering reduces the edge resistance by 2.2--4.3$\times$ and the top resistance by 1.3--2.0$\times$ at 0.52--1.05~eV. At 0.2--0.25~eV it raises both, because the image potential enters only the tunnelling integral and not the drift-diffusion band edge, so carriers that pass over the lowered barrier are deposited next to the contact. With $\varepsilon_c=3.2$ the stronger lowering at edge contacts makes the results non-monotonic between neighbouring cases (for example 4.1 at 1.05~eV against 0.065 at 1.0~eV), a sign that the cut-off-dominated lowering near the contact is beyond what this treatment can resolve. The image-force columns are therefore qualitative. The second variant applies the two-band form only to the $c$-axis component of each path (weight $c_y^2$), so in-plane paths see a parabolic band.
+
+\begin{table}[!htbp]
+\centering
+\caption{Top/edge on-state ratio with the anisotropic model ($m_c=0.17~m_0$, $m_\parallel=0.9~m_0$, most favourable straight path; $V_G=-3$~V, $V_D=0.05$~V): baseline two-band dispersion; image-force lowering with $\varepsilon_\parallel=6.4$ and three values of $\varepsilon_c$; two-band form only along $c$.}
+\label{tab:physsens}\footnotesize\setlength{\tabcolsep}{4pt}
+\begin{tabular}{lrrrrrr}
+\toprule
+ & & & \multicolumn{3}{c}{Image force, $\varepsilon_c=$} & Two-band \\
+Case & $\phi_{Bp}$ (eV) & Baseline & 6.4 & 3.2 & 12.8 & along $c$ only \\
+\midrule
+fixed barrier & 0.20 & 11.5 & 11.8 & 10.9 & 23 & 11.1 \\
+Pt, unpinned & 0.25 & 12.5 & 13.0 & 2.6 & 26 & 11.6 \\
+Pt, interlayer & 0.52 & 2.1 & 4.0 & 3.9 & 3.4 & 1.3 \\
+fixed barrier & 0.60 & 0.90 & 2.2 & 2.4 & 1.4 & 0.47 \\
+fixed barrier & 1.00 & 0.051 & 0.080 & 0.065 & 0.060 & 0.0068 \\
+Pt, direct & 1.05 & 0.036 & 0.096 & 4.1 & 0.042 & 0.0039 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+An earlier version of the image-force calculation, which measured $d$ along oblique paths (\texttt{data\_v3/image\_force.csv}), gave ratios of 26, 38, 4.8, 2.0, 0.070 and 0.055 for the six cases.
 
 \section{Hybrid contacts}
 \label{sec:hybrid}
@@ -370,6 +392,29 @@ Pt, direct & 1.05 & $2.62\times10^6$ & $5.29\times10^5$ & $7.70\times10^4$ & $3.
 \end{table}
 
 With the light isotropic mass the same holds: at direct pinning a 2-nm hybrid contact has 3.5$\times$ the edge resistance (18\,100 against 5\,200~\ohmcm), and a 50-nm one behaves like the top contact (8.9 against 8.8$\times10^5$~\ohmcm). With $m_c=0.078~m_0$ the 50-nm hybrid contact at direct pinning falls to 1\,490~\ohmcm, because its top face then tunnels along a lighter $c$ axis.
+
+\section{Bottom contacts}
+\label{sec:bottom}
+A bottom contact places the metal under the film, on the oxide, with the film lying over it. In the mesh the oxide and the back gate extend only under the channel, so the metal screens the gate completely from the film above it; a 0.25-nm free segment separates each contact from the film/oxide interface, and the oxide face next to the metal is a free surface. Holes enter through the vdW gap with the same transmission and pinning as top contacts, along the most favourable straight path from each contact node (\texttt{data\_v3/bottom.csv}). With the light isotropic mass the two high-barrier runs did not converge, also with 0.02-V gate steps (\texttt{data\_v3/bottom\_retry.csv}). Table~\ref{tab:bottom} compares them with the top and edge contacts of the same models.
+
+\begin{table}[!htbp]
+\centering
+\caption{On-state $R_{\rm tot}$ (\ohmcm) of 50-nm bottom contacts against 50-nm top and edge contacts (Pt, $V_G=-3$~V, $V_D=0.05$~V). Anisotropic: $m_c=0.17~m_0$, $m_\parallel=0.9~m_0$, two-band dispersion, most favourable straight path. --: not converged.}
+\label{tab:bottom}\footnotesize\setlength{\tabcolsep}{4pt}
+\begin{tabular}{lrrrrrrr}
+\toprule
+ & & \multicolumn{3}{c}{Anisotropic mass} & \multicolumn{3}{c}{Light isotropic mass} \\
+Case & $\phi_{Bp}$ (eV) & Bottom & Top & Edge & Bottom & Top & Edge \\
+\midrule
+fixed barrier & 0.20 & 40.8 & 3.97 & 0.344 & 516 & 4.77 & 0.342 \\
+Pt, unpinned & 0.25 & 83.2 & 7.60 & 0.608 & 2210 & 9.52 & 0.504 \\
+Pt, interlayer & 0.52 & 3230 & 118 & 56.0 & $3.54\times10^6$ & 330 & 7.20 \\
+fixed barrier & 0.60 & $1.03\times10^4$ & 227 & 251 & $3.02\times10^7$ & 918 & 17.8 \\
+fixed barrier & 1.00 & $5.39\times10^6$ & $2.05\times10^4$ & $4.04\times10^5$ & -- & $4.18\times10^5$ & 2720 \\
+Pt, direct & 1.05 & $1.18\times10^7$ & $3.36\times10^4$ & $9.24\times10^5$ & -- & $8.84\times10^5$ & 5200 \\
+\bottomrule
+\end{tabular}
+\end{table}
 
 \section{Self-heating with the anisotropic hole mass}
 \label{sec:anisoheat}

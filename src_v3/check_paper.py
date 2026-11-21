@@ -331,22 +331,77 @@ if ath is not None:
     q("unpinned top dT (K)", a.loc[("unpinned", "top50", 1.0), "dT"], 10, 0.05)
     q("energy balance edge 1 V (%)", 100 * (a.loc[("reference", "edge", 1.0), "P_out"] / a.loc[("reference", "edge", 1.0), "P_el"] - 1), 1.4, 0.05)
 
-imf = rd("image_force"); hyb = rd("hybrid")
-if imf is not None and hyb is not None:
-    head("Sec. 3.3  image-force lowering (image_force.csv vs hybrid.csv aniso references)")
-    r = ratio(imf, ["case"])
-    base = hyb[(hyb.variant == "aniso") & (hyb.geom != "hybrid50")].pivot_table(index="case", columns="geom", values="R_tot")
-    pi = imf.pivot_table(index="case", columns="geom", values="R_tot")
-    q("image interlayer ratio", r["interlayer (measured)"], 4.8, 0.03)
-    q("image phiB=0.6 ratio", r["phiB=0.6"], 2.0, 0.03)
-    q("image min ratio 1.0-1.05", min(r["phiB=1.0"], r["direct (measured)"]), 0.055, 0.03)
-    q("image max ratio 1.0-1.05", max(r["phiB=1.0"], r["direct (measured)"]), 0.070, 0.03)
-    q("image min ratio 0.2-0.25", min(r["phiB=0.2"], r["unpinned"]), 26, 0.03)
-    q("image max ratio 0.2-0.25", max(r["phiB=0.2"], r["unpinned"]), 38, 0.03)
+hyb = rd("hybrid")
+ima = rd("image_aniso")
+if ima is not None and hyb is not None:
+    head("Sec. 3.3  image-force lowering, perpendicular distance, uniaxial permittivity (image_aniso.csv)")
+    r = ratio(ima, ["variant", "case"])
+    i6 = r["iso_6.4"]; ih = r["eps_c_half"]; idb = r["eps_c_double"]
+    q("iso interlayer", i6["interlayer (measured)"], 4.0, 0.02)
+    q("iso phiB=0.6", i6["phiB=0.6"], 2.2, 0.02)
+    q("iso min 1.0-1.05", min(i6["phiB=1.0"], i6["direct (measured)"]), 0.080, 0.02)
+    q("iso max 1.0-1.05", max(i6["phiB=1.0"], i6["direct (measured)"]), 0.096, 0.02)
+    q("eps_c half, direct: edge wins by", ih["direct (measured)"], 4.1, 0.02)
+    base = ratio(hyb[(hyb.variant == "aniso") & (hyb.geom != "hybrid50")], ["case"])
+    allr = pd.concat([i6, ih, idb]); bb = pd.concat([base, base, base]).values
+    q("cases where image force raises top/edge (of 18)", float((allr.values > bb).sum()), 16, tol=-0.5)
+    base_t = hyb[(hyb.variant == "aniso")].pivot_table(index="case", columns="geom", values="R_tot")
+    pi = ima[ima.variant == "iso_6.4"].pivot_table(index="case", columns="geom", values="R_tot")
     hi = ["interlayer (measured)", "phiB=0.6", "phiB=1.0", "direct (measured)"]
-    fe = base.loc[hi, "edge"] / pi.loc[hi, "edge"]; ft = base.loc[hi, "top50"] / pi.loc[hi, "top50"]
-    q("edge R fall min (>=0.52 eV)", fe.min(), 1.9, 0.04); q("edge R fall max", fe.max(), 4.6, 0.03)
+    fe = base_t.loc[hi, "edge"] / pi.loc[hi, "edge"]; ft = base_t.loc[hi, "top50"] / pi.loc[hi, "top50"]
+    q("edge R fall min", fe.min(), 2.2, 0.03); q("edge R fall max", fe.max(), 4.3, 0.03)
     q("top R fall min", ft.min(), 1.3, 0.04); q("top R fall max", ft.max(), 2.0, 0.03)
+    for case, v in (("phiB=0.2", (11.8, 10.9, 23)), ("unpinned", (13.0, 2.6, 26)), ("phiB=1.0", (0.080, 0.065, 0.060)),
+                    ("direct (measured)", (0.096, 4.1, 0.042)), ("interlayer (measured)", (4.0, 3.9, 3.4)), ("phiB=0.6", (2.2, 2.4, 1.4))):
+        for col, qv in zip((i6, ih, idb), v):
+            q(f"SI table image force {case}", col[case], qv, 0.04)
+
+bt = rd("bottom")
+if bt is not None and hyb is not None:
+    head("Sec. 3.4  bottom contacts (bottom.csv)")
+    btr = rd("bottom_retry")
+    allb = pd.concat([bt, btr]) if btr is not None else bt
+    pb = allb.pivot_table(index=["variant", "case"], columns="geom", values="R_tot")["bottom50"]
+    ref = hyb.pivot_table(index=["variant", "case"], columns="geom", values="R_tot")
+    a_ = pb["aniso"] / ref.loc["aniso", "top50"]
+    q("bottom/top min at 0.2-0.25", min(a_["phiB=0.2"], a_["unpinned"]), 10, 0.04)
+    q("bottom/top max at 0.2-0.25", max(a_["phiB=0.2"], a_["unpinned"]), 11, 0.04)
+    q("bottom/top interlayer", a_["interlayer (measured)"], 27, 0.03)
+    q("bottom/top min at 1.0-1.05", min(a_["phiB=1.0"], a_["direct (measured)"]), 260, 0.03)
+    q("bottom/top max at 1.0-1.05", max(a_["phiB=1.0"], a_["direct (measured)"]), 350, 0.03)
+    q("bottom never better than top (min ratio, must be > 1)", a_.min(), 10, tol=-1e9)
+    iso_ = (pb["isotropic_baseline"] / ref.loc["isotropic_baseline", "top50"]).dropna()
+    q("isotropic: bottom penalty larger (min ratio, must be > 11)", iso_.min(), 100, tol=-1e9)
+
+mgw = rd("mass_gw")
+if mgw is not None:
+    head("Sec. 3.4  heavy in-plane masses (mass_gw.csv)")
+    r = ratio(mgw, ["case", "m_c", "m_par"])
+    il = r["interlayer (measured)"]
+    q("interlayer m_c 0.17 min ratio", il[0.17].min(), 1.03, 0.01); q("interlayer m_c 0.17 max ratio", il[0.17].max(), 1.09, 0.01)
+    q("interlayer m_c 0.078 min top advantage", 1 / il[0.078].max(), 1.3, 0.03)
+    q("interlayer m_c 0.078 max top advantage", 1 / il[0.078].min(), 1.5, 0.04)
+    q("unpinned min edge advantage", r["unpinned"].min(), 4.5, 0.02); q("unpinned max edge advantage", r["unpinned"].max(), 12, 0.04)
+    q("unpinned ratio at m_par/m_c=69", r["unpinned"][0.078][5.35], 4.5, 0.02)
+    d = r["direct (measured)"]
+    q("direct min top advantage", 1 / d.max(), 28, 0.02); q("direct max top advantage", 1 / d.min(), 150, 0.02)
+    e = mgw[mgw.geom == "edge"].pivot_table(index=["case", "m_c"], columns="m_par", values="R_tot")
+    q("edge R saturation: max change 3.0->5.35 m0 (%)", 100 * (e[5.35] / e[3.0] - 1).abs().max(), 20, tol=-25)
+
+am2 = rd("aniso_metals")
+if am2 is not None:
+    head("Sec. 3.3 / Discussion  separate pinning and resistances in Ohm um")
+    pt = am2[(am2.study == "metals") & (am2.metal == "Pt")]
+    e = pt[pt.geom == "edge"].set_index("case").R_tot; t = pt[pt.geom == "top50"].set_index("case").R_tot
+    q("direct edge vs depinned top (top better by)", e["direct (measured)"] / t["ideal MIGS (DFT)"], 8000, 0.03)
+    q("unpinned edge vs direct top (edge better by)", t["direct (measured)"] / e["unpinned"], 5.5e4, 0.02)
+    q("unpinned edge vs interlayer top (edge better by)", t["interlayer (measured)"] / e["unpinned"], 190, 0.03)
+    q("interlayer edge (kOhm um)", e["interlayer (measured)"] * 10, 560, 0.01)
+    q("interlayer top (MOhm um)", t["interlayer (measured)"] * 1e-2, 1.2, 0.02)
+    q("unpinned edge (kOhm um)", e["unpinned"] * 10, 6.1, 0.01)
+    q("unpinned top (kOhm um)", t["unpinned"] * 10, 76, 0.01)
+    dphi = am2[(am2.study == "metals") & (am2.case == "direct (measured)") & (am2.geom == "edge")].phiBp
+    q("direct pinning barrier min (eV)", dphi.min(), 1.05, 0.005); q("direct pinning barrier max (eV)", dphi.max(), 1.12, 0.005)
 
 ho = rd("hybrid_overlap")
 if ho is not None and hyb is not None:

@@ -1,0 +1,3 @@
+case,variant,geom,Phi_M,failed,err
+direct (measured),isotropic_baseline,bottom50,5.65,1,ramp of gate_bias failed at -0.313125
+phiB=1.0,isotropic_baseline,bottom50,4.902012499847981,1,ramp of gate_bias failed at -0.47261576377392395
