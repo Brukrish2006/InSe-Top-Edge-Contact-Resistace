@@ -41,7 +41,17 @@ ax[0].set_title("(a)", loc="left", fontsize=9)
 e = on[(on.geom == "edge") & on.tunneling.isna()].set_index("phiB_set").R_tot
 t = on[(on.geom == "top50") & on.tunneling.isna()].set_index("phiB_set").R_tot
 r = (t / e).dropna()
-ax[1].semilogy(r.index, r.values, color=INK, marker="D")
+ax[1].semilogy(r.index, r.values, color=INK, marker="D", label="light isotropic")
+_am = os.path.join(D, "aniso_metals.csv")
+if os.path.exists(_am):
+    am = pd.read_csv(_am)
+    am = am[(am.study == "barrier") & (am.get("failed", 0).fillna(0) == 0)] if "failed" in am else am[am.study == "barrier"]
+    ra = (am[am.geom == "top50"].set_index("phiB_set").R_tot / am[am.geom == "edge"].set_index("phiB_set").R_tot).dropna().sort_index()
+    ax[1].semilogy(ra.index, ra.values, color=INK, marker="D", mfc="white", ls="--", label="anisotropic")
+    ax[1].axhline(1, color="#8a8a86", lw=0.8)
+    ax[1].text(0.34, 75, "light isotropic", fontsize=7, ha="center", va="bottom", color=INK)
+    ax[1].text(0.55, 0.3, "anisotropic", fontsize=7, ha="right", va="center", color=INK)
+    print("aniso ratio", ra.round(3).to_dict())
 ax[1].set_xlabel(r"Hole barrier $\phi_{Bp}$ (eV)")
 ax[1].set_ylabel(r"$R_{\rm tot}^{\rm top}/R_{\rm tot}^{\rm edge}$ (on state)")
 ax[1].set_title("(b)", loc="left", fontsize=9)

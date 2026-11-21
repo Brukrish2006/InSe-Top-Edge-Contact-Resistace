@@ -697,6 +697,7 @@ class Device:
         path, dist = path[keep], dist[keep]
         Ev = -psi[path] + self.Cv
         B = -Ev if carrier == "p" else Ev + self.Eg
+        B0 = B[0] if len(B) else 0.0
         if P.get("image_force"):  # image-potential lowering along the path
             coef = q / (16 * math.pi * P["eps_r"] * eps0)  # V cm
             B = B - coef / np.maximum(dist, P["img_dmin"])
@@ -715,7 +716,12 @@ class Device:
         out = []
         if len(path) < 3:
             return path, out, B
-        run = np.minimum.accumulate(B)
+        Bs = B.copy()
+        if P.get("image_force"):
+            # the thermionic contact uses the unlowered barrier, so energies between the lowered barrier
+            # top and the unlowered one are counted here (transmission ~1 over the lowered barrier)
+            Bs[0] = max(B0, B[0])
+        run = np.minimum.accumulate(Bs)
         kap0 = math.sqrt(2 * m * m0 * q) / hbar * 1e-2
         for i in range(1, len(path)):
             lo, hi = run[i], run[i - 1]

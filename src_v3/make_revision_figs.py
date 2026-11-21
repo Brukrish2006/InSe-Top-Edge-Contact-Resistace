@@ -273,7 +273,9 @@ except Exception as e:
 
 # ------------------------------------------------------------------ Fig 19: geometry phase diagram in (m_par, m_c)
 try:
-    mp = ok(rd("mass_phase"))
+    mp = ok(rd("mass_phase_fine"))
+    if mp is None or not len(mp):
+        mp = ok(rd("mass_phase"))
     cases = [("unpinned", "(a) Pt, unpinned"), ("interlayer (measured)", "(b) Pt, interlayer"),
              ("phiB=0.8", "(c) 0.8 eV"), ("direct (measured)", "(d) Pt, direct")]
     fig, ax = plt.subplots(1, 4, figsize=(6.5, 2.3), sharey=True)
@@ -290,10 +292,17 @@ try:
         for (mc_, mp_), mk_ in (((0.17, 0.9), "*"), ((0.078, 0.9), "o")):
             ax[k].plot(np.log10(mp_), np.log10(mc_), mk_, color="k", mfc="white", ms=7 if mk_ == "*" else 5)
         ax[k].plot(np.log10([0.3, 1.9]), np.log10([0.3, 1.9]), color=GREY, lw=0.8, ls=":")
-        ax[k].set_xticks(np.log10([0.3, 0.6, 0.9, 1.9])); ax[k].set_xticklabels(["0.3", "0.6", "0.9", "1.9"], fontsize=7)
+        qthr = {"interlayer (measured)": 11.5, "phiB=0.8": 2.85, "direct (measured)": 2.45}.get(case)
+        if qthr:  # constant mass ratio m_par/m_c at the threshold
+            xs_ = np.array([0.3, 1.9]); ax[k].plot(np.log10(xs_), np.log10(xs_ / qthr), color=INK, lw=0.9, ls="--")
+            ax[k].text(0.97, 0.03, f"{qthr:g}", transform=ax[k].transAxes, fontsize=6, color=INK,
+                       ha="right", va="bottom", bbox=dict(boxstyle="round,pad=0.2", fc="white", ec="none", alpha=0.85))
+        ax[k].set_xlim(np.log10(0.27), np.log10(2.1)); ax[k].set_ylim(np.log10(mc.min()) - 0.08, np.log10(mc.max()) + 0.08)
+        ax[k].set_xticks(np.log10([0.3, 0.6, 0.9, 1.9])); ax[k].set_xticklabels(["0.3", "0.6", "0.9", "1.9"], fontsize=7); ax[k].grid(False)
         ax[k].set_title(f"{ttl}\n$\\phi_{{Bp}}$={pb:.2f} eV", loc="left", fontsize=8)
         ax[k].set_xlabel(r"$m_\parallel$ ($m_0$)", fontsize=8)
-    ax[0].set_yticks(np.log10([0.078, 0.17, 0.4, 0.9, 2.5])); ax[0].set_yticklabels(["0.078", "0.17", "0.4", "0.9", "2.5"], fontsize=7)
+    yt = [v for v in (0.078, 0.12, 0.17, 0.25, 0.4, 0.6, 0.9, 2.5) if v <= mc.max() * 1.01]
+    ax[0].set_yticks(np.log10(yt)); ax[0].set_yticklabels([f"{v:g}" for v in yt], fontsize=7)
     ax[0].set_ylabel(r"$m_c$ ($m_0$)", fontsize=8)
     cb = fig.colorbar(im, ax=ax, pad=0.02, fraction=0.03); cb.set_label(r"$\log_{10}(R^{\rm top}/R^{\rm edge})$", fontsize=8); cb.ax.tick_params(labelsize=7)
     fig.savefig(os.path.join(F, "fig19_mass_phase.png"), bbox_inches="tight"); fig.savefig(os.path.join(F, "fig19_mass_phase.pdf"), bbox_inches="tight")

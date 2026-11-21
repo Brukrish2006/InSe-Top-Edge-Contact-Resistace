@@ -674,7 +674,35 @@ def tasks_physics_sens():
     return T
 
 
-STUDIES = {"uq_gated": tasks_uq_gated, "thermal_lit": tasks_thermal_lit, "mesh_convergence": tasks_mesh_convergence,
+def tasks_hybrid_overlap():
+    """Hybrid contacts with short metal overlap (Lc = 2-20 nm): anisotropic model (m_c 0.17, m_par 0.9,
+    two-band, best straight path) and the isotropic baseline; edge and 50-nm references are in hybrid.csv."""
+    T = []
+    for case, Phi, P0 in _mass_cases():
+        for Lc in (2, 5, 10, 20):
+            P = _tensor(dict(P0, thermal=False), 0.9, m_c=0.17, disp="kane", obl=True)
+            sp = _gs("hybrid_overlap", "hybrid", Phi, P, dict(case=case, variant="aniso", Lc_set=Lc))
+            sp["Lc"] = Lc * NM
+            T.append(sp)
+        for Lc in (2, 10):
+            sp = _gs("hybrid_overlap", "hybrid", Phi, dict(P0, thermal=False), dict(case=case, variant="isotropic_baseline", Lc_set=Lc))
+            sp["Lc"] = Lc * NM
+            T.append(sp)
+    return T
+
+
+def tasks_image_force():
+    """Image-force lowering with the window between the lowered and unlowered barrier tops counted
+    as over-barrier transmission (anisotropic model, best straight path)."""
+    T = []
+    for case, Phi, P0 in _mass_cases():
+        for kind in GEOMS:
+            P = _aniso(dict(P0, thermal=False)); P.update(image_force=True)
+            T.append(_gs("image_force", kind, Phi, P, dict(case=case, variant="image_force_v2")))
+    return T
+
+
+STUDIES = {"uq_gated": tasks_uq_gated, "image_force": tasks_image_force, "hybrid_overlap": tasks_hybrid_overlap, "thermal_lit": tasks_thermal_lit, "mesh_convergence": tasks_mesh_convergence,
            "thickness_lit": tasks_thickness_lit, "inse_electron": tasks_inse_electron,
            "chen2019": tasks_chen2019, "chen2019_300K": tasks_chen2019_300K,
            "chen2019_mu": tasks_chen2019_mu,
